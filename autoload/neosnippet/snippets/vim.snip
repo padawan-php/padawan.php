@@ -1,0 +1,55 @@
+snippet     phpcomplete_extended_plugin
+    let s:${1:plugin_name}_plugin = {
+        \    'name': '$1'
+        \}
+
+    if !exists("s:$1_index")
+        let s:$1_index = {}
+    endif
+
+    function! phpcomplete_extended#$1#define() "{{{
+        let is_$1_project = 0 "check this is a valid $1 project
+
+        if is_$1_project
+            return s:$1_plugin
+        endif
+        return {}
+    endfunction "}}}
+
+    function! s:$1_plugin.init() "{{{
+        ${2}
+    endfunction "}}}
+
+    function! s:$1_plugin.is_valid_for_project() "{{{
+        return true
+    endfunction "}}}
+
+    function! s:$1_plugin.get_fqcn(parentFQCN, token_data) "{{{
+        let fqcn = ""
+        "get fqcn
+
+        return fqcn
+    endfunction "}}}
+
+    function! s:$1_plugin.get_menu_entries(fqcn, base, is_this, is_static) "{{{
+        let menu_entries = []
+        " get menu entries
+
+        return menu_entries
+    endfunction "}}}
+
+    function! s:$1_plugin.set_index(index) "{{{
+        let s:$1_index = a:index
+    endfunction "}}}
+
+    function! s:$1_plugin.resolve_fqcn(fqcn) "{{{
+        return a:fqcn
+    endfunction "}}}
+
+    function! s:$1_plugin.get_inside_quote_menu_entries(parentFQCN, token_data) "{{{
+        let menu_entries = []
+        //process menu entries
+
+        return menu_entries
+    endfunction "}}}
+

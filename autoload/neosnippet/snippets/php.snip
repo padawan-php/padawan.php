@@ -1,0 +1,93 @@
+snippet     phpcomplete_extended_plugin
+    <?php
+
+    class ${1:plugin_name}
+    {
+
+        /**
+         *  
+         * @var array 
+         */
+        private $index;
+
+        public function __construct()
+        {
+            $this->index = array();
+        }
+
+        /**
+         * called to check that this plugin script is valid for current project
+         *
+         * @return bool 
+         */
+        public function isValidForProject()
+        {
+            ${2}
+            //return is_file('projects/unique/file');
+        }
+
+        /**
+         * This hook is called before indexing started. Bootstraping code of the 
+         * framework goes here
+         * @parem ClassLoader $loader the composer ClassLoader object
+         */
+        public function init($loader)
+        {
+
+        }
+
+        /**
+         * Called after a class is processed
+         *
+         * @param string $fqcn FQCN of the class
+         * @param string $file file name of the class
+         * @param array $classData processed class info
+         */
+        public function postProcess($fqcn, $file, $classData)
+        {
+
+        }
+
+        /**
+         * Called after main index is created
+         *
+         * @param mixed $fullIndex the main index
+         * @param object $generatorObject the parant generator object
+         */
+        public function postCreateIndex($fullIndex, $generatorObject)
+        {
+
+        }
+
+        /**
+         * Called after update script initialized
+         *
+         * @param mixed $prevIndex the previous index of this plugin
+         */
+        public function preUpdateIndex($prevIndex)
+        {
+
+        }
+
+        /**
+         * Called after update index created
+         *
+         * @param mixed $classData class data of processed class
+         * @param mixed $fullIndex the main index
+         * @param object $generatorObject the parant generator object
+         */
+        public function postUpdateIndex($classData, $fullIndex, $generatorObject)
+        {
+
+        }
+
+        /**
+         * Returns the plugin index
+         *
+         * @return mixed the index created by this plugin script
+         */
+        public function getIndex()
+        {
+            return $this->index;
+        }
+    }

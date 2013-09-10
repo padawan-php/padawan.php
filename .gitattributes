@@ -1,0 +1,5 @@
+*.vim  text eol=lf
+*.php  text eol=lf
+*.txt  text eol=lf
+*.md  text eol=lf
+bin/core_index binary

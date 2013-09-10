@@ -1,0 +1,182 @@
+*phpcomplete-extended.txt*	Fast autocomplete plugin for PHP composer projects
+
+License: MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+Introduction		|phpcomplete-extended-introduction|
+Installation		|phpcomplete-extended-install|
+Variables		|phpcomplete-extended-variables|
+Key Mappings		|phpcomplete-extended-key-mappings|
+Commands		|phpcomplete-extended-commands|
+Functions		|phpcomplete-extended-functions|
+Writing Extension	|phpcomplete-extended-write-extension|
+
+
+==============================================================================
+INTRODUCTION					*phpcomplete-extended-introduction*
+
+phpcomplete-extended is a fast, extensible, context aware autocomplete plugin
+for PHP composer projects. Initially it reads autoload classmap of a composer
+project, parses doc-comments of each class and creates index from them. After
+that it auto updates index as you type thanks to
+[vimproc.vim](https://github.com/Shougo/vimproc.vim) plugin. Besides
+autocomplete this plugin have several code inspection features,
+
+* Includes full core PHP documentation
+* See documentation of current word, be it class name, method or property. It is
+  context aware.
+* Go to definition of a symbol. Also context aware.
+* Automatically add use statement of current completed word. Also added plugin
+  command of this action.
+* If (Unite) plugin installed following sources are available,
+    * `phpcomplete/files`: Lists PHP files of the project.
+    * `phpcomplete/vendors`: Lists vendor directories
+    * `phpcomplete/extends`: Lists classes that extends the class guessed from
+      the current cursor word.
+    * `phpcomplete/implements`: Lists classes that implements the class guessed
+      from the current cursor word.
+
+==============================================================================
+Installation					*phpcomplete-extended-install*
+
+The plugin depends on following plugins,
+
+*  [vimproc.vim](https://github.com/Shougo/vimproc.vim) : Asynchronous library for vim. Required for auto-update index. C
+  compiler is needed to build the plugiin. For windows install cygwin or
+  msys to get the compiler.
+*  [unite.vim](https://github.com/Shougo/unite.vim/): Optional, but enables some good features.
+
+Plugin managers are recommended for installing these plugins. Installation instructions for
+various plugin managers are given bellow.
+
+## Pathogen
+
+Issue following commands.
+
+```sh
+git clone https://github.com/Shougo/vimproc.vim.git ~/.vim/bundle
+cd ~/.vim/bundle/vimproc.vim
+make
+cd ..
+git clone https://github.com/Shougo/unite.vim.git ~/.vim/bundle
+git clone https://github.com/m2mdas/phpcomplete-extended.git ~/.vim/bundle
+```
+
+## NeoBundle (prefered)
+Put these lines in `.vimrc` and issue `source %` command
+
+```vim
+NeoBundle 'Shougo/vimproc', {
+      \ 'build' : {
+      \     'windows' : 'make -f make_mingw32.mak',
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+     \ }
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'm2mdas/phpcomplete-extended'
+"your other plugins
+NeoBundleCheck
+```
+
+If C compiler found for respective environment, `neobundle` will automatically
+compile the library.
+
+## Vundle
+
+Put following lines in `.vimrc` and issue `:BundleInstall` command.
+```vim
+Bundle 'Shougo/vimproc'
+Bundle 'Shougo/unite.vim'
+Bundle 'm2mdas/phpcomplete-extended'
+"your other plugins
+"....
+```
+
+After installation goto `vimproc` folder and issue `make` command from command
+line. C compiler must be installed.
+
+
+==============================================================================
+Variables					*phpcomplete-extended-variables*
+
+g:phpcomplete_index_composer_command		*g:phpcomplete_index_composer_command*
+		Sets composer command.
+
+		Default value "php composer.phar"
+
+g:phpcomplete_extended_auto_add_use		*g:phpcomplete_extended_auto_add_use*
+		Determine if the plugin will add use statement after class selection 
+		Permitted values 1 or 0
+
+		Default value 1
+
+g:phpcomplete_extended_use_default_mapping	*g:phpcomplete_extended_use_default_mapping*
+		Sets whether default mappings for plugin enabled or not.
+
+		Permitted value: 1 or 0
+
+		Default value 1
+
+==============================================================================
+Key Mappings					*phpcomplete-extended-key-mappings*
+
+<Plug>(phpcomplete-extended-goto)		*<Plug>(phpcomplete-extended-goto)*
+		Goto definition of current word. By default mapped to `K` in normal mode
+
+<Plug>(phpcomplete-extended-doc)		*<Plug>(phpcomplete-extended-doc)*
+		If found opens documentation of the word under the cursor. If not found
+		use default action is done. By default mapped to `<C-]>` in normal mode
+
+<Plug>(phpcomplete-extended-add-use)		*<Plug>(phpcomplete-extended-add-use)*
+		Adds use statement of the current word. By default mapped to
+		<leader><leader>u in normal mode
+
+
+==============================================================================
+Commands					*phpcomplete-extended-commands*
+
+PHPCompleteExtendedReload			*PHPCompleteExtendedReload*
+		Reload index from disk
+
+PHPCompleteExtendedClearIndexCache		*PHPCompleteExtendedClearIndexCache*
+		Clears intermediate index cache
+
+PHPCompleteExtendedGenerateIndex		*PHPCompleteExtendedGenerateIndex*
+		Generate index from scratch. Previous index discarded
+
+PHPCompleteExtendedUpdateIndex			*PHPCompleteExtendedUpdateIndex*
+		Manually update index of the class of current buffer. Used for debug
+		purpose
+
+PHPCompleteExtendedCheckUpdate			*PHPCompleteExtendedCheckUpdate*
+		Manually issue check update command. Used for debug purpose.
+
+
+==============================================================================
+Functions					*phpcomplete-extended-functions*
+TBD
+
+Writing Extensions				*phpcomplete-extended-write-extension*
+TBD
+
+
+vim:tw=78:ts=8:ft=help:norl:noet:fen:
