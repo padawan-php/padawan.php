@@ -70,8 +70,8 @@ command! -nargs=0 -bar PHPCompleteExtendedReload
 command! -nargs=0 -bar PHPCompleteExtendedClearIndexCache
       \ call phpcomplete_extended#clearIndexCache()
 
-command! -nargs=0 -bar PHPCompleteExtendedGenerateIndex
-      \ call phpcomplete_extended#generateIndex()
+command! -nargs=? -bar PHPCompleteExtendedGenerateIndex
+      \ call phpcomplete_extended#generateIndex("<args>")
 
 command! -nargs=0 -bar PHPCompleteExtendedUpdateIndex
       \ call phpcomplete_extended#updateIndex(0)
@@ -79,19 +79,12 @@ command! -nargs=0 -bar PHPCompleteExtendedUpdateIndex
 command! -nargs=0 -bar PHPCompleteExtendedCheckUpdate
       \ call phpcomplete_extended#checkUpdates()
 
+command! -nargs=0 -bar PHPCompleteExtendedEnable
+      \ call phpcomplete_extended#enable()
 
-augroup phpcomplete-extended
-autocmd!
-"Todo add configuration option to load later
-autocmd BufWinEnter,BufEnter  * call phpcomplete_extended#readDataForProject()
-autocmd VimLeave *     call phpcomplete_extended#saveIndexCache()
-autocmd BufWritePost *.php call phpcomplete_extended#updateIndex(1)
+command! -nargs=0 -bar PHPCompleteExtendedDisable
+      \ call phpcomplete_extended#disable()
 
-autocmd CursorHold *     call phpcomplete_extended#saveIndexCache()
-autocmd CursorHold *     call phpcomplete_extended#checkUpdates()
-autocmd CursorMoved,CursorMovedI *.php call phpcomplete_extended#checkUpdates()
-autocmd CursorMovedI *.php call phpcomplete_extended#trackMenuChanges()
-augroup END
 
 
 nnoremap <silent> <Plug>(phpcomplete-extended-goto) :<C-u>call phpcomplete_extended#gotoSymbolORDoc('goto')<CR>
@@ -104,6 +97,8 @@ if g:phpcomplete_extended_use_default_mapping
     silent! nmap <silent> <unique> <C-]> <Plug>(phpcomplete-extended-goto)
     silent! nmap <silent> <unique> <Leader><Leader>u <Plug>(phpcomplete-extended-add-use)
 endif
+
+call phpcomplete_extended#enable()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

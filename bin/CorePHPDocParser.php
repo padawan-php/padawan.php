@@ -273,7 +273,7 @@ class CorePhpDocParser
                         break;
                 }
             }
-            $methodInfo['signature'] = trim($modifier . " ". $methodName . "(" . join(" ,", $paramStrings) . " )");
+            $methodInfo['signature'] = "(" . join(" ,", $paramStrings) . ") : ". (string)$returns;
         }
 
         return $methodInfo;

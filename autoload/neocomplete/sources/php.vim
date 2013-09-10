@@ -51,7 +51,6 @@ function! s:source.gather_candidates(context) "{{{
 endfunction"}}}
 
 function! s:get_complete_position(context) "{{{
-    let b:neocomplete_sources = ['php', 'buffer']
     return phpcomplete_extended#CompletePHP(1, "")
 endfunction "}}}
 

@@ -1,7 +1,7 @@
 "=============================================================================
 " AUTHOR:  Mun Mun Das <m2mdas at gmail.com>
 " FILE: phpcomplete_extended.vim
-" Last Modified: September 10, 2013
+" Last Modified: September 11, 2013
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
 "     a copy of this software and associated documentation files (the
@@ -49,6 +49,10 @@ if !exists("s:psr_class_complete")
     let s:psr_class_complete = 0
 endif
 
+if !exists("s:phpcomplete_enabled")
+    let s:phpcomplete_enabled = 1
+endif
+
 let s:disabled_projects = []
 
 let s:T = {
@@ -69,6 +73,10 @@ function! phpcomplete_extended#CompletePHP(findstart, base) " {{{
             let b:completeContext.base = getline('.')[start : col('.')-2]
         endif
         return start
+    endif
+
+    if !s:phpcomplete_enabled
+        return []
     endif
 
     if !phpcomplete_extended#is_phpcomplete_extended_project()
@@ -132,9 +140,10 @@ function! s:get_complete_start_pos() "{{{
     while start >= 0 && line[start - 1] =~ '[\\a-zA-Z_0-9\x7f-\xff$]'
         let start -= 1
     endwhile
+
     let b:completeContext = {}
     let completeContext = s:get_complete_context()
-    if empty(completeContext)
+    if empty(completeContext) || !s:phpcomplete_enabled
         return start
     endif
     let b:completeContext = completeContext
@@ -296,7 +305,10 @@ function! s:guessTypeOfParsedTokens(parsedTokens) "{{{
         elseif has_key(g:phpcomplete_index['classes'], methodPropertyText)
             \ || has_key(g:phpcomplete_extended_core_index['classes'], methodPropertyText)
             let currentFQCN = methodPropertyText
-        elseif has_key(sourceData['namespaces']['uses'], methodPropertyText)
+        elseif has_key(sourceData, 'namespaces')
+                    \ && has_key(sourceData['namespaces'], 'uses')
+                    \ && !empty(sourceData['namespaces']['uses'])
+                    \ && has_key(sourceData['namespaces']['uses'], methodPropertyText)
             let currentFQCN = sourceData['namespaces']['uses'][methodPropertyText]. "\\" . methodPropertyText
 
         elseif !empty(aliases) && has_key(aliases, methodPropertyText)
@@ -320,20 +332,40 @@ function! s:getFQCNFromTokens(parsedTokens, currentFQCN, isThis) "{{{
 
     let isThis = a:isThis
 
+    let isPrevTokenArray = 0
+
+    if currentFQCN =~  '\[\]$' && len(parsedTokens) 
+                \ && has_key(parsedTokens[0], 'isArrayElement')
+        let currentFQCN = matchstr(currentFQCN, '\zs.*\ze\[\]$')
+        let isPrevTokenArray = 1
+    endif
     for token in parsedTokens
         let insideBraceText = token['insideBraceText']
         let methodPropertyText = token['methodPropertyText']
         let insideBraceText = token['insideBraceText']
+        let isArrayElement = has_key(token, 'isArrayElement')? 1 :0
         let currentClassData = phpcomplete_extended#getClassData(currentFQCN)
+        
         let  pluginFQCN = s:get_plugin_fqcn(currentFQCN,token)
 
         if insideBraceText[0] == "("
             let currentFQCN = ""
         elseif pluginFQCN != ""
             let currentFQCN = pluginFQCN
+        elseif isArrayElement 
+            let isPrevTokenArray = 0
+            if phpcomplete_extended#isClassOfType(currentFQCN, 'ArrayAccess') 
+                    \ && has_key(currentClassData['methods']['all'], 'offsetGet')
+                let offsetType = currentClassData['methods']['all']['offsetGet']['return']
+                if empty(offsetType)
+                    return ""
+                endif
+                let currentFQCN = offsetType
+            endif
+            continue
         else
             let classPropertyType = token.isMethod == 1 ? 'method' : 'property'
-            let currentFQCN = phpcomplete_extended#getFQCNForClassProperty(
+            let [currentFQCN, isPrevTokenArray] = phpcomplete_extended#getFQCNForClassProperty(
                 \ classPropertyType, methodPropertyText, currentFQCN, isThis)
 
         endif
@@ -345,6 +377,9 @@ function! s:getFQCNFromTokens(parsedTokens, currentFQCN, isThis) "{{{
             return ""
         endif
     endfor
+    if isPrevTokenArray
+        return currentFQCN . '[]'
+    endif
     return currentFQCN
 
 endfunction "}}}
@@ -398,6 +433,7 @@ function! s:geussLocalVarType(var, sourceFQCN, lines) "{{{
         elseif match(line, '@var\s*'.var.'\s*.*') >=0
             "@var $var fqcn"
             let fqcn = phpcomplete_extended#util#trim(matchstr(line, '@var\s*'.var.'\s*\zs.*\ze\s*\*'))
+            let fqcn = phpcomplete_extended#getFQCNFromWord(fqcn)
         endif
 
         if fqcn != ""
@@ -437,7 +473,7 @@ function! phpcomplete_extended#trackMenuChanges() "{{{
     let current_char = getline('.')[col('.') -2]
 
     if !pumvisible() && s:psr_class_complete
-        \ && (current_char == '(' || current_char == ':')
+        \ && (current_char == '(' || current_char == ':' || current_char == ' ')
         let s:psr_class_complete = 0
         let cur_pos = getpos(".")
         let prev_pos = copy(cur_pos)
@@ -507,7 +543,7 @@ function! phpcomplete_extended#addUse(word, fqcn) "{{{
     endif
 
 
-    let lines_to_class = getline(0, search('^\s*class'))
+    let lines_to_class = getline(0, search('^\s*\(class\|interface\)'))
     call setpos('.', cur_pos)
 
     if empty(lines_to_class) || phpcomplete_extended#util#trim(lines_to_class[0]) != "<?php"
@@ -515,6 +551,7 @@ function! phpcomplete_extended#addUse(word, fqcn) "{{{
     endif
 
     let last_use_pos = -1
+    let namespace_pos = -1
 
     for line in lines_to_class
         if match(line, '^\s*use\s*'.escape(fqcn, '\').'\s*;') >= 0
@@ -523,9 +560,13 @@ function! phpcomplete_extended#addUse(word, fqcn) "{{{
         if match(line, '^\s*use\s*.*;') >=0
             let last_use_pos = index(lines_to_class, line)+1
         endif
+        if match(line, '^\s*namespace\s*.*;') >=0
+            let namespace_pos = index(lines_to_class, line)+1
+        endif
+
     endfor
     if last_use_pos == -1
-        let last_use_pos = (len(lines_to_class) - 2) != 0? len(lines_to_class) - 2 : len(lines_to_class) - 1
+        let last_use_pos = namespace_pos == -1? 1 : namespace_pos + 1
     endif
     call append(last_use_pos, ['use '. fqcn. ';'])
     let cur_pos[1] = cur_pos[1] +1
@@ -656,7 +697,7 @@ function! s:getJumpDataOfCurrentWord(type) "{{{
     if match_till_cur_word[len(match_till_cur_word)-1] == "("
         let match_till_cur_word .= "'')"
     endif
-    let parsedTokens = phpcomplete_extended#parsereverse(match_till_cur_word, getline('.'))
+    let parsedTokens = phpcomplete_extended#parsereverse(match_till_cur_word, line('.'))
 
     if empty(parsedTokens)
         return {}
@@ -797,7 +838,8 @@ function! s:parseForward(lines, varLine) "{{{
     let joinedLine = varDecLine.join(lines, "")
     let parsedTokens = []
     let parsedTokens = phpcomplete_extended#parser#forwardParse(joinedLine, parsedTokens)
-    if len(parsedTokens) > 0 && parsedTokens[-1].pEnd != 1
+
+    if len(parsedTokens) && !has_key(parsedTokens[-1], 'pEnd')
         return []
     endif
     return parsedTokens
@@ -808,34 +850,16 @@ function! phpcomplete_extended#parsereverse(cursorLine, cursorLineNumber) "{{{
         return []
     endif
     let cursorLine = phpcomplete_extended#util#trim(a:cursorLine)
-    let cursorLineNumber = a:cursorLineNumber
-    let iterCount = 5
-    let lineCount = 10
-    let currentLine = cursorLineNumber - 1
+    let parsedTokens = []
     let parsedTokens = phpcomplete_extended#parser#reverseParse(cursorLine, [])
-    if empty(parsedTokens)
-        return []
-    endif
-    let isStart = parsedTokens[0].start
-    if !isStart
-        for i in range(0, iterCount)
-            let lines = phpcomplete_extended#util#getLines(currentLine, lineCount, "back")
-            let parsedTokens = phpcomplete_extended#parser#reverseParse(lines, parsedTokens)
-            if empty(parsedTokens)
-                return []
-            endif
 
-            let isStart = parsedTokens[0].start
 
-            if isStart
-                break
-            endif
-            let lineCount += lineCount
-        endfor
-    endif
-    let isStart = parsedTokens[0].start
-    if !isStart
-        return []
+    if empty(parsedTokens) 
+            \ || (len(parsedTokens) && has_key(parsedTokens[0], 'start') && parsedTokens[0].start == 0)
+        let linesTillFunc = s:getLinesTilFunc(a:cursorLineNumber)
+        let joinedLines = join(reverse(linesTillFunc),"")
+        let parsedTokens =  phpcomplete_extended#parser#reverseParse(joinedLines, [])
+        return parsedTokens
     endif
     return parsedTokens
 endfunction "}}}
@@ -907,13 +931,14 @@ function! phpcomplete_extended#getFQCNForClassProperty(type, property, parent_fq
     let is_this = a:is_this
     let property = a:property
     let classname = ''
+    let isArray = 0
 
     let this_fqcn = a:parent_fqcn
     let this_fqcn = s:get_plugin_resolve_fqcn(this_fqcn)
     let this_class_data = phpcomplete_extended#getClassData(this_fqcn)
 
     if empty(this_class_data)
-        return ""
+        return ["", 0]
     endif
 
 
@@ -921,20 +946,26 @@ function! phpcomplete_extended#getFQCNForClassProperty(type, property, parent_fq
     if type == 'property'
         let this_properties = this_class_data['properties']['all']
         if !has_key(this_properties, property)
-            return ''
+            return ['', 0]
         endif
         let classname = this_properties[property]['type']
+        if has_key(this_properties[property], 'array_type')
+            let isArray = this_properties[property]['array_type']
+        endif
     elseif type == 'method'
         let this_methods = this_class_data['methods']['all']
         if !has_key(this_methods, property)
-            return ''
+            return ['', 0]
         endif
         if has_key(this_methods[property], 'return')
             let classname = this_methods[property]['return']
+            if has_key(this_methods[property], 'array_return')
+                let isArray = this_methods[property]['array_return']
+            endif
         endif
     endif
 
-    return classname
+    return [classname, isArray]
 endfunction " }}}
 
 function! s:getClassMenuEntries(base) "{{{
@@ -1256,15 +1287,7 @@ function! s:loadIndex() " {{{
             call add(s:disabled_projects, getcwd())
             return
         endif
-        let composer_message = "Do you want to create composer autoload classmap?"
-        let ret = phpcomplete_extended#util#input_yesno(composer_message)
-        if ret
-            echon "\n"
-            call phpcomplete_extended#util#print_message("Generating autoload classmap")
-            let composer_command = g:phpcomplete_index_composer_command . " dumpautoload --optimize"
-            echon vimproc#system(composer_command)
-        endif
-        echon "\n"
+        echo "\n\n"
         call phpcomplete_extended#generateIndex()
     endif
 
@@ -1277,6 +1300,7 @@ function! s:loadIndex() " {{{
         endif
 
         let g:phpcomplete_index = s:readIndex(index_file)
+        call phpcomplete_extended#util#print_message("Index Loaded.")
         let g:phpcomplete_index_loaded = 1
     endif
 
@@ -1395,11 +1419,20 @@ function! phpcomplete_extended#loadCoreIndex() "{{{
     let g:core_index_loaded = 1
 endfunction "}}}
 
-function! phpcomplete_extended#generateIndex() "{{{
+function! phpcomplete_extended#generateIndex(...) "{{{
+    if !s:valid_composer_command()
+        echoerr printf('The composer command "%s" is not a valid Composer command. Please set g:phpcomplete_index_composer_command in your .vimrc file', g:phpcomplete_index_composer_command)
+        return
+    endif
+
     call s:makeCacheDir()
     call s:copyCoreIndex()
     call s:register_plugins()
+
     let input = g:phpcomplete_extended_root_dir . "/bin/IndexGenerator.php generate"
+    if len(a:000) == 1 && a:1 == '-verbose'
+        let input .= ' -verbose'
+    endif
     let input = phpcomplete_extended#util#substitute_path_separator(input)
 
     let plugin_php_file_command = join(map(copy(s:plugin_php_files), '" -u ".v:val'))
@@ -1407,12 +1440,23 @@ function! phpcomplete_extended#generateIndex() "{{{
     let cmd = 'php ' . input . plugin_php_file_command
     "echoerr cmd
     "return
+
+    let composer_command = g:phpcomplete_index_composer_command . " dumpautoload --optimize  1>/dev/null 2>&1"
+    echomsg "Generating autoload classmap"
+    call vimproc#system(composer_command)
+
     echomsg "Generating index..."
     let out =  vimproc#system(cmd)
     if out == "success"
         echomsg "Index generated"
     endif
     echo out
+endfunction "}}}
+
+function! s:valid_composer_command() "{{{
+    let cmd    = printf('%s --version', g:phpcomplete_index_composer_command)
+    let output = system(cmd)
+    return output =~ 'Composer version'
 endfunction "}}}
 
 function! phpcomplete_extended#updateIndex(background) "{{{
@@ -1429,6 +1473,7 @@ function! phpcomplete_extended#updateIndex(background) "{{{
     let cmd = 'php '. input
 
     if a:background
+        let cmd .= ' 1>/dev/null 2>/dev/null
         call vimproc#system_bg(cmd)
     else
         let out =  vimproc#system(cmd)
@@ -1460,7 +1505,12 @@ function! phpcomplete_extended#checkUpdates() "{{{
         let update_file = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended/'.s:update_info['update_file_name'])
 
         if filereadable(update_file)
-            let updateData = s:readIndex(update_file)
+            try
+                let updateData = s:readIndex(update_file)
+            catch 
+                echoerr "Error occured while reading update index"
+                return
+            endtry
 
             call s:updateLocalCache(updateData)
             call delete(update_file)
@@ -1488,7 +1538,8 @@ endfunction "}}}
 
 function! s:readIndex(filename) "{{{
     if(!filereadable(a:filename))
-        throw "file " . a:filename " is not readable"
+        echoerr printf('Could not read index file %s', fnamemodify(a:filename, ':.'))
+        return
     endif
     let file_content = readfile(a:filename)
     let true = 1
@@ -1508,6 +1559,7 @@ function! s:updateLocalCache(updateData) "{{{
     call s:setClassData(fqcn, file, classData)
     call s:updateIntrospectionData('extends', fqcn, extendsData)
     call s:updateIntrospectionData('implements', fqcn, implementsData)
+    call s:updateMenuEntries(classData['classname'])
 endfunction "}}}
 
 function! s:updateIntrospectionData(type,fqcn, data) "{{{
@@ -1515,6 +1567,9 @@ function! s:updateIntrospectionData(type,fqcn, data) "{{{
     let fqcn = a:fqcn
     let data = a:data
     let collection = g:phpcomplete_index[type]
+    if type(data) != type({})
+        return
+    endif
     for added in data['added']
         if !has_key(collection, added)
             let collection[added] = []
@@ -1535,7 +1590,55 @@ function! s:updateIntrospectionData(type,fqcn, data) "{{{
     endfor
 endfunction "}}}
 
+function! s:updateMenuEntries(className) "{{{
+    let className = a:className
+    let fqcns = g:phpcomplete_index['class_fqcn'][className]
+    let class_menu_entries = g:phpcomplete_index['class_func_menu_entries']
+    let idx = 0
+
+    for class_menu_entry in class_menu_entries
+        if class_menu_entry['word'] =~ '^'. className
+            call remove(class_menu_entries, idx)
+        else
+            let idx = idx + 1
+        endif
+    endfor
+
+    let menu_entries = []
+    if type(fqcns) == type('')
+        call add(menu_entries,  {
+            \ 'word': className,
+            \ 'kind': 'c',
+            \ 'menu': fqcns,
+            \ 'info': fqcns
+            \ }
+        \)
+
+    elseif type(fqcns) == type([])
+        let i = 1
+        for fqcn in fqcns
+            call add(menu_entries , {
+                \ 'word': className. '-'. i,
+                \ 'kind': 'c',
+                \ 'menu': fqcn,
+                \ 'info': fqcn
+                \}
+            \)
+            let i = i + 1
+        endfor
+    endif
+    for menu_entry in menu_entries
+        " add at last for now
+        call add(class_menu_entries, menu_entry)
+    endfor
+
+endfunction "}}}
+
 function! phpcomplete_extended#isClassOfType(classFQCN, typeFQCN) "{{{
+    if a:classFQCN == a:typeFQCN
+        return 1
+    endif
+
     if has_key(g:phpcomplete_index['extends'], a:typeFQCN)
         \ && index(g:phpcomplete_index['extends'][a:typeFQCN], a:classFQCN) >= 0
         return 1
@@ -1661,6 +1764,39 @@ function! s:get_plugin_inside_qoute_menu_entries(fqcn, lastToken) "{{{
         endif
     endfor
     return menu_entries
+endfunction "}}}
+
+function! phpcomplete_extended#init_autocmd() "{{{
+    augroup phpcomplete-extended
+        autocmd!
+        "Todo add configuration option to load later
+        autocmd BufWinEnter,BufEnter  * call phpcomplete_extended#readDataForProject()
+        autocmd VimLeave *     call phpcomplete_extended#saveIndexCache()
+        autocmd BufWritePost *.php call phpcomplete_extended#updateIndex(1)
+
+        autocmd CursorHold *     call phpcomplete_extended#saveIndexCache()
+        autocmd CursorHold *     call phpcomplete_extended#checkUpdates()
+        autocmd CursorMoved,CursorMovedI *.php call phpcomplete_extended#checkUpdates()
+        autocmd CursorMovedI *.php call phpcomplete_extended#trackMenuChanges()
+    augroup END
+endfunction "}}}
+
+function! phpcomplete_extended#enable() "{{{
+    let s:phpcomplete_enabled = 1
+    call phpcomplete_extended#init_autocmd()
+
+    command! -nargs=0 -bar PHPCompleteExtendedDisable
+          \ call phpcomplete_extended#disable()
+
+endfunction "}}}
+
+function! phpcomplete_extended#disable() "{{{
+    let s:phpcomplete_enabled = 0
+  augroup phpcomplete-extended
+    autocmd!
+  augroup END
+
+  silent! delcommand PHPCompleteExtendedDisable
 endfunction "}}}
 
 let &cpo = s:save_cpo

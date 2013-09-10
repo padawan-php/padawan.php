@@ -161,7 +161,21 @@ PHPCompleteExtendedClearIndexCache		*PHPCompleteExtendedClearIndexCache*
 		Clears intermediate index cache
 
 PHPCompleteExtendedGenerateIndex		*PHPCompleteExtendedGenerateIndex*
-		Generate index from scratch. Previous index discarded
+		Generate index from scratch. Previous index discarded.
+
+		To get verbose output append " -verbose" to the command.
+		For example,
+
+>
+		:PHPCompleteExtendedGenerateIndex -verbose
+<
+		To put large output in a scratch buffer you can use 
+		"tyru/capture.vim"(https://github.com/tyru/capture.vim). The 
+		command would be
+>
+		:Capture PHPCompleteExtendedGenerateIndex -verbose
+<
+
 
 PHPCompleteExtendedUpdateIndex			*PHPCompleteExtendedUpdateIndex*
 		Manually update index of the class of current buffer. Used for debug
@@ -169,6 +183,13 @@ PHPCompleteExtendedUpdateIndex			*PHPCompleteExtendedUpdateIndex*
 
 PHPCompleteExtendedCheckUpdate			*PHPCompleteExtendedCheckUpdate*
 		Manually issue check update command. Used for debug purpose.
+
+PHPCompleteExtendedDisable			*PHPCompleteExtendedDisable*
+		Disables PHP autocomplete
+
+PHPCompleteExtendedEnable			*PHPCompleteExtendedEnable*
+		Enables PHP autocomplete
+
 
 
 ==============================================================================

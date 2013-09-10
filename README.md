@@ -14,13 +14,23 @@ autocomplete this plugin have several code inspection features,
 * Go to definition of a symbol. Also context aware.
 * Automatically add use statement of current completed word. Also added plugin
   command of this action.
-* If (Unite) plugin installed following sources are available,
+* If [unite.vim](https://github.com/Shougo/unite.vim/) plugin installed following sources are available,
     * `phpcomplete/files`           : Lists PHP files of the project.
     * `phpcomplete/vendors`         : Lists vendor directories
     * `phpcomplete/extends`         : Lists classes that extends the class guessed from
       the current cursor word.
     * `phpcomplete/implements`      : Lists classes that implements the class guessed
       from the current cursor word.
+
+Demo videos (click on the image to goto youtube)
+-----------------------------------------------
+## Autocomplete demo video:
+
+[![ScreenShot](http://img.youtube.com/vi/yZYFKslqkC8/maxresdefault.jpg)](http://www.youtube.com/watch?v=yZYFKslqkC8)
+
+## Unite sources demo video:
+
+[![ScreenShot](http://i1.ytimg.com/vi/Wd5G7QA3OFw/maxresdefault.jpg)](http://www.youtube.com/watch?v=Wd5G7QA3OFw)
 
 Installation
 -------------
@@ -40,15 +50,15 @@ various plugin managers are given bellow.
 Issue following commands.
 
 ```sh
-git clone https://github.com/Shougo/vimproc.vim.git ~/.vim/bundle
+git clone https://github.com/Shougo/vimproc.vim.git ~/.vim/bundle/vimproc.vim
 cd ~/.vim/bundle/vimproc.vim
 make
 cd ..
-git clone https://github.com/Shougo/unite.vim.git ~/.vim/bundle
-git clone https://github.com/m2mdas/phpcomplete-extended.git ~/.vim/bundle
+git clone https://github.com/Shougo/unite.vim.git ~/.vim/bundle/unit.vim
+git clone https://github.com/m2mdas/phpcomplete-extended.git ~/.vim/bundle/phpcomplete-extended
 ```
 
-## NeoBundle (prefered)
+## NeoBundle (preferred)
 Put these lines in `.vimrc` and issue `source %` command
 
 ```vim
@@ -122,6 +132,13 @@ Neocomplete support is built-in and my preferred autocomplete plugin. It needs
 vim with lua bindings. To know more about installation refer to the plugin
 repository.
 
+## [supertab](https://github.com/ervandew/supertab)
+
+Minimal configuration for supertab support,
+
+    autocmd  FileType  php setlocal omnifunc=phpcomplete_extended#CompletePHP
+    let g:SuperTabDefaultCompletionType = "<c-x><c-o>"
+
 ## [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
 
 If `omnifunc` set the omni completer of `YouCompleteMe` should get the completion
@@ -138,7 +155,7 @@ and vim part is responsible for providing autocomplete menu entries based on the
 index. For reference see
 [phpcomplete-extended-symfony](https://github.com/m2mdas/phpcomplete-extended-symfony)
 and
-[phpcomplete-extended-laravlel](https://github.com/m2mdas/phpcomplete-extended-laravlel) plugins.
+[phpcomplete-extended-laravlel](https://github.com/m2mdas/phpcomplete-extended-laravel) plugins.
 
 License
 -------

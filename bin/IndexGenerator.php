@@ -3,7 +3,7 @@
  *=============================================================================
  * AUTHOR:  Mun Mun Das <m2mdas at gmail.com>
  * FILE: IndexGenerator.php
- * Last Modified: September 10, 2013
+ * Last Modified: October 04, 2013
  * License: MIT license  {{{
  *     Permission is hereby granted, free of charge, to any person obtaining
  *     a copy of this software and associated documentation files (the
@@ -29,6 +29,7 @@
 
 set_time_limit(0);
 ini_set('memory_limit','1000M');
+ini_set('display_errors', 'stderr');
 if(php_sapi_name() == 'cli') {
     if(count($argv) < 2) {
         echo "error: not enough arguments";
@@ -36,8 +37,14 @@ if(php_sapi_name() == 'cli') {
         array_shift($argv);
         array_shift($argv);
 
+        $verbose = false;
+        if(count($argv) > 0 && $argv[0] == '-verbose') {
+            array_shift($argv);
+            $verbose = true;
+        }
+
         //$time = microtime(true); 
-        $phpCompletePsr  = new IndexGenerator();
+        $phpCompletePsr  = new IndexGenerator($verbose);
 
         $plugins = explode("-u", implode("", $argv));
         foreach ($plugins as $pluginFile) {
@@ -48,15 +55,24 @@ if(php_sapi_name() == 'cli') {
         }
 
         $index  = $phpCompletePsr->generateIndex();
-        $phpCompletePsr->writeToFile($phpCompletePsr->getIndexFileName(), json_encode($index));
+
+        $jsonIndex = json_encode($index);
+        $lastJsonError = json_last_error();
+        if($lastJsonError != JSON_ERROR_NONE) {
+            printJsonError($lastJsonError);
+            exit;
+        }
+
+        $phpCompletePsr->writeToFile($phpCompletePsr->getIndexFileName(), $jsonIndex);
         $phpCompletePsr->writeToFile($phpCompletePsr->getReportFileName(), implode("\n", $phpCompletePsr->getInvalidClasses()));
     } else if($argv[1] == 'update') {
         array_shift($argv);
         array_shift($argv);
         $file = array_shift($argv);
         $cacheFileName = array_shift($argv);
+        $verbose = false;
 
-        $p = new IndexGenerator();
+        $p = new IndexGenerator($verbose);
         $plugins = explode("-u", implode("", $argv));
         foreach ($plugins as $pluginFile) {
             if(empty($pluginFile)) {
@@ -74,6 +90,34 @@ if(php_sapi_name() == 'cli') {
     }
 } else {
     exit;
+}
+
+function printJsonError($errorCode)
+{
+    switch (json_last_error()) {
+    case JSON_ERROR_NONE:
+        echo ' - No errors';
+        break;
+    case JSON_ERROR_DEPTH:
+        echo ' - Maximum stack depth exceeded';
+        break;
+    case JSON_ERROR_STATE_MISMATCH:
+        echo ' - Underflow or the modes mismatch';
+        break;
+    case JSON_ERROR_CTRL_CHAR:
+        echo ' - Unexpected control character found';
+        break;
+    case JSON_ERROR_SYNTAX:
+        echo ' - Syntax error, malformed JSON';
+        break;
+    case JSON_ERROR_UTF8:
+        echo ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+        break;
+    default:
+        echo ' - Unknown error';
+        break;
+    }
+    echo "\n";
 }
 
 class IndexGenerator
@@ -168,7 +212,14 @@ class IndexGenerator
      */
     public $plugins;
 
-    public function __construct() 
+    /**
+     * Verbosity
+     *
+     * @var bool
+     */
+    private $verbose;
+
+    public function __construct($verbose) 
     {
         $this->file_fqcn        = array();
         $this->fqcn_file        = array();
@@ -184,6 +235,7 @@ class IndexGenerator
         $this->parsedClasses    = array();
         $this->plugins = array();
         $this->loader = require 'vendor/autoload.php';
+        $this->verbose = $verbose;
     }
 
     public function addPlugin($pluginFile)
@@ -243,6 +295,7 @@ class IndexGenerator
         $implements      = $classCache['implements'];
         $this->fqcn_file = $classCache['fqcn_file'];
         $this->file_fqcn = $classCache['file_fqcn'];
+        $this->class_fqcn = $classCache['class_fqcn'];
         $fileData        = array();
         if(!is_file($this->pluginIndexFile)) {
             $pluginIndex = array();
@@ -269,6 +322,8 @@ class IndexGenerator
 
         $classData                    = $this->processClass($fqcn);
         $classCache['classes'][$fqcn] = $classData;
+        $classCache['class_fqcn'] = $this->class_fqcn;
+        $classCache['class_func_menu_entries'] = $this->createMenuEntries($this->class_fqcn, $this->coreIndex['function_list']);
 
         $fileData['classdata']['file'] = $fileName;
         $fileData['classdata']['fqcn'] = $fqcn;
@@ -281,7 +336,7 @@ class IndexGenerator
         $classCache['fqcn_file'][$fqcn]     = $fileName;
 
         file_put_contents('.phpcomplete_extended/'. $cacheFileName, json_encode($fileData));
-        file_put_contents('.phpcomplete_extended/tags.json', json_encode($classCache));
+        file_put_contents('.phpcomplete_extended/phpcomplete_index', json_encode($classCache));
         $this->execHook("postUpdateIndex", false, $classData, $classCache, $this);
         $this->writePluginIndexes();
 
@@ -391,19 +446,31 @@ class IndexGenerator
         $count = 0;
         foreach($classMap as $fqcn => $file) {
             if(
-                preg_match('/Test/',$file) 
+                preg_match('/DateSelect/', $file) //zend
+                //|| preg_match('/DateTime/', $file) //zend
+                || preg_match('/DateTimeSelect/', $file) //zend
+                || preg_match('/MonthSelect/', $file) //zend
+                //|| preg_match('/PropelDataCollector/', $file) //zend
+            ){
+                continue;
+            }
+
+            if(
+                !array_key_exists('PHPUnit_Framework_TestCase', $this->fqcn_file) &&
+                (preg_match('/Test/',$file) 
                 || preg_match('/TestCase/'         , $file)
                 || preg_match('/0/'                , $fqcn)
                 || preg_match('/Fixtures/'         , $file)
                 || preg_match('/Test/'             , $file)
                 //|| preg_match('/Command/'             , $file)
                 || preg_match('/DataFixtures/'     , $file)
-                || preg_match('/DateSelect/', $file) //zend
-                //|| preg_match('/DateTime/', $file) //zend
-                || preg_match('/DateTimeSelect/', $file) //zend
-                || preg_match('/MonthSelect/', $file) //zend
+                )
             ){
                 continue;
+            }
+
+            if($this->verbose) {
+                echo "processing $file\n";
             }
 
             if(!$this->validateClass($file)) {
@@ -634,13 +701,12 @@ class IndexGenerator
 
         $parsedClassData = $this->parseClass($fileName);
         $namespaces = $parsedClassData['namespaces'];
-        //if(!array_key_exists('file', $namespaces)){
-        //return false;
-        //}
         $classLineData = $parsedClassData['class_line_data'];
         $classTokens = array();
         $classTokens[] = $classLineData['extends'];
         $classTokens = array_merge($classTokens,  $classLineData['implements']);
+        $className = $classLineData['classname'];
+        $tokens = array();
         //print_r($namespaces);exit;
         foreach($classTokens as $classToken) {
             if(empty($classToken)) {
@@ -663,7 +729,30 @@ class IndexGenerator
                 return false;
             }
         }
-        $className = $classLineData['classname'];
+        foreach($parsedClassData['constructor_arguments'] as $classToken) {
+            if(empty($classToken)) {
+                continue;
+            }
+            if($classToken == $className) {
+                continue;
+            }
+            $fqcn = $this->guessClass($classToken, $namespaces);
+            if(empty($fqcn)) {
+                return false;
+            }
+            if(!array_key_exists($fqcn, $this->fqcn_file)) { //it may be an internal interface
+                try {
+                    $reflectionClass = new \ReflectionClass($fqcn);
+                    continue;
+                } catch (\Exception $e) {
+                    return false;
+                }
+            }
+            $isValidFqcnProperties = $this->validateClass($this->fqcn_file[$fqcn]);
+            if(!$isValidFqcnProperties) {
+                return false;
+            }
+        }
 
         if(array_key_exists($className, $this->fqcn_file) && $this->fqcn_file[$className] == $fileName) {
             $classFqcn = $className;
@@ -707,20 +796,28 @@ class IndexGenerator
         if(!$docComment) {
             $docComment = "";
         }
+        preg_match("/(\\\\)?(\w+)$/", $reflectionClass->name, $classNameMatches);
         $classData['docComment']         = $this->trimDocComment($docComment);
         $classContent                    = $this->getClassContent($reflectionClass->getFileName(), $fqcn);
 
         $classData['namespaces']['file'] = $reflectionClass->getNamespaceName();
         $parsedClassData                 = $this->parseClass($classData['file']);
-        $className                       = $parsedClassData['class_line_data']['classname'];
+        $className                       = $classNameMatches[2];
         $classData['namespaces']         = $parsedClassData['namespaces'];
         $classData['className']          = $className;
         $this->classes[]                 = $className;
 
         if(array_key_exists($className, $this->class_fqcn)) {
-            if(is_array( $this->class_fqcn[$className] )) {
+            if(is_array($this->class_fqcn[$className])
+                && !in_array($fqcn, $this->class_fqcn[$className])
+            ) {
+
                 $this->class_fqcn[$className][] = $fqcn;
-            } else {
+
+            } elseif(is_string($this->class_fqcn[$className])
+                && $this->class_fqcn[$className] != $fqcn
+            ) {
+
                 $fqcns                        = array();
                 $fqcns[]                      = $this->class_fqcn[$className];
                 $fqcns[]                      = $fqcn;
@@ -774,7 +871,6 @@ class IndexGenerator
         $out               = array();
         $out['params']     = array();
         $out['docComment'] = $this->trimDocComment($docComment);
-        $out['signature']  = trim($classContent[$reflectionMethod->getStartLine()-1]);
         $out['inheritdoc'] = $parsedComment['inheritdoc'];
         $out['startLine']  = $startLine;
         $out['endLine']    = $endLine;
@@ -783,6 +879,7 @@ class IndexGenerator
         $origin = $this->normalizePath($origin);
         $out['origin'] = $origin;
 
+        $params = array();
         foreach ($parameters as $parameter) {
             $parameterName = '$'.$parameter->getName();
             try {
@@ -799,13 +896,19 @@ class IndexGenerator
             } else {
                 $parameterType = $parameter->getClass()->getName();
             }
+            $params[] = $parameterType. ' '. $parameterName;
             $out['params'][$parameterName] = $parameterType;
         }
 
         if(array_key_exists('return', $parsedComment) && $parsedComment['return'] != "") {
             $returnType  = "";
-            $returnTypes = explode('|', $parsedComment['return']);
+            $arrayReturn = 0;
+            $returnTypes = explode('|', trim($parsedComment['return']));
             foreach ($returnTypes as $rType) {
+                if(preg_match('/\[\]$/', $rType)) {
+                    $arrayReturn = 1;
+                    $rType = trim($rType, "[]");
+                }
                 if(!$this->isScalar($rType)) {
                     $returnType = $rType;
                     if($returnType[0] == '\\') {
@@ -819,7 +922,11 @@ class IndexGenerator
             } else {
                 $out['return'] = $this->guessClass($returnType, $classData['namespaces']);
             }
+            $out['array_return'] = $arrayReturn;
         }
+
+        $return = empty($parsedComment['return'])? "none" : $parsedComment['return'];
+        $out['signature']  = '('. join(', ', $params) . ')  : '. $return;
 
         foreach($modifiers as $modifier) {
             $classData['methods']['modifier'][$modifier][] = $reflectionMethod->name;
@@ -830,10 +937,16 @@ class IndexGenerator
 
     private function getConstantData(ReflectionClass $reflectionClass, &$classData)
     {
+        $constants = array();
         try {
             $constants = $reflectionClass->getConstants();
         } catch (\Exception $e) {
             //echo  $e->getMessage();
+        }
+        foreach ($constants as $key => $value) {
+            if(is_string($value)) {
+                $constants[$key] = $this->fixUTF8($value);
+            }
         }
         $classData['constants'] = $constants;
     }
@@ -862,7 +975,9 @@ class IndexGenerator
             if($type=='method'){         
                 switch ($splits[0]) {
                 case '@param':
-                    if(count($splits) == 2) {
+                    if(count($splits) == 1) {
+                        continue;
+                    } elseif(count($splits) == 2) {
                         $splits[2] = $splits[1];
                     }
                     $out['params'][$splits[2]] = $splits[1];
@@ -901,9 +1016,16 @@ class IndexGenerator
         $type = $parsedComment['var'];
         $out = array();
         $out['type'] = "";
+        $out['array_type'] = 0;
+        if(preg_match('/\[\]$/', $type)) {
+            $out['array_type'] = 1;
+        }
         if(!$this->isScalar($type) && !empty($type)) {
             if($type[0] == '\\') {
                 $type = substr($type, 1);
+            }
+            if(preg_match('/\[\]$/', $type)) {
+                $type = trim($type, "[]");
             }
             $out['type'] = $this->guessClass($type, $classData['namespaces']);
         }
@@ -918,7 +1040,7 @@ class IndexGenerator
         }
     }
 
-    private function guessClass($classToken, $namespaces) 
+    private function guessClass($classToken, $namespaces)
     {
         if(empty($classToken)) {
             return "";
@@ -1012,8 +1134,16 @@ class IndexGenerator
             $comment = str_replace("/", '', $comment, $count);
             $newComments[] = $comment;
         }
-        return join("\n", $newComments);
+        $docComment = join("\n", $newComments);
+        $docComment = $this->fixUTF8($docComment);
+        return $docComment;
     }
+
+    private function fixUTF8($content)
+    {
+        return iconv('UTF-8', 'UTF-8//IGNORE', utf8_encode($content));
+    }
+
 
     private function getEmptyMergeProperty() 
     {
@@ -1224,27 +1354,45 @@ class IndexGenerator
         $fullLine = "";
         $isClassLine = false;
         $classLine = "";
+        $useEnded = false;
+
+        $isConstructorLine = false;
+        $constructorLine = "";
 
         foreach ($classContent as $line) {
+
             $line = trim(str_replace("<?php", "", $line), "\t\n ");
-            if(!$isMultiLine && !$isClassLine && count(explode(";", $line)) > 2) {
+            $line = str_replace('/* final */', "", $line);
+            if(!$isMultiLine && !$isClassLine && !$isConstructorLine && !$useEnded && count(explode(";", $line)) > 2) {
                 $formattedClassContent = array_merge($formattedClassContent, explode(';', $line));
                 continue;
             }
+
             if($isClassLine) {
                 $classLine .= " " . $line;
                 if(strpos($classLine, "{")) {
                     $isClassLine = false;
+                    $useEnded = true;
                     $formattedClassContent[] = trim($classLine, "{}");
                 }
             }
 
-            if(!$isMultiLine && !$isClassLine &&
+            if($isConstructorLine) {
+                $constructorLine .= " " . $line;
+                if(strpos($constructorLine, "{")) {
+                    $isConstructorLine = false;
+                    $formattedClassContent[] = trim($constructorLine, "{}");
+                    break;
+                }
+            }
+
+            if(!$isMultiLine && !$isClassLine && !$isConstructorLine &&
                 (
                     preg_match("/^\s*namespace/", $line) 
                     || preg_match("/^\s*use/", $line) 
                     || preg_match("/^\s*(abstract|final)?\s*(class|interface)/", $line) 
                     || preg_match("/^\s*interface/", $line)
+                    || preg_match("/^\s*public\s+function\s+__construct/", $line)
                 )
             ){
                 if(preg_match("/^\s*(abstract|final)?\s*(class|interface)/", $line )) {
@@ -1254,10 +1402,24 @@ class IndexGenerator
                         continue;
                     } else {
                         $isClassLine = false;
+                        $useEnded = false;
                         $formattedClassContent[] = trim($line, ";{}");
                         continue;
                     }
                 }
+
+                if(preg_match("/^\s*public\s+function\s+__construct/", $line)) {
+                    if(strpos($line, ")") === false) {
+                        $isConstructorLine = true;
+                        $constructorLine .= trim($line, ";");
+                        continue;
+                    } else {
+                        $isConstructorLine = false;
+                        $formattedClassContent[] = trim($line, ";{}");
+                        break;
+                    }
+                }
+
                 if(strpos($line, ";") === false && strpos($line, ",") >= 0) {
                     $isMultiLine = true;
                     $multiLine .= $line;
@@ -1296,15 +1458,14 @@ class IndexGenerator
         $className = "";
         $extends = array();
         $implements = array();
+        $constructorArguments = array();
         $classNameregex = "/^\s*(abstract|final)?(\s+)?(class)\s+([\\\\,\w]+)(\s+extends\s+([\\\\\w]+))?(\s+implements\s+([^{]*))?/";
         $interfaceRegex = "/^\s*interface\s+([\\\\,\w]+)(\s+extends(.*))?/"; 
+        $constructorRegex = "/^\s*public\s+function\s+__construct\((.*)\)/";
         $classContent = file($fileName);
         $formattedClassContent = $this->formatClassContent($classContent);
         $parseEnded = false;
         foreach ($formattedClassContent as $line) {
-            if($parseEnded) {
-                break;
-            }
             if(preg_match("/\s*namespace\s+(.*)(;)?/", $line, $matches)) {
                 $namespace = trim($matches[1], ";");
             }
@@ -1340,6 +1501,9 @@ class IndexGenerator
                 }
             }
             if(preg_match($classNameregex, $line, $matches)) {
+                if(strlen($className) > 0){
+                    continue;
+                }
                 $className = $matches[4];
                 if(!empty($matches[6])) { //extends
                     $extends = trim($matches[6], " \n\r");
@@ -1362,7 +1526,7 @@ class IndexGenerator
                         if(empty($implement)) { 
                             continue;
                         }
-                        $implement = trim($implement, " \n\r");
+                        $implement = trim($implement, " \n\r{");
                         if(strpos($implement, "\\")) {
                             $useTokens = explode("\\", $implement);
                             $firstToken = $useTokens[0];
@@ -1380,14 +1544,43 @@ class IndexGenerator
                         }
                     }
                 }
-                $parseEnded = true;
+            }
+            if(preg_match($constructorRegex, $line, $matches)) {
+                $arguments = explode(",", $matches[1]);
+                foreach ($arguments as $argument) {
+                    $argument = trim($argument);
+                    if(isset($argument[0]) && $argument[0] == '$') {
+                        continue;
+                    }
+                    $segments = preg_split("/\s+/", $argument);
+                    if(count($segments) == 1) {
+                        continue;
+                    }
+                    if($this->isScalar($segments[0])) {
+                        continue;
+                    }
+                    $argumentFQCN = $segments[0];
+                    if(strpos($segments[0], "\\")) {
+                        $useTokens = explode("\\", $segments[0]);
+                        $firstToken = $useTokens[0];
+                        $lastToken = array_pop($useTokens);
+                        $constructorArguments[] = $lastToken;
+                        if(array_key_exists($firstToken, $uses)) {
+                            $uses[$lastToken] = $uses[$firstToken]. "\\" . join("\\", $useTokens);
+                        } else {
+                            $uses[$lastToken] = $namespace . "\\" . join("\\", $useTokens);
+                        }
+                    } else {
+                        $constructorArguments[] = $argumentFQCN;
+                    }
+                }
             }
             if(preg_match($interfaceRegex, $line, $matches)) {
                 $className = $matches[1];
                 if(!empty($matches[3])) {
                     foreach (explode(",", $matches[3]) as $implement) {
                         //triplicate, will extract later
-                        $implement = trim($implement, " \n\r");
+                        $implement = trim($implement, " \n\r{");
                         if(strpos($implement, "\\")) {
                             $useTokens = explode("\\", $implement);
                             $firstToken = $useTokens[0];
@@ -1419,7 +1612,8 @@ class IndexGenerator
                 'implements' => $implements,
                 'extends' => $extends,
                 'classname' => $className
-            )
+            ), 
+            'constructor_arguments' =>  $constructorArguments
         );
         //ldd($parsedData);
         $this->parsedClasses[$fileName] = $parsedData;
@@ -1477,3 +1671,4 @@ class IndexGenerator
         $this->coreIndex = json_decode(file_get_contents($this->coreIndexFile), true);
     }
 }
+
