@@ -1473,7 +1473,7 @@ function! phpcomplete_extended#updateIndex(background) "{{{
     let cmd = 'php '. input
 
     if a:background
-        let cmd .= ' 1>/dev/null 2>/dev/null
+        let cmd .= ' 1>/dev/null 2>/dev/null'
         call vimproc#system_bg(cmd)
     else
         let out =  vimproc#system(cmd)
