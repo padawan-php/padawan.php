@@ -334,7 +334,7 @@ function! s:getFQCNFromTokens(parsedTokens, currentFQCN, isThis) "{{{
 
     let isPrevTokenArray = 0
 
-    if currentFQCN =~  '\[\]$' && len(parsedTokens) 
+    if currentFQCN =~  '\[\]$' && len(parsedTokens)
                 \ && has_key(parsedTokens[0], 'isArrayElement')
         let currentFQCN = matchstr(currentFQCN, '\zs.*\ze\[\]$')
         let isPrevTokenArray = 1
@@ -345,16 +345,16 @@ function! s:getFQCNFromTokens(parsedTokens, currentFQCN, isThis) "{{{
         let insideBraceText = token['insideBraceText']
         let isArrayElement = has_key(token, 'isArrayElement')? 1 :0
         let currentClassData = phpcomplete_extended#getClassData(currentFQCN)
-        
+
         let  pluginFQCN = s:get_plugin_fqcn(currentFQCN,token)
 
         if insideBraceText[0] == "("
             let currentFQCN = ""
         elseif pluginFQCN != ""
             let currentFQCN = pluginFQCN
-        elseif isArrayElement 
+        elseif isArrayElement
             let isPrevTokenArray = 0
-            if phpcomplete_extended#isClassOfType(currentFQCN, 'ArrayAccess') 
+            if phpcomplete_extended#isClassOfType(currentFQCN, 'ArrayAccess')
                     \ && has_key(currentClassData['methods']['all'], 'offsetGet')
                 let offsetType = currentClassData['methods']['all']['offsetGet']['return']
                 if empty(offsetType)
@@ -854,7 +854,7 @@ function! phpcomplete_extended#parsereverse(cursorLine, cursorLineNumber) "{{{
     let parsedTokens = phpcomplete_extended#parser#reverseParse(cursorLine, [])
 
 
-    if empty(parsedTokens) 
+    if empty(parsedTokens)
             \ || (len(parsedTokens) && has_key(parsedTokens[0], 'start') && parsedTokens[0].start == 0)
         let linesTillFunc = s:getLinesTilFunc(a:cursorLineNumber)
         let joinedLines = join(reverse(linesTillFunc),"")
@@ -1429,7 +1429,7 @@ function! phpcomplete_extended#generateIndex(...) "{{{
     call s:copyCoreIndex()
     call s:register_plugins()
 
-    let input = g:phpcomplete_extended_root_dir . "/bin/IndexGenerator.php generate"
+    let input = g:phpcomplete_extended_root_dir . "/bin/indexer.php generate"
     if len(a:000) == 1 && a:1 == '-verbose'
         let input .= ' -verbose'
     endif
@@ -1468,7 +1468,7 @@ function! phpcomplete_extended#updateIndex(background) "{{{
     let update_time = getftime(bufname('%'))
     let fileName = 'update_cache_'. update_time
     let plugin_php_file_command = join(map(copy(s:plugin_php_files), '" -u ".v:val'))
-    let input = printf('%s %s %s %s', g:phpcomplete_extended_root_dir . "/bin/IndexGenerator.php update" , file_location,  fileName, plugin_php_file_command)
+    let input = printf('%s %s %s %s', g:phpcomplete_extended_root_dir . "/bin/indexer.php update" , file_location,  fileName, plugin_php_file_command)
     let input = phpcomplete_extended#util#substitute_path_separator(input)
     let cmd = 'php '. input
 
@@ -1507,7 +1507,7 @@ function! phpcomplete_extended#checkUpdates() "{{{
         if filereadable(update_file)
             try
                 let updateData = s:readIndex(update_file)
-            catch 
+            catch
                 echoerr "Error occured while reading update index"
                 return
             endtry

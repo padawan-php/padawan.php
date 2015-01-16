@@ -1,6 +1,11 @@
 phpcomplete-extended
 ====================
 
+This plugin is a fork of [phpcomplete-extended](https://github.com/m2mdas/phpcomplete-extended) with refactored structure and fixed bugs.
+
+Plugin
+======
+
 phpcomplete-extended is a fast, extensible, context aware autocomplete plugin
 for PHP composer projects. Initially it reads autoload classmap of a composer
 project, parses doc-comments of each class and creates index from them. After

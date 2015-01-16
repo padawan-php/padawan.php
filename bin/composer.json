@@ -1,0 +1,15 @@
+{
+    "name": "mkusher/phpcomplete-extended",
+    "authors": [
+        {
+            "name": "Aleh Kashnikau",
+            "email": "aleh.kashnikau@gmail.com"
+        }
+    ],
+    "autoload":{
+        "psr-0":{"":"src/"}
+    },
+    "require": {
+        "phine/path": "~1.0"
+    }
+}
