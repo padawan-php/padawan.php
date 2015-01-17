@@ -2,9 +2,14 @@
 
 namespace Utils;
 
+use \Phine\Path\Path;
+
 class PathResolver {
     private $path;
 
+    public function __construct(Path $path){
+        $this->path = $path;
+    }
     public function canonical($path){
         return $this->path->canonical($path);
     }

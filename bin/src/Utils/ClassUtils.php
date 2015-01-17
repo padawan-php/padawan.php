@@ -10,10 +10,10 @@ class ClassUtils{
     private $validator;
     private $parser;
 
-    public function __construct(PathResolver $path){
+    public function __construct(PathResolver $path, ClassParser $parser, ClassValidator $validator){
         $this->path = $path;
-        $this->parser = new ClassParser($this);
-        $this->validator = new ClassValidator($this->parser, $this);
+        $this->parser = $parser;
+        $this->validator = $validator;
     }
 
     public function validate($file){
@@ -185,7 +185,7 @@ class ClassUtils{
         return $mergedProperties;
     }
 
-    
+
     private function getClassInfo($fqcn)
     {
         $classData = $this->getEmptyClassData($fqcn);
@@ -457,9 +457,6 @@ class ClassUtils{
             $classData['properties']['modifier'][$modifier][] = $reflectionProperty->name;
         }
     }
-
-    
-
 
     private function trimDocComment($docComment)
     {

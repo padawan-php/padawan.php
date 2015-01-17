@@ -167,4 +167,11 @@ class IndexWriter{
     {
         $this->pathResolver->write($fileName, $data);
     }
+
+    public function writeIndex($index){
+        $this->writeToFile($this->getIndexFileName(), $index);
+    }
+    public function writeReport($invalidClasses){
+        $this->writeToFile($this->getReportFileName(), implode("\n", $invalidClasses));
+    }
 }

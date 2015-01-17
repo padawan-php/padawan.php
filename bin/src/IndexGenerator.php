@@ -97,18 +97,27 @@ class IndexGenerator
      *
      * @var PathResolver
      */
-    public $pathResolver;
+    public $path;
 
-    public $composerUtils;
-    public $namespaceUtils;
+    /**
+     * Object with Composer-specific functions
+     *
+     * @var Utils\ComposerUtils
+     */
+    public $composer;
+
+    /**
+     * Object for work with class-information
+     *
+     * @var Utils\ClassUtils
+     */
     public $classUtils;
 
-    public function __construct(Utils\PathResolver $path, $verbose)
+    public function __construct(Utils\PathResolver $path, Utils\Composer $composer, Utils\ClassUtils $class, $verbose = false)
     {
-        $this->pathResolver     = $path;
-        $this->composerUtils    = new Utils\ComposerUtils($this->pathResolver);
-        $this->classUtils       = new Utils\ClassUtils();
-        $this->namespaceUtils   = new Utils\NamespaceUtils();
+        $this->path             = $path;
+        $this->composer         = $composer;
+        $this->classUtils       = $class;
         $this->file_fqcn        = array();
         $this->fqcn_file        = array();
         $this->class_fqcn       = array();
@@ -117,12 +126,12 @@ class IndexGenerator
         $this->invalidClasses   = array();
         $this->processedClasses = array();
         $this->parsedClasses    = array();
-        $this->plugins = array();
-        $this->verbose = $verbose;
+        $this->plugins          = array();
+        $this->verbose          = $verbose;
     }
 
     public function getComposerUtils(){
-        return $this->composerUtils;
+        return $this->composer;
     }
 
     public function getClassUtils(){
@@ -133,105 +142,13 @@ class IndexGenerator
         return $this->namespaceUtils;
     }
 
-    public function addPlugin($pluginFile)
-    {
-        if(!is_file($pluginFile)) {
-            echo "not a valid file \n";
-            return;
-        }
-        include $pluginFile;
-        $className = basename($pluginFile, ".php");
-        $plugin = new $className;
-        if($plugin->isValidForProject()){
-            $this->plugins[] = $plugin;
-        }
-    }
-
-    /**
-     * calls plugin hooks
-     * @param string $hookName name of the plugin hook
-     * @param bool $return expect return date
-     */
-    public function execHook($hookName, $return)
-    {
-        $args = func_get_args();
-        $out = array();
-        array_shift($args);
-        $return = array_shift($args);
-        $extraArgs = $args;
-        foreach ($this->plugins as $plugin) {
-            if(method_exists($plugin, $hookName)) {
-                $pluginArgs = $extraArgs;
-
-                if($hookName == "preUpdateIndex") {
-                    $pluginIndex    = $extraArgs[0];
-                    $indexForPlugin = $pluginIndex[strtolower(get_class($plugin))];
-                    $pluginArgs     = array($indexForPlugin);
-                }
-
-                $ret = call_user_func_array(array($plugin, $hookName), $pluginArgs);
-                if($return) {
-                    $out[strtolower(get_class($plugin))] = $ret;
-                }
-            }
-        }
-        if($return) {
-            return $out;
-        }
-    }
-
-
-    private function getUpdatedExtraData($fqcn, &$prevData, &$classData, &$classCache, $extraDataList, $extraClassDataKey, $extraClassCacheKey)
-    {
-        $extraDataDiff = array(
-            'added' => array(),
-            'removed' => array()
-        );
-        $parentCountValues = array_count_values(
-            array_merge($prevData[$extraClassDataKey], $classData[$extraClassDataKey])
-        );
-
-        foreach($parentCountValues as $value => $count) {
-            if($count == 1) {
-                if(in_array($value, $prevData[$extraClassDataKey])) { //removed
-                    $extraDataDiff['removed'][] = $value;
-                } else {
-                    $extraDataDiff['added'][] = $value;
-                }
-            }
-        }
-
-        foreach($extraDataDiff['removed'] as $removed) {
-            $removedExtendData = $extraDataList[$removed];
-            array_splice($removedExtendData, array_search($fqcn, $removedExtendData), 1);
-            $classCache[$extraClassCacheKey][$removed] = $removedExtendData;
-        }
-
-        foreach($extraDataDiff['added'] as $added) {
-            $classCache[$extraClassCacheKey][$added][] = $fqcn;
-        }
-        return $extraDataDiff;
-    }
-
     public function generateIndex()
     {
-        $this->processCoreIndexFile();
+        // @TODO coreIndex should be set before generation started
         $time = microtime(true); // Gets microseconds
-        //TODO: pasre constructor for doctype
         $classMap = $this->getComposerUtils()->getClassMap();
-        $cwd = str_replace('\\','/',getcwd())."/";
-        if(strpos($cwd, ':') == 1) {
-            $drive = strtolower(substr($cwd, 0, 2));
-            $cwd = substr_replace($cwd, $drive, 0, 2);
-        }
-        array_walk($classMap, function(&$item, $key) use ($cwd){
-            $item = str_replace("\\", '/', $item);
-            if(strpos($item, ':') == 1) {
-                $drive = strtolower(substr($item, 0, 2));
-                $item = substr_replace($item, $drive, 0, 2);
-            }
-            $item = str_replace($cwd, '', $item);
-        });
+        $cwd = $this->path->canonical(getcwd()) . "/";
+        $classMap = $this->getComposerUtils()->canonicalClassMap($cwd, $classMap);
         $out = array();
         $out['namespaces'] = array();
         $out['interface'] = array();
@@ -382,52 +299,6 @@ class IndexGenerator
         return $dict;
     }
     /**
-     * Gets the value of indexFileName
-     *
-     * @return indexFileName
-     */
-    public function getIndexFileName()
-    {
-        return $this->indexFileName;
-    }
-
-    /**
-     * Sets the value of indexFileName
-     *
-     * @param string $indexFileName name of the file
-     *
-     * @return $this
-     */
-    public function setIndexFileName($indexFileName ="./.phpcomplete_extended/phpcomplete_index")
-    {
-        $this->indexFileName = $indexFileName;
-        return $this;
-    }
-
-    /**
-     * Gets the value of reportFileName
-     *
-     * @return reportFileName
-     */
-    public function getReportFileName()
-    {
-        return $this->reportFileName;
-    }
-
-    /**
-     * Sets the value of reportFileName
-     *
-     * @param string $reportFileName report file name
-     *
-     * @return $this
-     */
-    public function setReportFileName($reportFileName="./.phpcomplete_extended/report.txt")
-    {
-        $this->reportFileName = $reportFileName;
-        return $this;
-    }
-
-    /**
      * Gets the value of invalidClasses
      *
      * @return array
@@ -449,10 +320,85 @@ class IndexGenerator
         $this->invalidClasses = $invalidClasses;
         return $this;
     }
-    
-    public function processCoreIndexFile()
+
+    public function addPlugin($pluginFile)
     {
-        $this->coreIndex = json_decode($this->pathResolver->load($this->coreIndexFile), true);
+        if(!is_file($pluginFile)) {
+            echo "not a valid file \n";
+            return;
+        }
+        include $pluginFile;
+        $className = basename($pluginFile, ".php");
+        $plugin = new $className;
+        if($plugin->isValidForProject()){
+            $this->plugins[] = $plugin;
+        }
+    }
+
+    /**
+     * calls plugin hooks
+     * @param string $hookName name of the plugin hook
+     * @param bool $return expect return date
+     */
+    public function execHook($hookName, $return)
+    {
+        $args = func_get_args();
+        $out = array();
+        array_shift($args);
+        $return = array_shift($args);
+        $extraArgs = $args;
+        foreach ($this->plugins as $plugin) {
+            if(method_exists($plugin, $hookName)) {
+                $pluginArgs = $extraArgs;
+
+                if($hookName == "preUpdateIndex") {
+                    $pluginIndex    = $extraArgs[0];
+                    $indexForPlugin = $pluginIndex[strtolower(get_class($plugin))];
+                    $pluginArgs     = array($indexForPlugin);
+                }
+
+                $ret = call_user_func_array(array($plugin, $hookName), $pluginArgs);
+                if($return) {
+                    $out[strtolower(get_class($plugin))] = $ret;
+                }
+            }
+        }
+        if($return) {
+            return $out;
+        }
+    }
+
+
+    private function getUpdatedExtraData($fqcn, &$prevData, &$classData, &$classCache, $extraDataList, $extraClassDataKey, $extraClassCacheKey)
+    {
+        $extraDataDiff = array(
+            'added' => array(),
+            'removed' => array()
+        );
+        $parentCountValues = array_count_values(
+            array_merge($prevData[$extraClassDataKey], $classData[$extraClassDataKey])
+        );
+
+        foreach($parentCountValues as $value => $count) {
+            if($count == 1) {
+                if(in_array($value, $prevData[$extraClassDataKey])) { //removed
+                    $extraDataDiff['removed'][] = $value;
+                } else {
+                    $extraDataDiff['added'][] = $value;
+                }
+            }
+        }
+
+        foreach($extraDataDiff['removed'] as $removed) {
+            $removedExtendData = $extraDataList[$removed];
+            array_splice($removedExtendData, array_search($fqcn, $removedExtendData), 1);
+            $classCache[$extraClassCacheKey][$removed] = $removedExtendData;
+        }
+
+        foreach($extraDataDiff['added'] as $added) {
+            $classCache[$extraClassCacheKey][$added][] = $fqcn;
+        }
+        return $extraDataDiff;
     }
 }
 

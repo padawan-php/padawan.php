@@ -8,9 +8,12 @@ class ClassParser{
     private $parsedClasses;
     private $utils;
 
-    public function __construct(ClassUtils $utils){
+    public function __construct(ClassUtils $utils = null){
         $this->parsedClasses    = [];
         $this->utils            = $utils;
+    }
+    public function setUtils(ClassUtils $utils){
+        $this->utils = $utils;
     }
     public function parseClass($fileName)
     {

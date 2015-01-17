@@ -2,7 +2,7 @@
 
 namespace Utils;
 
-class ComposerUtils {
+class Composer {
     private $vendorPath;
     private $loader;
     private $path;
@@ -18,9 +18,19 @@ class ComposerUtils {
     public function getLoader(){
         return $this->loader;
     }
+    public function getCanonicalClassMap($cwd){
+        return $this->canonicalizeClassMap($cwd, $this->getClassMap());
+    }
     public function getClassMap(){
         return require $this->path
             ->join([$this->getComposerPath(), 'autoload_classmap.php']);
+    }
+    public function canonicalizeClassMap($cwd, $classMap){
+        foreach($classMap as $key => $item){
+            $item = $this->path->canonical($item);
+            $classMap[$key] = str_replace($item, '', $cwd);
+        }
+        return $classMap;
     }
     public function listVendorLibraries()
     {
