@@ -3,6 +3,7 @@
 namespace Utils;
 
 class IndexWriter{
+
     /**
      *
      * @var IndexGenerator
@@ -40,6 +41,21 @@ class IndexWriter{
      * @var string
      */
     private $pluginIndexFile;
+
+    /**
+     *
+     * @var PathResolver
+     */
+    private $path;
+
+    public function __construct(\IndexGenerator $generator, PathResolver $path){
+        $this->generator        = $generator;
+        $this->path             = $path;
+        $this->indexFileName    = './.phpcomplete_extended/phpcomplete_index';
+        $this->reportFileName   = './.phpcomplete_extended/report.txt';
+        $this->coreIndexFile    = './.phpcomplete_extended/core_index';
+        $this->pluginIndexFile  = './.phpcomplete_extended/plugin_index';
+    }
 
     /**
      * Gets the value of coreIndex
@@ -86,14 +102,50 @@ class IndexWriter{
         $this->coreIndexFile = $coreIndexFile;
         return $this;
     }
+    /**
+     * Gets the value of indexFileName
+     *
+     * @return indexFileName
+     */
+    public function getIndexFileName()
+    {
+        return $this->indexFileName;
+    }
 
+    /**
+     * Sets the value of indexFileName
+     *
+     * @param string $indexFileName name of the file
+     *
+     * @return $this
+     */
+    public function setIndexFileName($indexFileName)
+    {
+        $this->indexFileName = $indexFileName;
+        return $this;
+    }
 
-    public function __construct(IndexGenerator $generator){
-        $this->generator        = $generator;
-        $this->indexFileName    = './.phpcomplete_extended/phpcomplete_index';
-        $this->reportFileName   = './.phpcomplete_extended/report.txt';
-        $this->coreIndexFile    = './.phpcomplete_extended/core_index';
-        $this->pluginIndexFile  = './.phpcomplete_extended/plugin_index';
+    /**
+     * Gets the value of reportFileName
+     *
+     * @return reportFileName
+     */
+    public function getReportFileName()
+    {
+        return $this->reportFileName;
+    }
+
+    /**
+     * Sets the value of reportFileName
+     *
+     * @param string $reportFileName report file name
+     *
+     * @return $this
+     */
+    public function setReportFileName($reportFileName)
+    {
+        $this->reportFileName = $reportFileName;
+        return $this;
     }
 
     public function writeUpdatedClassInfo($fileName, $cacheFileName)
@@ -165,7 +217,7 @@ class IndexWriter{
 
     public function writeToFile($fileName, $data)
     {
-        $this->pathResolver->write($fileName, $data);
+        $this->path->write($fileName, $data);
     }
 
     public function writeIndex($index){
@@ -173,5 +225,8 @@ class IndexWriter{
     }
     public function writeReport($invalidClasses){
         $this->writeToFile($this->getReportFileName(), implode("\n", $invalidClasses));
+    }
+    public function loadCoreIndex(){
+        return [];
     }
 }

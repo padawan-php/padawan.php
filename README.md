@@ -1,7 +1,7 @@
-phpcomplete-extended
+phpcomplete-composer(WIP)
 ====================
 
-This plugin is a fork of [phpcomplete-extended](https://github.com/m2mdas/phpcomplete-extended) with refactored structure and fixed bugs.
+This plugin is a fork of [phpcomplete-extended by M2mdas](https://github.com/m2mdas/phpcomplete-extended) with completely rebuilt index generation part. New index generator based on [nikic/PHP-Parser](https://github.com/nikic/PHP-Parser).
 
 Plugin
 ======

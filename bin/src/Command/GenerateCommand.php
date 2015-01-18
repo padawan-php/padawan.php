@@ -4,18 +4,23 @@ namespace Command;
 
 class GenerateCommand extends AbstractCommand{
     public function run(array $arguments = []){
+        $time = microtime(true);
         $verbose = $this->isVerbose($arguments);
         $this->addPlugins($arguments);
         $generator = $this->get("IndexGenerator");
 
-        $index  = $this->prepareIndex($generator->generateIndex());
+        $index = $generator->generateIndex($this->get("Index"));
+        printf("Parsed: %d, time: %f\n", count($index->getClassMap()), microtime(true) - $time);
+        $index = $this->prepareIndex($index);
+        printf("time: %f\n", microtime(true) - $time);
+        return;
         $indexWriter = $this->get('IndexWriter');
 
         $indexWriter->writeIndex($index);
         $indexWriter->writeReport($generator->getInvalidClasses());
     }
     protected function prepareIndex($index){
-        $jsonIndex = json_encode($index);
+        $jsonIndex = json_encode($index->toArray());
         $lastJsonError = json_last_error();
         if($lastJsonError != JSON_ERROR_NONE) {
             $this->printJsonError($lastJsonError);

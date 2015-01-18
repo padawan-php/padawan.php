@@ -42,6 +42,14 @@ class PathResolver {
             }
         }
     }
+    public function getWorkingDirectory(){
+        return $this->canonical(getcwd());
+    }
+    public function getAbsolutePath($path, $cwd=null){
+        if(!$cwd)
+            $cwd = $this->getWorkingDirectory();
+        return $this->join([$cwd,$path]);
+    }
     public function remove($path){
         $this->path->remove($path);
     }

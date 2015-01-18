@@ -28,11 +28,11 @@ class Composer {
     public function canonicalizeClassMap($cwd, $classMap){
         foreach($classMap as $key => $item){
             $item = $this->path->canonical($item);
-            $classMap[$key] = str_replace($item, '', $cwd);
+            $classMap[$key] = str_replace($cwd, '', $item);
         }
         return $classMap;
     }
-    public function listVendorLibraries()
+    public function getVendorLibs()
     {
         $vendorLibs = array();
         $autoloadNamespaces = require $this->path->join([$this->getComposerPath(), 'autoload_namespaces.php']);

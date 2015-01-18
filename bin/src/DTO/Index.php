@@ -13,6 +13,7 @@ class Index {
     private $vendorLibs         = [];
     private $invalidClasses     = [];
     private $validClasses       = [];
+    private $classesFQCN        = [];
 
     public function getNamespaces(){
         return $this->namespaces;
@@ -101,8 +102,34 @@ class Index {
     public function addInvalidClass($class){
         $this->invalidClasses[] = $class;
     }
+
+    public function getClassesFQCN(){
+        return $this->classesFQCN;
+    }
+    public function setClassesFQCN(array $classesFQCN){
+        $this->classesFQCN = $classesFQCN;
+    }
+    public function addClassFQCN(FQCN $fqcn){
+        $this->classesFQCN[$fqcn->className] = $fqcn->toString();
+    }
+    public function getClassList(){
+        return [];
+    }
     public function toArray(){
         //@TODO fix format to get_object_vars
-        return get_object_vars($this);
+        return [
+            "extends" => $this->getExtends(),
+            "implements" => $this->getImplements(),
+            "vendor_libs" => $this->getVendorLibs(),
+            "namespaces" => $this->getNamespaces(),
+            "interface" => $this->getInterfaces(),
+            "fqcn_file" => $this->getClassMap(),
+            "file_fqcn" => $this->getFlippedClassMap(),
+            "classes" => $this->getClasses(),
+            "class_fqcn" => $this->getClassesFQCN(),
+            "class_list" => $this->getClassList(),
+            "class_func_const_list" => [],
+            "class_func_menu_entries" => [],
+        ];
     }
 }
