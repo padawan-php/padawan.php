@@ -2,13 +2,13 @@
 
 namespace Utils;
 
-use Parser\ClassParser;
+use Parser\Parser;
 
 class ClassUtils{
     private $path;
     private $parser;
 
-    public function __construct(PathResolver $path, ClassParser $parser){
+    public function __construct(PathResolver $path, Parser $parser){
         $this->path = $path;
         $this->parser = $parser;
     }

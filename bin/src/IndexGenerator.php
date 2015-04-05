@@ -1,31 +1,7 @@
 <?php
-/**
- *=============================================================================
- * AUTHOR:  Mun Mun Das <m2mdas at gmail.com>
- * FILE: IndexGenerator.php
- * Last Modified: October 04, 2013
- * License: MIT license  {{{
- *     Permission is hereby granted, free of charge, to any person obtaining
- *     a copy of this software and associated documentation files (the
- *     "Software"), to deal in the Software without restriction, including
- *     without limitation the rights to use, copy, modify, merge, publish,
- *     distribute, sublicense, and/or sell copies of the Software, and to
- *     permit persons to whom the Software is furnished to do so, subject to
- *     the following conditions:
- *
- *     The above copyright notice and this permission notice shall be included
- *     in all copies or substantial portions of the Software.
- *
- *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- *     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- *     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- *     IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- *     CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- *     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- *     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * }}}
- *=============================================================================
- */
+
+use Entity\ClassData;
+use Entity\InterfaceData;
 
 class IndexGenerator
 {
@@ -61,7 +37,7 @@ class IndexGenerator
      *
      * @var Utils\ClassUtils
      */
-    protected $classUtils;
+    protected $class;
 
     public function __construct(Utils\PathResolver $path, Utils\Composer $composer, Utils\ClassUtils $class, $verbose = false)
     {
@@ -84,15 +60,16 @@ class IndexGenerator
         return $this->namespaceUtils;
     }
 
-    public function generateIndex(\DTO\Index $index)
+    public function generateIndex(\Entity\Index $index)
     {
         // @TODO coreIndex should be set before generation started
         $this->populateClassMapIndex($index);
         $index->setVendorLibs($this->getComposerUtils()->getVendorLibs());
-        $this->execHook("init", false, $this->getComposerUtils()->getLoader());
+        //$this->execHook("init", false, $this->getComposerUtils()->getLoader());
 
         $this->generateProjectIndex($index);
 
+        /* @TODO I have no idea about what is happening below. Should look through it */
         //@TODO add classMap populating
 //        foreach ($coreIndex['class_list'] as $coreClass) {
 //        }
@@ -111,37 +88,48 @@ class IndexGenerator
 //        $classFuncMenuEntries = $this->createMenuEntries($this->class_fqcn, $this->coreIndex['function_list']);
 //        $out['class_func_menu_entries'] = $classFuncMenuEntries;
 //        $this->execHook("postCreateIndex", false, $out, $this);
-//        //@TODO move it to the command and writer
-//        //$this->writePluginIndexes();
         return $index;
     }
 
-    public function generateProjectIndex(\DTO\Index $index){
+    public function generateProjectIndex(\Entity\Index $index){
         $classMap = $index->getClassMap();
         foreach($classMap as $fqcn => $file) {
             $this->processFile($index, $fqcn, $file);
         }
     }
 
-    public function processFile(\DTO\Index $index, $fqcn, $file){
+    public function processFile(\Entity\Index $index, $fqcn, $file){
         if($this->verbose) {
             echo "processing $file\n";
         }
 
         $fqcn = $this->getClassUtils()->getParser()->parseFQCN($fqcn);
-        if(!empty($fqcn->namespace)) {
-            $index->addNamespace($fqcn->namespace);
+        if(!empty($fqcn->getNamespace())) {
+            $index->addNamespace($fqcn->getNamespace());
         }
         $index->addClassFQCN($fqcn);
 
-        $classData = $this->getClassUtils()->getParser()->parseFile($fqcn, $file);
+        $nodes = $this->getClassUtils()->getParser()->parseFile($fqcn, $file);
+        if(!is_array($nodes)){
+            $nodes = [$nodes];
+        }
+        foreach($nodes as $node){
+            if($node instanceof ClassData){
+                $index->addClass($node, $fqcn->toString());
 
-        $index->addClass($classData, $fqcn->toString());
+                $this->populateExtendsIndex($index, $node->fqcn, $node->parentClasses);
+                $this->populateImplementsIndex($index, $node->fqcn, $node->interfaces);
 
-        $this->populateExtendsIndex($index, $classData->parentClasses);
-        $this->populateImplementsIndex($index, $classData->interfaces);
+                $this->execHook("postProcess", false, $fqcn->toString(), $file, $node->toArray());
+            }
+            elseif($node instanceof InterfaceData){
+                $index->addClass($node, $fqcn->toString());
+                $index->addInterface($node, $fqcn->toString());
+                $this->populateImplementsIndex($index, $node->fqcn, $node->interfaces);
+            }
 
-        $this->execHook("postProcess", false, $fqcn->toString(), $file, $classData->toArray());
+        }
+
     }
 
     public function addPlugin($pluginFile)
@@ -191,67 +179,32 @@ class IndexGenerator
         }
     }
 
-    protected function populateClassMapIndex(\DTO\Index $index){
+    protected function populateClassMapIndex(\Entity\Index $index){
         $cwd = $this->path->canonical(getcwd() . "/");
         $classMap = $this->getComposerUtils()->getCanonicalClassMap($cwd);
         $index->setClassMap($classMap);
         return $index;
     }
-    protected function populateExtendsIndex(\DTO\Index $index, array $parentClasses = []){
+    protected function populateExtendsIndex(\Entity\Index $index, \Entity\FQCN $fqcn, array $parentClasses = []){
         if(empty($parentClasses))
             return;
         foreach ($parentClasses as $parentClass) {
             if(empty($parentClass)) {
                 continue;
             }
-            $index->addExtend($fqcn, $parentClass);
+            $index->addExtend($fqcn->toString(), $parentClass);
         }
     }
 
-    protected function populateImplementsIndex(\DTO\Index $index, array $interfaces = []){
+    protected function populateImplementsIndex(\Entity\Index $index, \Entity\FQCN $fqcn, array $interfaces = []){
         if(empty($interfaces))
             return;
         foreach ($interfaces as $interface) {
             if(empty($interface)) {
                 return;
             }
-            $index->addImplement($fqcn, $interface);
+            $index->addImplement($fqcn->toString(), $interface);
         }
-    }
-
-    /**
-     * Check if indexer able to process this file
-     *
-     * Here placed list of files with known expcetions in them
-     *
-     * @return bool
-     */
-    protected function canProccessFile(\DTO\Index $index, $fqcn, $file){
-        if(
-            preg_match('/DateSelect/', $file) //zend
-            || preg_match('/DateTime/', $file) //zend
-            || preg_match('/DateTimeSelect/', $file) //zend
-            || preg_match('/MonthSelect/', $file) //zend
-            || preg_match('/PropelDataCollector/', $file) //zend
-        ){
-            return false;
-        }
-
-        if(
-            !array_key_exists('PHPUnit_Framework_TestCase', $index->getFlippedClassMap())
-            && (
-                   preg_match('/Test/'             , $file)
-                || preg_match('/TestCase/'         , $file)
-                || preg_match('/0/'                , $fqcn)
-                || preg_match('/Fixtures/'         , $file)
-                || preg_match('/Test/'             , $file)
-            //|| preg_match('/Command/'             , $file)
-                || preg_match('/DataFixtures/'     , $file)
-            )
-        ){
-            return false;
-        }
-        return true;
     }
 
     private function createMenuEntries($class_fqcn, $functions)

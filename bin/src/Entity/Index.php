@@ -1,6 +1,6 @@
 <?php
 
-namespace DTO;
+namespace Entity;
 
 class Index {
     private $namespaces         = [];
@@ -22,7 +22,8 @@ class Index {
         $this->namespaces = $namespaces;
     }
     public function addNamespace($namespace){
-        $this->namespaces[] = $namespace;
+        if(!in_array($namespace, $this->namespaces))
+            $this->namespaces[] = $namespace;
     }
 
     public function getInterfaces(){
@@ -32,7 +33,14 @@ class Index {
         $this->interfaces = $interfaces;
     }
     public function addInterface($interface){
-        $this->interfaces[] = $interface;
+        $this->interfaces[$interface->fqcn->toString()] = $interface;
+    }
+    public function getInterfacesArray(){
+        $map = [];
+        foreach($this->getInterfaces() as $interfaceName => $interface){
+            $map[$interfaceName] = $interface->toArray();
+        }
+        return $map;
     }
 
     public function getClasses(){
@@ -45,7 +53,14 @@ class Index {
         if($key)
             $this->classes[$key] = $class;
         else 
-            $this->classes[] = $class;
+            $this->classes[$class->fqcn->toString()] = $class;
+    }
+    public function getClassesArray(){
+        $map = [];
+        foreach($this->getClasses() as $className => $class){
+            $map[$className] = $class->toArray();
+        }
+        return $map;
     }
 
     public function getClassMap(){
@@ -70,7 +85,13 @@ class Index {
         $this->extends = $extends;
     }
     public function addExtend($class, $parent){
-        $this->extends[$parent][] = $class;
+        if(!array_key_exists($parent, $this->extends)
+            || !is_array($this->extends[$parent])){
+            $this->extends[$parent] = [];
+        }
+        if(!in_array($class, $this->extends[$parent])){
+            $this->extends[$parent][] = $class;
+        }
     }
 
     public function getImplements(){
@@ -80,7 +101,13 @@ class Index {
         $this->implements = $implements;
     }
     public function addImplement($class, $interface){
-        $this->implements[$interface][] = $class;
+        if(!array_key_exists($interface, $this->implements)
+            || !is_array($this->implements[$interface])){
+            $this->implements[$interface] = [];
+        }
+        if(!in_array($class, $this->implements[$interface])){
+            $this->implements[$interface][] = $class;
+        }
     }
 
     public function getVendorLibs(){
@@ -122,10 +149,10 @@ class Index {
             "implements" => $this->getImplements(),
             "vendor_libs" => $this->getVendorLibs(),
             "namespaces" => $this->getNamespaces(),
-            "interface" => $this->getInterfaces(),
+            "interface" => $this->getInterfacesArray(),
             "fqcn_file" => $this->getClassMap(),
             "file_fqcn" => $this->getFlippedClassMap(),
-            "classes" => $this->getClasses(),
+            "classes" => $this->getClassesArray(),
             "class_fqcn" => $this->getClassesFQCN(),
             "class_list" => $this->getClassList(),
             "class_func_const_list" => [],

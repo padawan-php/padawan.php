@@ -2,86 +2,99 @@
 
 namespace Parser;
 
-use DTO\FQCN;
-use Utils\PathResolver;
-use PhpParser\Parser AS PhpParser;
-use PhpParser\NodeTraverser AS Traverser;
-use DTO\ClassData;
-use DTO\MethodData;
-use \PhpParser\Node\Stmt\Class_;
-use \PhpParser\Node\Stmt\ClassMethod;
+use Entity;
+use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Property;
+use PhpParser\Node\Stmt\PropertyProperty;
+use PhpParser\Node\Stmt\ClassConst;
 
 class ClassParser{
-    private $parsedClasses = [];
-    /** @var PathResolver */
-    private $path;
-    /** @var PhpParser */
-    private $parser;
-    /** @var Traverser */
-    private $traverser;
-    /** @var Visitor\Visitor */
-    private $visitor;
+    private $docParser;
+    private $methodsParser;
+    private $propertiesParser;
+    private $useParser;
 
-    public function __construct(PhpParser $parser = null, PathResolver $path = null){
-        $this->path             = $path;
-        $this->parser           = $parser;
+    /**
+     * Constructor
+     */
+    public function __construct(
+        CommentParser $docParser,
+        MethodParser $methodsParser,
+        PropertyParser $propertiesParser,
+        UseParser $useParser
+    )
+    {
+        $this->docParser = $docParser;
+        $this->methodsParser = $methodsParser;
+        $this->propertiesParser = $propertiesParser;
+        $this->useParser = $useParser;
     }
-    public function setParser(PhpParser $parser){
-        $this->parser = $parser;
-    }
-    public function setTraverser(Traverser $traverser){
-        $this->traverser = $traverser;
-    }
-    public function setVisitor(Visitor\Visitor $visitor){
-        $this->visitor = $visitor;
-        $this->visitor->setParser($this);
-        $this->traverser->addVisitor($this->visitor);
-    }
-    public function parseFQCN($fqcn){
-        $regex = '/(.*)(?=\\\\(\w+)$)|(.*)/';
-        $ret = preg_match($regex, $fqcn, $matches);
-        if(!$ret) {
-            throw new \Exception("Error while parsing FQCN");
+
+    public function parse(Class_ $node, Entity\FQCN $fqcn, $file){
+        $classData = new Entity\ClassData($fqcn, $file);
+        if($node->extends){
+            $classData->setParentClass(
+                $this->useParser->getFQCN($node->extends)->toString()
+            );
         }
-        return new \DTO\FQCN(
-            count($matches) == 3 ? $matches[2] : $matches[3],
-            count($matches) == 3 ? $matches[1] : ""
+        foreach($node->implements AS $interfaceName){
+            $classData->addInterface(
+                $this->useParser->getFQCN($interfaceName)->toString()
+            );
+        }
+        $classData->startLine = $node->getAttribute("startLine");
+        $classData->doc = $this->parseDocComments(
+            $classData,
+            $node->getAttribute("comments")
         );
-    }
-    public function parseFile(FQCN $fqcn, $file){
-        $file = $this->path->getAbsolutePath($file);
-        $classData = new ClassData($fqcn, $file);
-
-        $content = $this->path->load($file);
-        try{
-            $ast = $this->parser->parse($content);
-
-            $this->visitor->setClassData($classData);
-            $this->traverser->traverse($ast);
-        }
-        catch(\Exception $e){
-            printf("Parsing failed in file %s\n", $file);
+        foreach($node->stmts AS $child){
+            if($child instanceof ClassMethod){
+                $classData->addMethod($this->parseMethod($child));
+            }
+            elseif($child instanceof Property){
+                foreach($child->props AS $prop){
+                    $classData->addProp(
+                        $this->parseProperty($prop, $child->type)
+                    );
+                }
+            }
+            elseif($child instanceof ClassConst){
+                foreach($child->consts AS $const){
+                    $classData->addConst($const->name);
+                }
+            }
         }
         return $classData;
     }
-    public function parseInterface(){}
-    public function parseClass(Class_ $node, ClassData $classData){
-        $classData->startLine = $node->getAttribute("startLine");
-        $this->parseMethods($node->getMethods(), $classData);
-        $this->parseProperties();
+
+    /**
+     * Parses Method node though $methodsParser
+     *
+     * @return MethodData
+     */
+    protected function parseMethod(ClassMethod $node)
+    {
+        return $this->methodsParser->parse($node);
     }
-    protected function parseMethods(array $methods, ClassData $classData){
-        foreach($methods AS $method){
-            $classData->addMethod($this->parseMethod($method));
-        }
+
+    /**
+     * Parses Property node through $propertiesParser
+     *
+     * @return ClassProperty
+     */
+    protected function parseProperty(PropertyProperty $node, $modifier)
+    {
+        return $this->propertiesParser->parse($node, $modifier);
     }
-    protected function parseMethod(ClassMethod $methodAST){
-        $method = new MethodData($methodAST->name);
-        $method->startLine = $methodAST->getAttribute("startLine");
-        $comments = $methodAST->getAttribute("comments");
-        $method->doc = $comments[count($comments)-1];
-        return $method;
+
+
+    /**
+     * Parses doc comments trough $docParser
+     */
+    protected function parseDocComments($classData, $node)
+    {
+        $classData->doc = $this->docParser->parse($node);
     }
-    protected function parseMethodArgument(){}
-    protected function parseProperties(){}
+
 }

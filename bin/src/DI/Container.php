@@ -9,9 +9,9 @@ class Container {
         $this->loadBasicServices();
         $this->loadParser();
         $this->map['Composer'] = new \Utils\Composer($this->get("Path"));
-        $this->map['ClassUtils'] = new \Utils\ClassUtils(
+        $this->map["ClassUtils"] = new \Utils\ClassUtils(
             $this->get("Path"),
-            $this->get("ClassParser")
+            $this->get("Parser")
         );
         $this->map["IndexGenerator"] = new \IndexGenerator(
             $this->get("Path"),
@@ -19,7 +19,6 @@ class Container {
             $this->get("ClassUtils")
         );
         $this->map["IndexWriter"] = new \Utils\IndexWriter(
-            $this->get("IndexGenerator"),
             $this->get("Path")
         );
     }
@@ -28,7 +27,7 @@ class Container {
             return $this->map[$service];
         }
         else {
-            throw new \Exception("Unknown service \"{$service}\"");
+            throw new ServiceNotFoundException("Unknown service \"{$service}\"");
         }
     }
     public function set($serviceName, $service, $overwrite = false){
@@ -42,7 +41,7 @@ class Container {
     }
     private function loadBasicServices(){
         $this->map = [
-            'Index' => new \DTO\Index(),
+            'Index' => new \Entity\Index(),
             'PathUtils' => new \Phine\Path\Path(),
             'PhpParser' => new \PhpParser\Parser(new \PhpParser\Lexer),
             'Traverser' => new \PhpParser\NodeTraverser(),
@@ -51,11 +50,36 @@ class Container {
         $this->map['Path'] = new \Utils\PathResolver($this->get("PathUtils"));
     }
     private function loadParser(){
-        $this->map['ClassParser'] = new \Parser\ClassParser(
+        $this->set("UseParser", new \Parser\UseParser);
+        $this->set("MethodParser", new \Parser\MethodParser(
+            $this->get("UseParser")
+        ));
+        $this->set("PropertyParser", new \Parser\PropertyParser(
+            $this->get("UseParser")
+        ));
+        $this->set("CommentParser", new \Parser\CommentParser(
+            $this->get("UseParser")
+        ));
+        $this->map["ClassParser"] = new \Parser\ClassParser(
+            $this->get("CommentParser"),
+            $this->get("MethodParser"),
+            $this->get("PropertyParser"),
+            $this->get("UseParser")
+        );
+        $this->map["InterfaceParser"] = new \Parser\InterfaceParser(
+            $this->get("CommentParser"),
+            $this->get("MethodParser"),
+            $this->get("PropertyParser")
+        );
+
+        $this->map['Parser'] = new \Parser\Parser(
             $this->get("PhpParser"),
+            $this->get("ClassParser"),
+            $this->get("InterfaceParser"),
+            $this->get("UseParser"),
             $this->get("Path")
         );
-        $this->map['ClassParser']->setTraverser($this->get('Traverser'));
-        $this->map['ClassParser']->setVisitor($this->get('Visitor'));
+        $this->map['Parser']->setTraverser($this->get('Traverser'));
+        $this->map['Parser']->setVisitor($this->get('Visitor'));
     }
 }

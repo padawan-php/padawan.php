@@ -7,9 +7,10 @@
         }
     ],
     "autoload":{
-        "psr-0":{"":"src/"}
+        "psr-0":{"":"bin/src/"}
     },
     "require": {
-        "phine/path": "~1.0"
+        "phine/path": "~1.0",
+        "nikic/php-parser": "~1.1"
     }
 }
