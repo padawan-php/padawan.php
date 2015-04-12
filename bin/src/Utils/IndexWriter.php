@@ -38,14 +38,17 @@ class IndexWriter{
 
     public function __construct(PathResolver $path){
         $this->path             = $path;
-        $this->indexFileName    = './.phpcomplete_extended/phpcomplete_index';
-        $this->reportFileName   = './.phpcomplete_extended/report.txt';
-        $this->coreIndexFile    = './.phpcomplete_extended/core_index';
-        $this->pluginIndexFile  = './.phpcomplete_extended/plugin_index';
+        $this->indexFileName    = './.padawan.vim/phpcomplete_index';
+        $this->reportFileName   = './.padawan.vim/report.txt';
+        $this->coreIndexFile    = './.padawan.vim/core_index';
+        $this->pluginIndexFile  = './.padawan/plugin_index';
     }
 
     public function writeIndex($index){
-        $this->writeToFile($this->getIndexFileName(), $index);
+        $this->writeToFile(
+            $this->getIndexFileName(),
+            $this->prepareIndex($index)
+        );
     }
     public function writeReport($invalidClasses){
         $this->writeToFile($this->getReportFileName(), implode("\n", $invalidClasses));
@@ -57,6 +60,30 @@ class IndexWriter{
             return;
         }
         $this->writeToFile($this->pluginIndexFile, json_encode($indexes));
+    }
+    protected function prepareIndex($index){
+        $arr = $index->toArray();
+        $arr["class_list"] = [];
+        $arr["namespaces"] = array_values($arr["namespaces"]);
+        foreach($arr["classes"] AS $fqcn => $class){
+            $className = $class["classname"];
+            $arr["class_list"][] = $className;
+            $arr["class_func_menu_entries"][] = [
+                "word" => $className,
+                "kind" => "c",
+                "menu" => $fqcn,
+                "info" => $fqcn
+            ];
+        }
+        ksort($arr["class_fqcn"]);
+        sort($arr["class_list"]);
+        asort($arr["fqcn_file"]);
+        $jsonIndex = json_encode($arr);
+        $lastJsonError = json_last_error();
+        if($lastJsonError != JSON_ERROR_NONE) {
+            exit;
+        }
+        return $jsonIndex;
     }
     /**
      * Gets the value of coreIndexFile

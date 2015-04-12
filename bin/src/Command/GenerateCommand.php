@@ -10,20 +10,10 @@ class GenerateCommand extends AbstractCommand{
         $generator = $this->get("IndexGenerator");
 
         $index = $generator->generateIndex($this->get("Index"));
-        $index = $this->prepareIndex($index);
         $indexWriter = $this->get('IndexWriter');
 
         $indexWriter->writeIndex($index);
         //$indexWriter->writeReport($generator->getInvalidClasses());
-    }
-    protected function prepareIndex($index){
-        $jsonIndex = json_encode($index->toArray());
-        $lastJsonError = json_last_error();
-        if($lastJsonError != JSON_ERROR_NONE) {
-            $this->printJsonError($lastJsonError);
-            exit;
-        }
-        return $jsonIndex;
     }
     protected function printJsonError($errorCode)
     {

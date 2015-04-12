@@ -1,102 +1,88 @@
-phpcomplete-composer(WIP)
+Padawan.vim for php
 ====================
 
-This plugin is a fork of [phpcomplete-extended by M2mdas](https://github.com/m2mdas/phpcomplete-extended) with completely rebuilt index generation part. New index generator based on [nikic/PHP-Parser](https://github.com/nikic/PHP-Parser).
+Smart php intelligent code completion plugin. It tries to be 
+a [Jedi](https://github.com/davidhalter/jedi-vim), but currently 
+it's only a padawan.
+
+This plugin is a fork of 
+[phpcomplete-extended by M2mdas](https://github.com/m2mdas/phpcomplete-extended) 
+with completely rewritten index generation part. 
+New index generator based on [nikic/PHP-Parser](https://github.com/nikic/PHP-Parser).
+
+Currently it's under development and does not support some of the original 
+plugin features.
 
 Plugin
 ======
 
-phpcomplete-extended is a fast, extensible, context aware autocomplete plugin
-for PHP composer projects. Initially it reads autoload classmap of a composer
-project, parses doc-comments of each class and creates index from them. After
-that it auto updates index as you type thanks to
+Padawan.vim  reads autoload classmap of a composer
+project, parses doc-comments and functions declarations of each class and creates index 
+from them. After that it auto updates index as you type thanks to
 [vimproc.vim](https://github.com/Shougo/vimproc.vim) plugin. Besides
-autocomplete this plugin have several code inspection features,
+autocomplete this plugin have several code inspection features:
 
-* Includes full core PHP documentation
 * See documentation of current word, be it class name, method or property. It is
   context aware.
 * Go to definition of a symbol. Also context aware.
 * Automatically add use statement of current completed word. Also added plugin
   command of this action.
-* If [unite.vim](https://github.com/Shougo/unite.vim/) plugin installed following sources are available,
-    * `phpcomplete/files`           : Lists PHP files of the project.
-    * `phpcomplete/vendors`         : Lists vendor directories
-    * `phpcomplete/extends`         : Lists classes that extends the class guessed from
-      the current cursor word.
-    * `phpcomplete/implements`      : Lists classes that implements the class guessed
-      from the current cursor word.
 
-Demo videos (click on the image to goto youtube)
------------------------------------------------
+Demo videos (click on the image to goto youtube) by M2mdas
+----------------------------------------------------------
 ## Autocomplete demo video:
 
 [![ScreenShot](http://img.youtube.com/vi/yZYFKslqkC8/maxresdefault.jpg)](http://www.youtube.com/watch?v=yZYFKslqkC8)
 
-## Unite sources demo video:
-
-[![ScreenShot](http://i1.ytimg.com/vi/Wd5G7QA3OFw/maxresdefault.jpg)](http://www.youtube.com/watch?v=Wd5G7QA3OFw)
 
 Installation
 -------------
 
-The plugin depends on following plugins,
+The plugin depends on following plugins:
 
+*  php 5.4+
 *  [vimproc.vim](https://github.com/Shougo/vimproc.vim) : Asynchronous library for vim. Required for auto-update index. C
   compiler is needed to build the plugiin. For windows install cygwin or
   msys to get the compiler.
-*  [unite.vim](https://github.com/Shougo/unite.vim/): Optional, but enables some good features.
 
 Plugin managers are recommended for installing these plugins. Installation instructions for
 various plugin managers are given bellow.
 
 ## Pathogen
-
+ 
+You should manually install vimproc.vim!
 Issue following commands.
 
 ```sh
-git clone https://github.com/Shougo/vimproc.vim.git ~/.vim/bundle/vimproc.vim
-cd ~/.vim/bundle/vimproc.vim
-make
-cd ..
-git clone https://github.com/Shougo/unite.vim.git ~/.vim/bundle/unit.vim
-git clone https://github.com/m2mdas/phpcomplete-extended.git ~/.vim/bundle/phpcomplete-extended
+git clone https://github.com/mkusher/padawan.vim ~/.vim/bundle/padawan.vim
 ```
 
 ## NeoBundle (preferred)
+
+You should manually install vimproc.vim!
 Put these lines in `.vimrc` and issue `source %` command
 
 ```vim
-NeoBundle 'Shougo/vimproc', {
-      \ 'build' : {
-      \     'windows' : 'make -f make_mingw32.mak',
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'unix' : 'make -f make_unix.mak',
-      \    },
-     \ }
-NeoBundle 'Shougo/unite.vim'
-NeoBundle 'm2mdas/phpcomplete-extended'
+NeoBundle 'mkusher/padawan.vim', { 'build': {'unix': 'php /path/to/composer.phar install'} }
 "your other plugins
 NeoBundleCheck
 ```
 
-If C compiler found for respective environment, `neobundle` will automatically
-compile the library.
+You should have composer.phar installed.
 
 ## Vundle
 
+You should manually install vimproc.vim!
 Put following lines in `.vimrc` and issue `:BundleInstall` command.
 ```vim
-Bundle 'Shougo/vimproc'
-Bundle 'Shougo/unite.vim'
-Bundle 'm2mdas/phpcomplete-extended'
+Bundle 'mkusher/padawan.vim'
 "your other plugins
 "....
 ```
 
-After installation goto `vimproc` folder and issue `make` command from command
-line. C compiler must be installed.
+After installation goto `padawan.vim` folder and run 
+`php /path/to/composer.phar install` command from command
+line. You should have composer installed.
 
 Walk through of the plugin
 -------------------------
@@ -115,7 +101,8 @@ composer.phar dumpautoload --optimize` command. By default composer command is
 set to `php composer.phar`. The command can be changed by setting
 `g:phpcomplete_index_composer_command` global variable.
 
-The plugin is dependent on `@var`, `@param`, `@return` doc-comments to give proper context aware
+The plugin is dependent on `@var`, `@param`, `@return` doc-comments and class 
+declarations to give proper context aware
 autocomplete. So documenting your class will help tremendously. It does not
 analyse full class. Just parses the variable declaration to get the relevant
 tokens. Does not provide autocomplete suggestion if there is error in code.
@@ -147,20 +134,31 @@ Minimal configuration for supertab support,
 ## [YouCompleteMe](https://github.com/Valloric/YouCompleteMe)
 
 If `omnifunc` set the omni completer of `YouCompleteMe` should get the completion
-candidates. I haven't tested it though.
+candidates. You should check semantic trigers for php.
 
-Extensions
----------
+Why not original plugin
+-----------------------
 
-Phpcomplete Extended pluign exposes api hooks so that it can be possible to
-provide framework specific autocomplete suggestion. For example facades in
-laravel, DIC services in Symfony2 etc. The plugin api divided in two part, `PHP`
-and `vim`. PHP part is responsible for creating index related to the framework,
-and vim part is responsible for providing autocomplete menu entries based on the
-index. For reference see
-[phpcomplete-extended-symfony](https://github.com/m2mdas/phpcomplete-extended-symfony)
-and
-[phpcomplete-extended-laravlel](https://github.com/m2mdas/phpcomplete-extended-laravel) plugins.
+The M2mdas's plugin is pretty good, but have some core bugs due to
+self-written parser:
+
+* It does not support files with 2 or more classes in it
+* It fails on parsing RabbitMQ classes
+
+So, I decided to rewrite index generation part.
+
+Roadmap
+-------
+
+As of now this plugin sucks, but I'm working hard on it and these features are
+now in progress:
+
+* Fix bugs with symbol type detection
+* Fix plugin user interface
+* Add doc-comment parsing
+* Add class inheritance indexing
+* Add plugins support
+* Add symfony2 plugin
 
 License
 -------
@@ -175,4 +173,3 @@ This plugin would not be possible without the works of
 [shawncplus](https://github.com/shawncplus/),
 [tpope](https://github.com/tpope/), [vim-jp](https://github.com/vim-jp),
 [thinca](https://github.com/thinca) and many others.
-

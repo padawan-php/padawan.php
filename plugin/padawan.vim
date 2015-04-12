@@ -1,6 +1,6 @@
 "=============================================================================
 " AUTHOR:  Mun Mun Das <m2mdas at gmail.com>
-" FILE: phpcomplete_extended.vim
+" FILE: padawan.vim
 " Last Modified: September 10, 2013
 " License: MIT license  {{{
 "     Permission is hereby granted, free of charge, to any person obtaining
@@ -46,7 +46,7 @@ endif
 let g:loaded_phpcomplete_extended = 1
 
 let g:phpcomplete_extended_tags_cache_dir =
-      \ get(g:, 'phpcomplete_extended_tags_cache_dir', expand('~/.phpcomplete_extended'))
+      \ get(g:, 'phpcomplete_extended_tags_cache_dir', expand('~/.padawan.vim'))
 
 let g:phpcomplete_extended_cache_disable =
       \ get(g:, 'phpcomplete_extended_cache_disable', 0)

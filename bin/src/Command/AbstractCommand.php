@@ -2,10 +2,13 @@
 
 namespace Command;
 
+use DI\Container;
+
 abstract class AbstractCommand implements CommandInterface{
     protected $container;
     public function __construct(){
-        $this->container = new \DI\Container();
+        $this->container = new Container();
+        $a = new Container;
     }
     public function get($serviceName){
         return $this->container->get($serviceName);

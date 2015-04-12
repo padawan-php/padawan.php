@@ -334,7 +334,7 @@ function! s:getFQCNFromTokens(parsedTokens, currentFQCN, isThis) "{{{
 
     let isPrevTokenArray = 0
 
-    if currentFQCN =~  '\[\]$' && len(parsedTokens)
+    if currentFQCN =~  '\[\]$' && len(parsedTokens) 
                 \ && has_key(parsedTokens[0], 'isArrayElement')
         let currentFQCN = matchstr(currentFQCN, '\zs.*\ze\[\]$')
         let isPrevTokenArray = 1
@@ -345,16 +345,16 @@ function! s:getFQCNFromTokens(parsedTokens, currentFQCN, isThis) "{{{
         let insideBraceText = token['insideBraceText']
         let isArrayElement = has_key(token, 'isArrayElement')? 1 :0
         let currentClassData = phpcomplete_extended#getClassData(currentFQCN)
-
+        
         let  pluginFQCN = s:get_plugin_fqcn(currentFQCN,token)
 
         if insideBraceText[0] == "("
             let currentFQCN = ""
         elseif pluginFQCN != ""
             let currentFQCN = pluginFQCN
-        elseif isArrayElement
+        elseif isArrayElement 
             let isPrevTokenArray = 0
-            if phpcomplete_extended#isClassOfType(currentFQCN, 'ArrayAccess')
+            if phpcomplete_extended#isClassOfType(currentFQCN, 'ArrayAccess') 
                     \ && has_key(currentClassData['methods']['all'], 'offsetGet')
                 let offsetType = currentClassData['methods']['all']['offsetGet']['return']
                 if empty(offsetType)
@@ -854,7 +854,7 @@ function! phpcomplete_extended#parsereverse(cursorLine, cursorLineNumber) "{{{
     let parsedTokens = phpcomplete_extended#parser#reverseParse(cursorLine, [])
 
 
-    if empty(parsedTokens)
+    if empty(parsedTokens) 
             \ || (len(parsedTokens) && has_key(parsedTokens[0], 'start') && parsedTokens[0].start == 0)
         let linesTillFunc = s:getLinesTilFunc(a:cursorLineNumber)
         let joinedLines = join(reverse(linesTillFunc),"")
@@ -1199,7 +1199,7 @@ function! s:setClassData(fqcn, file,  classData) "{{{
 endfunction "}}}
 
 function! s:makeCacheDir() "{{{
-    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended')
+    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.padawan.vim')
     if !isdirectory(cache_dir)
         call mkdir(cache_dir)
     endif
@@ -1210,7 +1210,7 @@ function! phpcomplete_extended#saveIndexCache() " {{{
         return
     endif
 
-    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended')
+    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.padawan.vim')
     let index_cache_file = phpcomplete_extended#util#substitute_path_separator(fnamemodify(cache_dir, ':p:h')."/index_cache")
     let content = []
     if exists('g:phpcomplete_index_cache')
@@ -1224,7 +1224,7 @@ function! s:getCacheFile() " {{{
     if !phpcomplete_extended#is_phpcomplete_extended_project()
         return
     endif
-    let index_cache_file = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h')."/.phpcomplete_extended/index_cache")
+    let index_cache_file = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h')."/.padawan.vim/index_cache")
     return index_cache_file
 endfunction
 " }}}
@@ -1277,19 +1277,8 @@ function! s:loadIndex() " {{{
         return
     endif
 
-    let index_file = phpcomplete_extended#util#substitute_path_separator(getcwd().'/.phpcomplete_extended/phpcomplete_index')
+    let index_file = phpcomplete_extended#util#substitute_path_separator(getcwd().'/.padawan.vim/phpcomplete_index')
     let plugin_index_file = s:getPluginIndexFileName()
-
-    if !filereadable(index_file)
-        let initial_message = "Composer project detected, Do you want to create index?"
-        let ret = phpcomplete_extended#util#input_yesno(initial_message)
-        if !ret
-            call add(s:disabled_projects, getcwd())
-            return
-        endif
-        echo "\n\n"
-        call phpcomplete_extended#generateIndex()
-    endif
 
     if !g:phpcomplete_index_loaded
         call phpcomplete_extended#util#print_message("Loading Index")
@@ -1393,7 +1382,7 @@ endfunction
 
 function! s:copyCoreIndex() "{{{
     let src  = phpcomplete_extended#util#substitute_path_separator(g:phpcomplete_extended_root_dir . "/bin/core_index")
-    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended')
+    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.padawan.vim')
     let dest = phpcomplete_extended#util#substitute_path_separator(cache_dir. "/core_index")
     if empty(findfile(dest, cache_dir))
         call phpcomplete_extended#util#copy(src, dest)
@@ -1404,7 +1393,7 @@ function! phpcomplete_extended#loadCoreIndex() "{{{
     if exists('g:core_index_loaded') && g:core_index_loaded
         return
     endif
-    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended')
+    let cache_dir = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.padawan.vim')
     let location = phpcomplete_extended#util#substitute_path_separator(cache_dir. "/core_index")
 
     if !filereadable(location)
@@ -1502,12 +1491,12 @@ function! phpcomplete_extended#checkUpdates() "{{{
             let s:update_info = {}
             return
         endif
-        let update_file = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended/'.s:update_info['update_file_name'])
+        let update_file = phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.padawan.vim/'.s:update_info['update_file_name'])
 
         if filereadable(update_file)
             try
                 let updateData = s:readIndex(update_file)
-            catch
+            catch 
                 echoerr "Error occured while reading update index"
                 return
             endtry
@@ -1533,7 +1522,7 @@ function! phpcomplete_extended#checkUpdates() "{{{
 endfunction "}}}
 
 function! s:getPluginIndexFileName() "{{{
-    return phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.phpcomplete_extended/plugin_index')
+    return phpcomplete_extended#util#substitute_path_separator(fnamemodify(getcwd(), ':p:h').'/.padawan.vim/plugin_index')
 endfunction "}}}
 
 function! s:readIndex(filename) "{{{
@@ -1664,7 +1653,7 @@ endfunction
 "}}}
 
 function! s:register_plugins() "{{{
-    let list = split(globpath(&runtimepath, 'autoload/phpcomplete_extended/*.vim'), "\n")
+    let list = split(globpath(&runtimepath, 'autoload/padawan/*.vim'), "\n")
     let s:plugins = {}
     let s:plugin_php_files = []
     for script_file in list

@@ -36,9 +36,13 @@ class Uses {
     }
 
     public function toArray(){
-        $map = [];
+        $map = [
+            "uses" => [],
+            "alias" => [],
+            "file" => $this->fqcn->toString()
+        ];
         foreach($this->map AS $alias=>$fqcn){
-            $map[$alias] = $fqcn->toString();
+            $map["uses"][$alias] = $fqcn->getNamespace();
         }
         return $map;
     }

@@ -5,18 +5,12 @@ namespace Entity;
 class MethodsCollection{
     private $methods = [];
     public function add(MethodData $method){
-        foreach($this->methods AS $curMethod){
-            if($curMethod->name === $method->name){
-                return;
-            }
-        }
-        $this->methods[] = $method;
+        $this->methods[$method->name] = $method;
     }
     public function remove(MethodData $method){
-        if(($key = array_search($method, $this->methods)) !== false){
-            unset($this->methods[$key]);
+        if(array_key_exists($method->name, $this->methods)){
+            unset($this->methods[$method->name]);
         }
-
     }
     public function toArray(){
         $map = [

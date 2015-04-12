@@ -22,8 +22,7 @@ class Index {
         $this->namespaces = $namespaces;
     }
     public function addNamespace($namespace){
-        if(!in_array($namespace, $this->namespaces))
-            $this->namespaces[] = $namespace;
+        $this->namespaces[$namespace] = $namespace;
     }
 
     public function getInterfaces(){

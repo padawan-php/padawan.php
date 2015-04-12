@@ -19,7 +19,7 @@ class MethodData {
     }
 
     public function getSignature(){
-        return sprintf("%s(%s) : %s", $this->name, 
+        return sprintf("(%s) : %s",
             $this->getParamsStr(), $this->getReturn()
         );
     }
@@ -72,9 +72,10 @@ class MethodData {
         $map = [];
         foreach($this->arguments AS $argument){
             $type = $argument->type;
+            $argName = '$' . $argument->name;
             if($type instanceof FQCN)
                 $type = $type->toString();
-            $map[$argument->name] = $type;
+            $map[$argName] = $type;
         }
         return $map;
     }
