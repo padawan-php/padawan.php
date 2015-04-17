@@ -10,18 +10,8 @@ ini_set('display_errors', 'stderr');
 /** @var $command \Command\CommandInterface */
 
 $arguments = [];
+$router = new Router;
 
-if(php_sapi_name() == 'cli') {
-    if(count($argv) < 2) {
-        $command = new \Command\ErrorCommand;
-    } elseif ($argv[1] == 'generate') {
-        $command = new \Command\GenerateCommand;
-    } else if($argv[1] == 'update') {
-        $command = new \Command\UpdateCommand;
-    } else {
-        $command = new \Command\ErrorCommand;
-    }
-} else {
-    $command = new \Command\ErrorCommand;
-}
+$command = $router->getCommand($argv[1]);
+
 $command->run($arguments);

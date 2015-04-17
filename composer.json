@@ -7,10 +7,14 @@
         }
     ],
     "autoload":{
-        "psr-0":{"":"bin/src/"}
+        "psr-0":{"":"src/"}
     },
     "require": {
         "phine/path": "~1.0",
-        "nikic/php-parser": "~1.1"
+        "nikic/php-parser": "~1.1",
+        "monolog/monolog": "~1.13",
+        "mnapoli/php-di": "~4.4",
+        "sami/sami": "~3.0",
+        "react/react": "0.4.*"
     }
 }
