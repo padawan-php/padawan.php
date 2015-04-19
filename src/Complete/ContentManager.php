@@ -35,12 +35,16 @@ class ContentManager {
     ){
         $entries = [];
         if($line){
-            list($lines, $badLine) = $this->prepareContent(
+            list($lines, $badLine, $completionLine) = $this->prepareContent(
                 $content,
-                $line
+                $line,
+                $column
             );
-            $this->updateFileIndex($project, $lines, $file);
-            $entries = $this->findEntries($project, $badLine, $column, $lines);
+            try {
+                $this->updateFileIndex($project, $lines, $file);
+            }
+            catch(\Exception $e){}
+            $entries = $this->findEntries($project, $completionLine, $column, $lines);
         }
         elseif(!empty($content)) {
             $this->updateFileIndex($project, $content, $file);
@@ -59,11 +63,17 @@ class ContentManager {
      * @TODO
      * Should check for bad lines
      */
-    protected function prepareContent($content, $line){
+    protected function prepareContent($content, $line, $column){
         $lines = explode(PHP_EOL, $content);
-        $badLine = trim($lines[$line-1]);
+        if($line > count($lines)){
+            $badLine = "";
+        }
+        else{
+            $badLine = $lines[$line-1];
+        }
+        $completionLine = substr($badLine, 0, $column+1);
         $lines[$line-1] = "";
-        return [$lines, $badLine];
+        return [$lines, trim($badLine), trim($completionLine)];
     }
     protected function updateFileIndex(Project $project, $lines, $file){
         if(is_array($lines)){

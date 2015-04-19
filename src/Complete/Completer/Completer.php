@@ -6,18 +6,16 @@ use Entity\Completion\Context;
 use Entity\Project;
 
 class Completer{
-    private $classNameCompleter;
-    private $interfaceNameCompleter;
-    private $namespaceCompleter;
-
     public function __construct(
         ClassNameCompleter $classNameCompleter,
         InterfaceNameCompleter $interfaceNameCompleter,
-        NamespaceCompleter $namespaceCompleter
+        NamespaceCompleter $namespaceCompleter,
+        ObjectCompleter $objectCompleter
     ){
         $this->classNameCompleter = $classNameCompleter;
         $this->interfaceNameCompleter = $interfaceNameCompleter;
         $this->namespaceCompleter = $namespaceCompleter;
+        $this->objectCompleter = $objectCompleter;
     }
     public function getEntries(Project $project, Context $context){
         if($context->isNamespace()){
@@ -32,6 +30,9 @@ class Completer{
             printf("Interfaces completion");
             return $this->getAllInterfaces($project, $context);
         }
+        elseif($context->isThis() || $context->isObject()){
+            return $this->getObjectCompletion($project, $context);
+        }
         return [];
     }
     protected function getAllNamespaces(Project $project, Context $context){
@@ -43,4 +44,12 @@ class Completer{
     protected function getAllInterfaces(Project $project, Context $context){
         return $this->interfaceNameCompleter->getEntries($project, $context);
     }
+    protected function getObjectCompletion(Project $project, Context $context){
+        return $this->objectCompleter->getEntries($project, $context);
+    }
+
+    private $classNameCompleter;
+    private $interfaceNameCompleter;
+    private $namespaceCompleter;
+    private $objectCompleter;
 }

@@ -6,66 +6,89 @@ use Entity\Completion\Token;
 use Entity\Completion\Context;
 
 class ContextResolver{
-    const S_VAR                 = '$';
-    const S_CLASS               = '->';
-    const S_STATIC              = '::';
-    const S_USE                 = 'use';
-    const S_NAMESPACE           = 'namespace';
-    const S_NEW_CLASS           = 'new';
-    const S_EXT_CLASS           = 'extends';
-    const S_IMPL_INTERFACE      = 'implements';
-    protected static $SOFT_TERMINATES = [
-        ' ', '(', ')', '[', ']', '\'', '"'
-    ];
-    protected static $TERMINATES = [
-        ';', ',', '.', '='
-    ];
-    public function getContext($badLine, $column){
+    public function getContext($badLine){
         if(empty($badLine)){
-            return null;
+            throw new \Exception("Could not define empty line context");
         }
-        $token = new Token;
-        $length = strlen($badLine);
-        for($i=0; $i<$length ;++$i){
-            $curChar = $badLine[$i];
-            $token = $this->addChar($token, $curChar);
-        }
-        $context = new Context($token->prefix, $token->postfix);
+        printf("\n%s\n", $badLine);
+        $token = $this->getCompletionToken($badLine);
+        $context = new Context($token, $token->symbol);
         return $this->defineContextType($context, $token);
     }
-    public function addChar($token, $curChar){
-        $token->postfix .= $curChar;
-        if(
-            $this->isSimpleSymbol($token->postfix)
-            || $this->isTerminableSymbol($token->postfix)
+    protected function getCompletionToken($badLine){
+        $token = new Token;
+        $token->type = -1;
+        $token->parent = $token;
+        if(strpos($badLine, '<?php') === false
+            || strpos($badLine, '<?') === false
         ){
-            $token->updateSymbol();
+            $badLine = '<?php ' . $badLine;
         }
-        elseif(
-            !$this->isTerminableSymbol($token->symbol)
-            && $this->isSoftTerminateSymbol($curChar)
-        ){
-            $token = new Token;
+        $symbols = token_get_all($badLine);
+        $symbols = array_slice($symbols, 1);
+        foreach($symbols AS $symbol){
+            $token = $this->addSymbol($token, $symbol);
         }
-        elseif(
-            $this->isTerminateSymbol($curChar)
-        ){
-            $token = new Token;
+        return $token;
+    }
+    protected function addSymbol(Token $parent, $symbol){
+        print_r($symbol);
+        if(is_array($symbol)){
+            $code = $symbol[0];
+            $symbol = $symbol[1];
+        }
+        else {
+            $code = $symbol;
+        }
+        if($code == T_WHITESPACE){
+            return $parent;
+        }
+        if($code === T_STRING || $code === T_NS_SEPARATOR){
+            $parent->symbol .= $symbol;
+            return $parent;
+        }
+        if(is_int($code)){
+            printf("%s\n", token_name($code));
+        }
+        $token = new Token;
+        if($code === ';' || $code === ','){
+            return $parent;
+        }
+        switch($code){
+        case T_VARIABLE:
+            $token->symbol = $symbol;
+        case T_NAMESPACE:
+        case T_USE:
+        case T_NEW:
+        case T_EXTENDS:
+        case T_IMPLEMENTS:
+        case T_OBJECT_OPERATOR:
+            $token->type = self::$MAP[$code];
+            break;
+        case ')':
+        case ']':
+            $token = $parent->parent;
+            break;
+        default:
+            return $parent;
+        }
+        if($token){
+            $parent->addChild($token);
         }
         return $token;
     }
     protected function defineContextType(Context $context, Token $token){
-        printf("\n%s: %s - %s\n", $token->symbol, $token->postfix, $token->prefix);
-        switch($token->symbol){
+        print_r($token);
+        switch($token->type){
         case self::S_VAR:
             $context->addType(Context::TYPE_VAR);
             break;
-        case self::S_CLASS:
-            if($token->prefix === '$this'){
+        case self::S_OBJECT:
+            if($token->symbol === '$this'){
                 $context->addType(Context::TYPE_THIS);
             }
             else {
-                $context->addType(Context::TYPE_CLASS);
+                $context->addType(Context::TYPE_OBJECT);
             }
             break;
         case self::S_STATIC:
@@ -76,34 +99,33 @@ class ContextResolver{
             break;
         case self::S_USE:
             $context->addType(Context::TYPE_USE);
-        case self::S_NEW_CLASS:
-        case self::S_EXT_CLASS:
+        case self::S_NEW:
+        case self::S_EXTENDS:
             $context->addType(Context::TYPE_CLASSNAME);
             break;
-        case self::S_IMPL_INTERFACE:
+        case self::S_IMPLEMENTS:
             $context->addType(Context::TYPE_INTERFACENAME);
             break;
         }
         return $context;
     }
-    protected function isSimpleSymbol($symbol){
-        return $this->isSymbol($symbol, self::S_VAR)
-            || $this->isSymbol($symbol, self::S_CLASS)
-            || $this->isSymbol($symbol, self::S_STATIC);
-    }
-    protected function isTerminableSymbol($symbol){
-        return $this->isSymbol($symbol, self::S_USE)
-            || $this->isSymbol($symbol, self::S_NEW_CLASS)
-            || $this->isSymbol($symbol, self::S_NAMESPACE);
-    }
-    protected function isSoftTerminateSymbol($symbol){
-        return in_array($symbol, self::$SOFT_TERMINATES);
-    }
-    protected function isTerminateSymbol($symbol){
-        return in_array($symbol, self::$TERMINATES);
-    }
-    protected function isSymbol($symbol, $check){
-        $symbol = strtolower($symbol);
-        return strpos($symbol, $check) === strlen($symbol) - strlen($check);
-    }
+    const S_VAR                 = '$';
+    const S_OBJECT              = '->';
+    const S_STATIC              = '::';
+    const S_USE                 = 'use';
+    const S_NAMESPACE           = 'namespace';
+    const S_NEW                 = 'new';
+    const S_EXTENDS             = 'extends';
+    const S_IMPLEMENTS          = 'implements';
+
+    public static $MAP          = [
+        T_VARIABLE              => self::S_VAR,
+        T_OBJECT_OPERATOR       => self::S_OBJECT,
+        T_STATIC                => self::S_STATIC,
+        T_USE                   => self::S_USE,
+        T_NAMESPACE             => self::S_NAMESPACE,
+        T_NEW                   => self::S_NEW,
+        T_EXTENDS               => self::S_EXTENDS,
+        T_IMPLEMENTS            => self::S_IMPLEMENTS
+    ];
 }

@@ -6,7 +6,7 @@ class Context {
     const TYPE_VAR              = 1;
     const TYPE_USE              = 2;
     const TYPE_NAMESPACE        = 4;
-    const TYPE_CLASS            = 8;
+    const TYPE_OBJECT           = 8;
     const TYPE_CLASSNAME        = 16;
     const TYPE_INTERFACENAME    = 32;
     const TYPE_THIS             = 64;
@@ -15,16 +15,17 @@ class Context {
 
     private $type       = 0;
     private $postfix    = "";
-    private $prefix     = "";
-    public function __construct($prefix, $postfix){
-        $this->prefix = $prefix;
+    private $token;
+    private $scope;
+    public function __construct(Token $token, $postfix){
+        $this->token = $token;
         $this->postfix = $postfix;
     }
     public function addType($type){
         $this->type = $this->type | $type;
     }
-    public function getPrefix(){
-        return $this->prefix;
+    public function getToken(){
+        return $this->token;
     }
     public function getPostfix(){
         return $this->postfix;
@@ -41,8 +42,8 @@ class Context {
     public function isNamespace(){
         return (bool) ($this->type & self::TYPE_NAMESPACE);
     }
-    public function isClass(){
-        return (bool) ($this->type & self::TYPE_CLASS);
+    public function isObject(){
+        return (bool) ($this->type & self::TYPE_OBJECT);
     }
     public function isClassName(){
         return (bool) ($this->type & self::TYPE_CLASSNAME);
