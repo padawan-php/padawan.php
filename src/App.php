@@ -18,7 +18,7 @@ class App {
                 $this->getCommandName($request)
             );
         $this->container = $command->getContainer();
-        $arguments = $this->parseDataString($data);
+        $arguments = $this->parseQuery($request->getQuery(), $data);
         $arguments["project"] = $this->loadProject($arguments);
         try{
             $result = $command->run(
@@ -85,8 +85,11 @@ class App {
         $commandName = trim($request->getPath(), '\/');
         return $commandName;
     }
-    protected function parseDataString($data){
-        parse_str($data, $query);
+    protected function parseQuery($query, $data){
+        parse_str($data, $content);
+        if(!array_key_exists('contents', $content))
+            $content = ['contents' => ''];
+        $query['contents'] = $content['contents'];
         $keys = ["path", "contents", "filepath", "line", "column"];
         foreach($keys AS $key){
             if(!array_key_exists($key, $query)){

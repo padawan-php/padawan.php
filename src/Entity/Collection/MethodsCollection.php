@@ -14,40 +14,12 @@ class MethodsCollection{
             unset($this->methods[$method->name]);
         }
     }
-    public function toArray(){
-        $map = [
-            "modifier" => [
-                "public" => [],
-                "private" => [],
-                "protected" => [],
-                "abstract" => [],
-                "final" => [],
-                "static" => []
-            ],
-            "all" => [
-            ]
-        ];
-        foreach($this->methods AS $method){
-            if($method->isPublic()){
-                $map["modifier"]["public"][] = $method->name;
-            }
-            if($method->isProtected()){
-                $map["modifier"]["protected"][] = $method->name;
-            }
-            if($method->isPrivate()){
-                $map["modifier"]["private"][] = $method->name;
-            }
-            if($method->isStatic()){
-                $map["modifier"]["public"][] = $method->name;
-            }
-            if($method->isFinal()){
-                $map["modifier"]["final"][] = $method->name;
-            }
-            if($method->isAbstract()){
-                $map["modifier"]["abstract"][] = $method->name;
-            }
-            $map["all"][$method->name] = $method->toArray();
+    public function get($name){
+        if(array_key_exists($name, $this->methods)){
+            return $this->methods[$name];
         }
-        return $map;
+    }
+    public function all(){
+        return $this->methods;
     }
 }

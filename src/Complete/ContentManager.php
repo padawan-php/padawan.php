@@ -3,27 +3,27 @@
 namespace Complete;
 
 use Entity\Project;
+use Entity\Completion\Scope;
 use Parser\Parser;
 use Generator\IndexGenerator;
 use Entity\Completion\Entry;
 use Entity\Completion\Context;
 use Complete\Completer\Completer;
+use Complete\Resolver\ContextResolver;
+use Complete\Resolver\ScopeResolver;
 
 class ContentManager {
-    private $parser;
-    private $generator;
-    private $contextResolver;
-    private $completer;
-
     public function __construct(
         Parser $parser,
         IndexGenerator $generator,
         ContextResolver $contextResolver,
+        ScopeResolver $scopeResolver,
         Completer $completer
     ){
         $this->parser = $parser;
         $this->generator = $generator;
         $this->contextResolver = $contextResolver;
+        $this->scopeResolver = $scopeResolver;
         $this->completer = $completer;
     }
     public function createCompletion(
@@ -42,9 +42,14 @@ class ContentManager {
             );
             try {
                 $this->updateFileIndex($project, $lines, $file);
+                $scope = $this->findScope(
+                    $project, implode("\n", $lines), $line, $file
+                );
             }
-            catch(\Exception $e){}
-            $entries = $this->findEntries($project, $completionLine, $column, $lines);
+            catch(\Exception $e){
+                $scope = new Scope;
+            }
+            $entries = $this->findEntries($project, $scope, $completionLine, $column, $lines);
         }
         elseif(!empty($content)) {
             $this->updateFileIndex($project, $content, $file);
@@ -55,9 +60,12 @@ class ContentManager {
             "context" => []
         ];
     }
-    protected function findEntries(Project $project, $badLine, $column, $lines){
+    protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
         $context = $this->contextResolver->getContext($badLine, $column);
-        return $this->completer->getEntries($project, $context);
+        return $this->completer->getEntries($project, $context, $scope);
+    }
+    protected function findScope(Project $project, $content, $line, $file){
+        return $this->scopeResolver->findScope($project, $content, $line, $file);
     }
     /**
      * @TODO
@@ -97,4 +105,10 @@ class ContentManager {
             $nodes
         );
     }
+
+    private $parser;
+    private $generator;
+    private $contextResolver;
+    private $scopeResolver;
+    private $completer;
 }

@@ -30,7 +30,7 @@ class PathResolver {
         if(!$isDir){
             $dirPath = dirname($dirPath);
         }
-        if(!$this->exists($dirPath) && !$this->isDir($dirPath)){
+        if(!empty($dirPath) && !$this->exists($dirPath) && !$this->isDir($dirPath)){
             mkdir($dirPath);
         }
         else if(!$this->isDir($dirPath)){

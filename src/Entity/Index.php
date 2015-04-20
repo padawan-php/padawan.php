@@ -44,6 +44,13 @@ class Index {
     public function getClasses(){
         return $this->classes;
     }
+    public function findClassByFQCN(FQCN $fqcn){
+        $str = $fqcn->toString();
+        if(array_key_exists($str, $this->classes)){
+            return $this->classes[$str];
+        }
+        return null;
+    }
     public function addClass(ClassData $class, $key = null){
         if($key)
             $this->classes[$key] = $class;

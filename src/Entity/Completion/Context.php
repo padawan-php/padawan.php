@@ -16,7 +16,6 @@ class Context {
     private $type       = 0;
     private $postfix    = "";
     private $token;
-    private $scope;
     public function __construct(Token $token, $postfix){
         $this->token = $token;
         $this->postfix = $postfix;

@@ -39,8 +39,8 @@ class BasicIO{
 
     public function __construct(PathResolver $path){
         $this->path             = $path;
-        $this->indexFileName    = './.padawan.vim/project';
-        $this->reportFileName   = './.padawan.vim/report.txt';
+        $this->indexFileName    = './.padawan/project';
+        $this->reportFileName   = './.padawan/report.txt';
     }
 
     /**

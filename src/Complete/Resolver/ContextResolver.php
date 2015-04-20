@@ -1,6 +1,6 @@
 <?php
 
-namespace Complete;
+namespace Complete\Resolver;
 
 use Entity\Completion\Token;
 use Entity\Completion\Context;
@@ -10,7 +10,7 @@ class ContextResolver{
         if(empty($badLine)){
             throw new \Exception("Could not define empty line context");
         }
-        printf("\n%s\n", $badLine);
+        printf("\nBad line: %s\n", $badLine);
         $token = $this->getCompletionToken($badLine);
         $context = new Context($token, $token->symbol);
         return $this->defineContextType($context, $token);
@@ -32,7 +32,6 @@ class ContextResolver{
         return $token;
     }
     protected function addSymbol(Token $parent, $symbol){
-        print_r($symbol);
         if(is_array($symbol)){
             $code = $symbol[0];
             $symbol = $symbol[1];
@@ -47,11 +46,11 @@ class ContextResolver{
             $parent->symbol .= $symbol;
             return $parent;
         }
-        if(is_int($code)){
-            printf("%s\n", token_name($code));
-        }
         $token = new Token;
-        if($code === ';' || $code === ','){
+        if($this->isBreakSymbol($code)){
+            while($parent->type != -1){
+                $parent = $parent->parent;
+            }
             return $parent;
         }
         switch($code){
@@ -78,13 +77,12 @@ class ContextResolver{
         return $token;
     }
     protected function defineContextType(Context $context, Token $token){
-        print_r($token);
         switch($token->type){
         case self::S_VAR:
             $context->addType(Context::TYPE_VAR);
             break;
         case self::S_OBJECT:
-            if($token->symbol === '$this'){
+            if($token->parent->symbol === '$this'){
                 $context->addType(Context::TYPE_THIS);
             }
             else {
@@ -108,6 +106,9 @@ class ContextResolver{
             break;
         }
         return $context;
+    }
+    private function isBreakSymbol($symbol){
+        return in_array($symbol, [';', ',', '=', '-']);
     }
     const S_VAR                 = '$';
     const S_OBJECT              = '->';
