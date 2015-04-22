@@ -85,11 +85,8 @@ class App {
         $commandName = trim($request->getPath(), '\/');
         return $commandName;
     }
-    protected function parseQuery($query, $data){
-        parse_str($data, $content);
-        if(!array_key_exists('contents', $content))
-            $content = ['contents' => ''];
-        $query['contents'] = $content['contents'];
+    protected function parseQuery(array $query, $data){
+        $query['contents'] = urldecode($data);
         $keys = ["path", "contents", "filepath", "line", "column"];
         foreach($keys AS $key){
             if(!array_key_exists($key, $query)){

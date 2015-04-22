@@ -11,6 +11,7 @@ use Utils\PathResolver;
 use Utils\Composer;
 use Utils\ClassUtils;
 use Psr\Log\LoggerInterface;
+use Parser\Processor\IndexProcessor;
 
 class IndexGenerator
 {
@@ -55,11 +56,19 @@ class IndexGenerator
      */
     protected $logger;
 
+
+    /**
+     *
+     * @var IndexProcessor
+     */
+    protected $processor;
+
     public function __construct(
         PathResolver $path,
         Composer $composer,
         ClassUtils $class,
         LoggerInterface $logger,
+        IndexProcessor $processor,
         $verbose = false
     )
     {
@@ -69,6 +78,7 @@ class IndexGenerator
         $this->logger           = $logger;
         $this->plugins          = array();
         $this->verbose          = $verbose;
+        $this->processor        = $processor;
     }
 
     public function getComposerUtils(){
@@ -105,13 +115,15 @@ class IndexGenerator
             $start = microtime(1);
             $this->processFile($index, $fqcn, $file);
             $end = microtime(1) - $start;
-            $this->getLogger()->addInfo("Indexing: [$end]s");
+            $this->getLogger()->addDebug("Indexing: [$end]s");
+            $this->getLogger()->addDebug("Memory: ". memory_get_usage());
             $globalTime += $end;
             ++$done;
             $process = floor($done/$all * 100);
             $this->getLogger()->addInfo("Progress: $process%");
         }
         $this->getLogger()->addInfo("[ $globalTime ]");
+        gc_enable();
     }
 
     public function processFile(Index $index, $fqcn, $file, $rewrite=false){
@@ -126,6 +138,10 @@ class IndexGenerator
             return;
         }
         $startParser = microtime(1);
+        $processor = $this->processor;
+        $processor->clearResultNodes();
+        $parser = $this->getClassUtils()->getParser();
+        $parser->setProcessor($processor);
         $nodes = $this->getClassUtils()->getParser()
             ->parseFile($fqcn, $file);
         $end = microtime(1) - $startParser;

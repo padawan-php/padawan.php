@@ -16,5 +16,10 @@
         "mnapoli/php-di": "~4.4",
         "sami/sami": "~3.0",
         "react/react": "0.4.*"
+    },
+    "require-dev": {
+        "behat/behat": "~3.0",
+        "peridot-php/peridot": "~1.15",
+        "peridot-php/leo": "~1.4"
     }
 }

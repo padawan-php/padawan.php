@@ -9,16 +9,12 @@ class Router{
      * @return Command\CommandInterface
      */
     public function getCommand($commandName, array $arguments = []){
-        if(php_sapi_name() == 'cli') {
-            if ($commandName == 'generate') {
-                $command = new \Command\GenerateCommand;
-            } else if($commandName == 'update') {
-                $command = new \Command\UpdateCommand;
-            } else if($commandName == 'complete'){
-                $command = new \Command\CompleteCommand;
-            } else {
-                $command = new \Command\ErrorCommand;
-            }
+        if ($commandName == 'generate') {
+            $command = new \Command\GenerateCommand;
+        } else if($commandName == 'update') {
+            $command = new \Command\UpdateCommand;
+        } else if($commandName == 'complete'){
+            $command = new \Command\CompleteCommand;
         } else {
             $command = new \Command\ErrorCommand;
         }

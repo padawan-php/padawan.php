@@ -10,6 +10,8 @@ class GenerateCommand extends AbstractCommand{
         $verbose = $this->isVerbose($arguments);
         $generator = $this->get("Generator\IndexGenerator");
         $rootDir = getcwd();
+        // @TODO this should be somehow configured
+        exec("composer dumpautoload -o");
         if(array_key_exists("rootDir", $arguments)){
             $rootDir = $arguments["rootDir"];
         }

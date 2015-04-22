@@ -3,22 +3,14 @@
 namespace Command;
 
 class CompleteCommand extends AbstractCommand {
+
     public function run(array $arguments = []){
         $project = $arguments["project"];
         $contentManager = $this->get("Complete\ContentManager");
-        $column = $file = $line = $content = "";
-        if(array_key_exists("column", $arguments)){
-            $column = $arguments["column"];
-        }
-        if(array_key_exists("column", $arguments)){
-            $line = $arguments["line"];
-        }
-        if(array_key_exists("column", $arguments)){
-            $content = $arguments["contents"];
-        }
-        if(array_key_exists("column", $arguments)){
-            $file = $arguments["filepath"];
-        }
+        $column = $arguments['column'];
+        $file = $arguments['filepath'];
+        $line = $arguments['line'];
+        $content = $arguments['contents'];
         $completion = $contentManager->createCompletion(
             $project,
             $content,

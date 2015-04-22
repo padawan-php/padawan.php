@@ -10,13 +10,9 @@ class Composer {
     public function __construct(PathResolver $path, $vendorPath='vendor'){
         $this->vendorPath = $vendorPath;
         $this->path = $path;
-        $this->loader = require $this->path->join([$this->vendorPath, 'autoload.php']);
     }
     public function getComposerPath(){
         return $this->path->join([$this->vendorPath, 'composer']);
-    }
-    public function getLoader(){
-        return $this->loader;
     }
     public function getCanonicalClassMap($cwd){
         return $this->canonicalizeClassMap($cwd, $this->getClassMap());

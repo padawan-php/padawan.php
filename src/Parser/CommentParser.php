@@ -2,13 +2,11 @@
 
 namespace Parser;
 
-use Sami\Parser\DocBlockParser;
-
 class CommentParser {
 
     private $docCommentParser;
 
-    public function __construct(DocBlockParser $docCommentParser){
+    public function __construct($docCommentParser = null){
         $this->docCommentParser = $docCommentParser;
     }
     public function parse($doc){

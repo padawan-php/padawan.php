@@ -11,6 +11,8 @@ use Entity\Completion\Context;
 use Complete\Completer\Completer;
 use Complete\Resolver\ContextResolver;
 use Complete\Resolver\ScopeResolver;
+use Parser\Processor\IndexProcessor;
+use Parser\Processor\ScopeProcessor;
 
 class ContentManager {
     public function __construct(
@@ -18,13 +20,17 @@ class ContentManager {
         IndexGenerator $generator,
         ContextResolver $contextResolver,
         ScopeResolver $scopeResolver,
-        Completer $completer
+        Completer $completer,
+        IndexProcessor $indexProcessor,
+        ScopeProcessor $scopeProcessor
     ){
         $this->parser = $parser;
         $this->generator = $generator;
         $this->contextResolver = $contextResolver;
         $this->scopeResolver = $scopeResolver;
         $this->completer = $completer;
+        $this->indexProcessor = $indexProcessor;
+        $this->scopeProcessor = $scopeProcessor;
     }
     public function createCompletion(
         Project $project,
@@ -97,8 +103,10 @@ class ContentManager {
         if(!$fqcn){
             return;
         }
-        $nodes = $this->parser
-            ->parseContent($fqcn, $file, $content);
+        $this->indexProcessor->clearResultNodes();
+        $parser = $this->parser;
+        $parser->setProcessor($this->indexProcessor);
+        $nodes = $parser->parseContent($fqcn, $file, $content);
         $this->generator->processFileNodes(
             $project->getIndex(),
             $fqcn,
@@ -111,4 +119,6 @@ class ContentManager {
     private $contextResolver;
     private $scopeResolver;
     private $completer;
+    private $indexProcessor;
+    private $scopeProcessor;
 }

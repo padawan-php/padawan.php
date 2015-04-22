@@ -52,7 +52,7 @@ class ScopeParser{
         }
         foreach($stmts AS $node){
             if($this->isIn($node, $line)){
-                $this->lookNode($node, $line);
+                //$this->lookNode($node, $line);
             }
         }
     }

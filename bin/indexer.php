@@ -10,7 +10,7 @@ ini_set('display_errors', 'stderr');
 /** @var $command \Command\CommandInterface */
 
 $arguments = [];
-$router = new Router;
+$router = new \Router;
 
 $command = $router->getCommand($argv[1]);
 
