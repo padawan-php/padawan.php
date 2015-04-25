@@ -1,6 +1,8 @@
 Padawan.php for composer projects
 =================================
 
+[![Build Status](https://travis-ci.org/mkusher/padawan.php.svg?branch=master)](https://travis-ci.org/mkusher/padawan.php)
+
 Smart php intelligent code completion plugin for composer projects.
 It tries to be a [Jedi](https://github.com/davidhalter/jedi-vim),
 but currently it's only a padawan.
