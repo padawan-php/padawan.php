@@ -90,6 +90,7 @@ class ContentManager {
         return [$lines, trim($badLine), trim($completionLine)];
     }
     protected function updateFileIndex(Project $project, $lines, $file){
+        //gc_disable();
         if(is_array($lines)){
             $content = implode("\n", $lines);
         }
@@ -105,13 +106,14 @@ class ContentManager {
         }
         $this->indexProcessor->clearResultNodes();
         $parser = $this->parser;
-        $parser->setProcessor($this->indexProcessor);
+        $parser->addProcessor($this->indexProcessor);
         $nodes = $parser->parseContent($fqcn, $file, $content);
         $this->generator->processFileNodes(
             $project->getIndex(),
             $fqcn,
             $nodes
         );
+        //gc_enable();
     }
 
     private $parser;

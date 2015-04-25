@@ -141,7 +141,7 @@ class IndexGenerator
         $processor = $this->processor;
         $processor->clearResultNodes();
         $parser = $this->getClassUtils()->getParser();
-        $parser->setProcessor($processor);
+        $parser->addProcessor($processor);
         $nodes = $this->getClassUtils()->getParser()
             ->parseFile($fqcn, $file);
         $end = microtime(1) - $startParser;

@@ -9,15 +9,6 @@ use PhpParser\Parser AS ASTGenerator;
 use PhpParser\NodeTraverser AS Traverser;
 
 class Parser{
-    private $parsedClasses = [];
-    /** @var PathResolver */
-    private $path;
-    /** @var PhpParser */
-    private $parser;
-    /** @var Traverser */
-    private $traverser;
-    /** @var Visitor\Visitor */
-    private $visitor;
 
     public function __construct(
         ASTGenerator $parser,
@@ -41,7 +32,7 @@ class Parser{
             $this->useParser->setUses($uses);
             $ast = $this->parser->parse($content);
 
-            $this->visitor->setFileInfo($fqcn, $file);
+            $this->setFileInfo($fqcn, $file);
             $this->traverser->traverse($ast);
         }
         catch(\Exception $e){
@@ -52,14 +43,37 @@ class Parser{
     public function parseFQCN($fqcn){
         return $this->useParser->parseFQCN($fqcn);
     }
-    public function setProcessor(Processor\ProcessorInterface $visitor){
-        if(!empty($this->visitor)){
-            $this->traverser->removeVisitor($this->visitor);
+    public function addProcessor(Processor\ProcessorInterface $processor){
+        $this->processors[] = $processor;
+        $this->traverser->addVisitor($processor);
+    }
+    public function clearProcessors(){
+        foreach($this->processors AS $processor){
+            $this->traverser->removeVisitor($processor);
         }
-        $this->visitor = $visitor;
-        $this->traverser->addVisitor($this->visitor);
+        $this->processors = [];
     }
     public function getResultNode(){
-        return $this->visitor->getResultNodes();
+        $nodes = [];
+        foreach($this->processors as $processor){
+            $nodes = array_merge($processor->getResultNodes(), $nodes);
+        }
+        return $nodes;
     }
+
+    protected function setFileInfo(FQCN $fqcn, $file){
+        foreach($this->processors AS $processor){
+            $processor->setFileInfo($fqcn, $file);
+        }
+    }
+
+    private $parsedClasses = [];
+    /** @var PathResolver */
+    private $path;
+    /** @var PhpParser */
+    private $parser;
+    /** @var Traverser */
+    private $traverser;
+    /** @var Processor\ProcessorInterface[] */
+    private $processors;
 }
