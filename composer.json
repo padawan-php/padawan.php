@@ -14,8 +14,8 @@
         "nikic/php-parser": "~1.1",
         "monolog/monolog": "~1.13",
         "mnapoli/php-di": "~4.4",
-        "sami/sami": "~3.0",
-        "react/react": "0.4.*"
+        "react/react": "0.4.*",
+        "phpdocumentor/reflection-docblock": "~2.0"
     },
     "require-dev": {
         "behat/behat": "~3.0",
