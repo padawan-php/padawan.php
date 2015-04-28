@@ -13,7 +13,7 @@ use Complete\Resolver\ContextResolver;
 use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
-
+use Psr\Log\LoggerInterface;
 
 class ContentManager {
     public function __construct(
@@ -22,14 +22,16 @@ class ContentManager {
         ContextResolver $contextResolver,
         Completer $completer,
         IndexProcessor $indexProcessor,
-        ScopeProcessor $scopeProcessor
+        ScopeProcessor $scopeProcessor,
+        LoggerInterface $logger
     ){
-        $this->parser = $parser;
-        $this->generator = $generator;
-        $this->contextResolver = $contextResolver;
-        $this->completer = $completer;
-        $this->indexProcessor = $indexProcessor;
-        $this->scopeProcessor = $scopeProcessor;
+        $this->parser           = $parser;
+        $this->generator        = $generator;
+        $this->contextResolver  = $contextResolver;
+        $this->completer        = $completer;
+        $this->indexProcessor   = $indexProcessor;
+        $this->scopeProcessor   = $scopeProcessor;
+        $this->logger           = $logger;
         $this->cachePool        = [];
     }
     public function createCompletion(
@@ -49,23 +51,24 @@ class ContentManager {
             );
             try {
                 $scope = $this->processFileContent($project, $lines, $line, $file);
-                echo microtime(1) - $start;
-                echo " for indexing preparing\n";
-                echo microtime(1) - $start;
-                echo " for scope preparing\n";
+                if(empty($scope)){
+                    $scope = new Scope;
+                }
+                $this->logger->addDebug(sprintf(
+                    "%s seconds for ast processing"
+                , (microtime(1) - $start)));
             }
             catch(\Exception $e){
                 $scope = new Scope;
             }
             $entries = $this->findEntries($project, $scope, $completionLine, $column, $lines);
-                echo microtime(1) - $start;
-                echo " for entries preparing\n";
+            $this->logger->addDebug(sprintf(
+                "%s seconds for entries generation"
+            , (microtime(1) - $start)));
         }
         elseif(!empty($content)) {
             $this->updateFileIndex($project, $content, $file);
         }
-        echo microtime(1) - $start;
-        echo " seconds for creaeting completion\n";
 
         return [
             "entries" => $entries,
@@ -88,7 +91,7 @@ class ContentManager {
         else{
             $badLine = $lines[$line-1];
         }
-        $completionLine = substr($badLine, 0, $column+1);
+        $completionLine = substr($badLine, 0, $column-1);
         $lines[$line-1] = "";
         return [$lines, trim($badLine), trim($completionLine)];
     }
@@ -111,13 +114,13 @@ class ContentManager {
         if(!$fqcn){
             return;
         }
-        if(!array_key_exists($file, $this->cachePool)){
-            $this->cachePool[$file] = [0, null, null];
+        if(false && !array_key_exists($file, $this->cachePool)){
+            $this->cachePool[$file] = [0, [], []];
         }
         if($this->isValidCache($file, $content)){
             list($hash, $indexNodes, $scopeNodes) = $this->cachePool[$file];
         }
-        else {
+        if(empty($scopeNodes)) {
             $this->indexProcessor->clearResultNodes();
             $this->scopeProcessor->clearResultNodes();
             $this->scopeProcessor->setIndex($project->getIndex());
@@ -151,4 +154,5 @@ class ContentManager {
     private $indexProcessor;
     private $scopeProcessor;
     private $cachePool;
+    private $logger;
 }

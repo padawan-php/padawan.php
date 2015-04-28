@@ -57,6 +57,10 @@ class ObjectCompleter {
             return [];
         }
         $class = $index->findClassByFQCN($scope->getFQCN());
+        if(empty($class)){
+            echo "Got empty class\n";
+            return [];
+        }
         $entries = [];
         foreach($class->methods->all() AS $method){
             $entry = new Entry($method->name, $method->getSignature());

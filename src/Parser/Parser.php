@@ -7,6 +7,7 @@ use Entity\Node\Uses;
 use Utils\PathResolver;
 use PhpParser\Parser AS ASTGenerator;
 use PhpParser\NodeTraverser AS Traverser;
+use Psr\Log\LoggerInterface;
 
 class Parser{
 
@@ -14,7 +15,8 @@ class Parser{
         ASTGenerator $parser,
         PathResolver $path,
         Traverser $traverser,
-        UseParser $useParser
+        UseParser $useParser,
+        LoggerInterface $logger
     ){
         $this->path             = $path;
         $this->parser           = $parser;
@@ -22,6 +24,7 @@ class Parser{
         $this->useParser        = $useParser;
         $this->processors       = [];
         $this->astPool          = [];
+        $this->logger           = $logger;
     }
     public function parseFile(FQCN $fqcn, $file){
         $file = $this->path->getAbsolutePath($file);
@@ -36,18 +39,25 @@ class Parser{
         $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
         $this->useParser->setUses($uses);
         list($oldHash, $ast) = $this->astPool[$file];
-        if($oldHash !== $hash){
+        if($oldHash !== $hash || empty($ast)){
             try{
                 $ast = $this->parser->parse($content);
             }
             catch(\Exception $e){
                 printf("Parsing failed in file %s\n", $file);
+                return [];
             }
             $this->astPool[$file] = [$hash, $ast];
         }
         $this->setFileInfo($fqcn, $file);
+        $this->logger->addInfo(sprintf("Traversing with %s processors",
+            count($this->processors)
+        ));
         $this->traverser->traverse($ast);
-        return $this->getResultNode();
+        $nodes = $this->getResultNode();
+        $this->clearProcessors();
+        $this->logger->addInfo('Found ' . count($nodes) . ' nodes');
+        return $nodes;
     }
     public function parseFQCN($fqcn){
         return $this->useParser->parseFQCN($fqcn);
@@ -86,4 +96,5 @@ class Parser{
     /** @var Processor\ProcessorInterface[] */
     private $processors;
     private $astPool;
+    private $logger;
 }

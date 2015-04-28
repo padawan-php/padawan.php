@@ -36,7 +36,7 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         }
     }
     public function setFileInfo(FQCN $fqcn, $file){
-        $this->scope = new Scope;
+        $this->scope = new Scope($this->scope);
         $this->scope->setFQCN($fqcn);
     }
     public function clearResultNodes(){
@@ -64,7 +64,6 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         return [$startLine, $endLine];
     }
     public function createScopeFromMethod(ClassMethod $node){
-        $this->scope = new Scope($this->scope);
         $index = $this->getIndex();
         if(empty($index)){
             echo "empty index\n";
@@ -107,4 +106,5 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     /** @var UseParser */
     private $useParser;
     private $index;
+    private $scope;
 }

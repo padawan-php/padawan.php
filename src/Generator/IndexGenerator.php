@@ -152,17 +152,17 @@ class IndexGenerator
     }
     public function processFileNodes(Index $index, FQCN $fqcn, $nodes){
         $index->addFQCN($fqcn);
-        if(!is_array($nodes)){
-            $nodes = [$nodes];
-        }
+        $this->getLogger()->addDebug('Processing nodes ' . count($nodes));
         foreach($nodes as $node){
             if($node instanceof ClassData){
+                $this->getLogger()->addDebug('Class');
                 $index->addClass($node, $fqcn->toString());
 
                 $this->populateExtendsIndex($index, $node->fqcn, $node->parentClasses);
                 $this->populateImplementsIndex($index, $node->fqcn, $node->interfaces);
             }
             elseif($node instanceof InterfaceData){
+                $this->getLogger()->addDebug('Interface');
                 $index->addInterface($node, $fqcn->toString());
                 $this->populateImplementsIndex($index, $node->fqcn, $node->interfaces);
             }
