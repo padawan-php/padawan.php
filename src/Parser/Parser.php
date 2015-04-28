@@ -20,6 +20,8 @@ class Parser{
         $this->parser           = $parser;
         $this->traverser        = $traverser;
         $this->useParser        = $useParser;
+        $this->processors       = [];
+        $this->astPool          = [];
     }
     public function parseFile(FQCN $fqcn, $file){
         $file = $this->path->getAbsolutePath($file);
@@ -27,17 +29,24 @@ class Parser{
         return $this->parseContent($fqcn, $file, $content);
     }
     public function parseContent(FQCN $fqcn, $file, $content){
-        try{
-            $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
-            $this->useParser->setUses($uses);
-            $ast = $this->parser->parse($content);
-
-            $this->setFileInfo($fqcn, $file);
-            $this->traverser->traverse($ast);
+        $hash = hash('md5', $content);
+        if(!array_key_exists($file, $this->astPool)){
+            $this->astPool[$file] = [0,0];
         }
-        catch(\Exception $e){
-            printf("Parsing failed in file %s\n", $file);
+        $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
+        $this->useParser->setUses($uses);
+        list($oldHash, $ast) = $this->astPool[$file];
+        if($oldHash !== $hash){
+            try{
+                $ast = $this->parser->parse($content);
+            }
+            catch(\Exception $e){
+                printf("Parsing failed in file %s\n", $file);
+            }
+            $this->astPool[$file] = [$hash, $ast];
         }
+        $this->setFileInfo($fqcn, $file);
+        $this->traverser->traverse($ast);
         return $this->getResultNode();
     }
     public function parseFQCN($fqcn){
@@ -76,4 +85,5 @@ class Parser{
     private $traverser;
     /** @var Processor\ProcessorInterface[] */
     private $processors;
+    private $astPool;
 }

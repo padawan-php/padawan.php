@@ -14,12 +14,12 @@ use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
 
+
 class ContentManager {
     public function __construct(
         Parser $parser,
         IndexGenerator $generator,
         ContextResolver $contextResolver,
-        ScopeResolver $scopeResolver,
         Completer $completer,
         IndexProcessor $indexProcessor,
         ScopeProcessor $scopeProcessor
@@ -27,10 +27,10 @@ class ContentManager {
         $this->parser = $parser;
         $this->generator = $generator;
         $this->contextResolver = $contextResolver;
-        $this->scopeResolver = $scopeResolver;
         $this->completer = $completer;
         $this->indexProcessor = $indexProcessor;
         $this->scopeProcessor = $scopeProcessor;
+        $this->cachePool        = [];
     }
     public function createCompletion(
         Project $project,
@@ -39,6 +39,7 @@ class ContentManager {
         $column,
         $file
     ){
+        $start = microtime(1);
         $entries = [];
         if($line){
             list($lines, $badLine, $completionLine) = $this->prepareContent(
@@ -47,19 +48,24 @@ class ContentManager {
                 $column
             );
             try {
-                $this->updateFileIndex($project, $lines, $file);
-                $scope = $this->findScope(
-                    $project, implode("\n", $lines), $line, $file
-                );
+                $scope = $this->processFileContent($project, $lines, $line, $file);
+                echo microtime(1) - $start;
+                echo " for indexing preparing\n";
+                echo microtime(1) - $start;
+                echo " for scope preparing\n";
             }
             catch(\Exception $e){
                 $scope = new Scope;
             }
             $entries = $this->findEntries($project, $scope, $completionLine, $column, $lines);
+                echo microtime(1) - $start;
+                echo " for entries preparing\n";
         }
         elseif(!empty($content)) {
             $this->updateFileIndex($project, $content, $file);
         }
+        echo microtime(1) - $start;
+        echo " seconds for creaeting completion\n";
 
         return [
             "entries" => $entries,
@@ -69,9 +75,6 @@ class ContentManager {
     protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
         $context = $this->contextResolver->getContext($badLine, $column);
         return $this->completer->getEntries($project, $context, $scope);
-    }
-    protected function findScope(Project $project, $content, $line, $file){
-        return $this->scopeResolver->findScope($project, $content, $line, $file);
     }
     /**
      * @TODO
@@ -89,8 +92,12 @@ class ContentManager {
         $lines[$line-1] = "";
         return [$lines, trim($badLine), trim($completionLine)];
     }
-    protected function updateFileIndex(Project $project, $lines, $file){
-        //gc_disable();
+
+    /**
+     *
+     * @return Scope
+     */
+    protected function processFileContent(Project $project, $lines, $line, $file){
         if(is_array($lines)){
             $content = implode("\n", $lines);
         }
@@ -104,23 +111,44 @@ class ContentManager {
         if(!$fqcn){
             return;
         }
-        $this->indexProcessor->clearResultNodes();
-        $parser = $this->parser;
-        $parser->addProcessor($this->indexProcessor);
-        $nodes = $parser->parseContent($fqcn, $file, $content);
-        $this->generator->processFileNodes(
-            $project->getIndex(),
-            $fqcn,
-            $nodes
-        );
-        //gc_enable();
+        if(!array_key_exists($file, $this->cachePool)){
+            $this->cachePool[$file] = [0, null, null];
+        }
+        if($this->isValidCache($file, $content)){
+            list($hash, $indexNodes, $scopeNodes) = $this->cachePool[$file];
+        }
+        else {
+            $this->indexProcessor->clearResultNodes();
+            $this->scopeProcessor->clearResultNodes();
+            $this->scopeProcessor->setIndex($project->getIndex());
+            $this->scopeProcessor->setLine($line);
+            $parser = $this->parser;
+            $parser->addProcessor($this->indexProcessor);
+            $parser->addProcessor($this->scopeProcessor);
+            $nodes = $parser->parseContent($fqcn, $file, $content);
+            $this->generator->processFileNodes(
+                $project->getIndex(),
+                $fqcn,
+                $nodes
+            );
+            $scopeNodes = $this->scopeProcessor->getResultNodes();
+            $contentHash = hash('sha1', $content);
+            $this->cachePool[$file] = [$contentHash, $nodes, $scopeNodes];
+        }
+        return $scopeNodes[0];
+    }
+
+    private function isValidCache($file, $content){
+        $contentHash = hash('sha1', $content);
+        list($hash) = $this->cachePool[$file];
+        return $hash === $contentHash;
     }
 
     private $parser;
     private $generator;
     private $contextResolver;
-    private $scopeResolver;
     private $completer;
     private $indexProcessor;
     private $scopeProcessor;
+    private $cachePool;
 }
