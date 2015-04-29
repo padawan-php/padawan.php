@@ -29,6 +29,7 @@ class App {
             $result = [
                 "error" => $e->getMessage()
             ];
+            echo $e->getMessage();
         }
 
         $this->setResponseHeaders($response);
