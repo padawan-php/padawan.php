@@ -21,7 +21,7 @@ abstract class AbstractCommand implements CommandInterface{
         }
         $builder = new ContainerBuilder;
         $builder->setDefinitionCache(new \Doctrine\Common\Cache\ArrayCache);
-        $builder->addDefinitions(__DIR__ . '/config.php');
+        $builder->addDefinitions(dirname(__DIR__) . '/DI/config.php');
         self::$container = $builder->build();
     }
     protected function isVerbose($arguments){
