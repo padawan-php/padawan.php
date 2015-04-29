@@ -38,7 +38,7 @@ DOCBLOCK;
             $comment = $this->comment;
             expect(count($comment->getVars()))->to->equal(2);
         });
-        it('creates return FQCN', function(){
+        it('returns FQCN', function(){
             $comment = $this->comment;
             expect($comment->getReturn())->to->be->an->instanceof(FQCN::class);
             expect($comment->getReturn()->toString())->to->equal('Entity\Node\Comment');
