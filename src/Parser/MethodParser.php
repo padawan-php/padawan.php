@@ -9,15 +9,19 @@ use PhpParser\Node\Param;
 use PhpParser\Node\Name;
 
 class MethodParser{
-    /** @var $useParser UseParser */
-    private $useParser;
 
     /**
      * Constructs
+     *
+     * @param UseParser $useParser
      */
-    public function __construct(UseParser $useParser)
+    public function __construct(
+        UseParser $useParser,
+        CommentParser $commentParser
+    )
     {
-        $this->useParser = $useParser;
+        $this->useParser        = $useParser;
+        $this->commentParser    = $commentParser;
     }
 
     /**
@@ -37,18 +41,26 @@ class MethodParser{
                 $method->addParam($this->parseMethodArgument($child));
             }
         }
-        if(is_array($comments))
-            $method->doc = $comments[count($comments)-1]->getText();
+        if(is_array($comments)){
+            $comment = $this->commentParser->parse(
+                $comments[count($comments)-1]->getText()
+            );
+            $method->doc = $comment->getDoc();
+            $method->return = $comment->getReturn();
+        }
         return $method;
     }
     protected function parseMethodArgument(Param $node){
-        $param = new MethodParam();
-        $param->name = $node->name;
+        $param = new MethodParam($node->name);
         if($node->type instanceof Name)
-            $param->type = $this->useParser->getFQCN($node->type);
+            $param->setFQCN($this->useParser->getFQCN($node->type));
         else{
-            $param->type = $node->type;
+            $param->setType($node->type);
         }
         return $param;
     }
+
+    /** @var $useParser UseParser */
+    private $useParser;
+    private $commentParser;
 }

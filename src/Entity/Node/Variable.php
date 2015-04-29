@@ -15,6 +15,12 @@ class Variable {
     public function setFQCN($fqcn){
         $this->fqcn = $fqcn;
     }
+    public function setType($fqcn){
+        $this->setFQCN($fqcn);
+    }
+    public function getType(){
+        return $this->getFQCN();
+    }
     private $name;
     private $fqcn;
 }

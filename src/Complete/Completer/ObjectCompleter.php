@@ -6,8 +6,12 @@ use Entity\Project;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 use Entity\Completion\Scope;
+use Psr\Log\LoggerInterface;
 
 class ObjectCompleter {
+    public function __construct(LoggerInterface $logger){
+        $this->logger = $logger;
+    }
     public function getEntries(Project $project, Context $context, Scope $scope){
         if($context->isThis()){
             return $this->getEntriesForThis($project, $context, $scope);
@@ -33,6 +37,7 @@ class ObjectCompleter {
         if(empty($fqcn)){
             return [];
         }
+        $this->logger->addDebug('Creating completion for ' . $fqcn->toString());
         $class = $index->findClassByFQCN($fqcn);
         $entries = [];
         foreach($class->methods->all() AS $method){
@@ -72,4 +77,6 @@ class ObjectCompleter {
         }
         return $entries;
     }
+
+    private $logger;
 }

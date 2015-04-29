@@ -30,15 +30,18 @@ class MethodData {
         $paramsStr = [];
         foreach($this->arguments as $argument){
             $curParam = [];
-            if($argument->type){
-                $curParam[] = $argument->type;
+            if($argument->getType()){
+                $curParam[] = $argument->getType();
             }
-            $curParam[] = sprintf("$%s", $argument->name);
+            $curParam[] = sprintf("$%s", $argument->getName());
             $paramsStr[] = implode(" ", $curParam);
         }
         return implode(", ", $paramsStr);
     }
     public function getReturn(){
+        if($this->return instanceof FQCN){
+            return $this->return->toString();
+        }
         return "none";
     }
     public function isPublic() {

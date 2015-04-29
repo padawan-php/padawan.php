@@ -16,6 +16,15 @@ class UseParser {
             $this->uses->add($fqcn, $use->alias);
         }
     }
+    public function parseType($type){
+        $fqcn = $this->uses->find($type);
+        if(!empty($fqcn)){
+            return $fqcn;
+        }
+        return $this->uses->getFQCN()->join(
+            $this->parseFQCN($type)
+        );
+    }
     public function getFQCN(Name $node = null){
         if($node === null)
             return $node;

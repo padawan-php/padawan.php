@@ -2,8 +2,6 @@
 
 namespace Entity\Node;
 
-class MethodParam {
-    public $name = "";
-    public $type = "";
+class MethodParam extends Variable {
     public $default = "";
 }
