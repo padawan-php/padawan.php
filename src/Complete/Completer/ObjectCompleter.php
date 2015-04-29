@@ -3,6 +3,7 @@
 namespace Complete\Completer;
 
 use Entity\Project;
+use Entity\Node\MethodData;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 use Entity\Completion\Scope;
@@ -41,7 +42,7 @@ class ObjectCompleter {
         $class = $index->findClassByFQCN($fqcn);
         $entries = [];
         foreach($class->methods->all() AS $method){
-            $entry = new Entry($method->name, $method->getSignature());
+            $entry = $this->createEntryForMethod($method);
             $entries[] = $entry;
         }
         foreach($class->properties->all() AS $property){
@@ -68,7 +69,7 @@ class ObjectCompleter {
         }
         $entries = [];
         foreach($class->methods->all() AS $method){
-            $entry = new Entry($method->name, $method->getSignature());
+            $entry = $this->createEntryForMethod($method);
             $entries[] = $entry;
         }
         foreach($class->properties->all() AS $property){
@@ -76,6 +77,19 @@ class ObjectCompleter {
             $entries[] = $entry;
         }
         return $entries;
+    }
+    /**
+     * Creates menu entry for MethodData
+     *
+     * @param MethodData $method a method
+     * @return Entry
+     */
+    protected function createEntryForMethod(MethodData $method){
+        return new Entry(
+            $method->name,
+            $method->getSignature(),
+            sprintf("%s\n%s\n", $method->getSignature(), $method->doc)
+        );
     }
 
     private $logger;
