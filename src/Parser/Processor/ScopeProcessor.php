@@ -81,9 +81,7 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
             return;
         }
         foreach($method->arguments AS $param){
-            $var = new Variable($param->name);
-            $var->setFQCN($param->type);
-            $this->scope->addVar($var);
+            $this->scope->addVar($param);
         }
     }
     public function addVarToScope(Assign $node){
