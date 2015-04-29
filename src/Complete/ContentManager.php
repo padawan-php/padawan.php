@@ -114,7 +114,7 @@ class ContentManager {
         if(!$fqcn){
             return;
         }
-        if(false && !array_key_exists($file, $this->cachePool)){
+        if(!array_key_exists($file, $this->cachePool)){
             $this->cachePool[$file] = [0, [], []];
         }
         if($this->isValidCache($file, $content)){
