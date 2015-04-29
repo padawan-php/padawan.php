@@ -3,7 +3,7 @@
 namespace Entity;
 
 class FQCN {
-    private $parts;
+
     public function __get($key){
         if($key === "className"){
             return $this->getClassName();
@@ -12,12 +12,29 @@ class FQCN {
             return $this->getNamespace();
         }
     }
-    public function __construct($className, $namespace = ""){
+    public function __construct($className, $namespace = "", $isArray=false){
         if($namespace){
-            $this->parts = explode("\\", $namespace);
+            if(!is_array($namespace)){
+                $this->parts = explode("\\", $namespace);
+            }
+            else{
+                $this->parts = $namespace;
+            }
         }
         else {
             $this->parts = [];
+        }
+        $this->_isArray = $isArray;
+        $this->_isScalar = false;
+        if(count($this->parts) === 0){
+            switch($className){
+            case "int":
+            case "string":
+            case "float":
+            case "array":
+                $this->_isScalar = true;
+                break;
+            }
         }
         $this->parts[] = $className;
     }
@@ -51,4 +68,14 @@ class FQCN {
     public function __toString(){
         return $this->toString();
     }
+    public function isArray(){
+        return $this->_isArray;
+    }
+    public function isScalar(){
+        return $this->_isScalar;
+    }
+
+    private $parts;
+    private $_isArray;
+    private $_isScalar;
 }

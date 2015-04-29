@@ -4,6 +4,7 @@ namespace Parser;
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Context;
 use Entity\Node\Comment;
 use Entity\Node\MethodParam;
 use Entity\Node\Variable;
@@ -34,13 +35,13 @@ class CommentParser {
     }
 
     /**
-     * This is a method description
+     * Parses doc comment and populates comment entity
      *
      * @param string $text
-     * @return DocBlock
      */
     protected function parseDoc(Comment $comment, $text){
-        $block = new DocBlock($text);
+        $context = $this->getContext();
+        $block = new DocBlock($text, $context);
         foreach($block->getTags() AS $tag){
             switch($tag->getName()){
             case "param":
@@ -72,9 +73,18 @@ class CommentParser {
         $param = new Variable($name);
         return $param;
     }
+    /**
+     * Creates FQN by type string
+     *
+     * @param string $type
+     * @return \Entity\FQCN
+     */
     protected function getFQCN($type){
         return $this->useParser->parseType($type);
     }
+    /**
+     * @return string
+     */
     protected function trimComment($comment){
         $lines = explode("\n", $comment);
         foreach($lines AS $key => $line){
@@ -85,6 +95,17 @@ class CommentParser {
             ], "", $line);
         }
         return implode("\n", $lines);
+    }
+    /**
+     * @return Context
+     */
+    protected function getContext(){
+        $uses = $this->useParser->getUses();
+        $namespace = $uses->getFQCN()->toString();
+        $aliases = array_map(function($fqcn){
+            return $fqcn->toString();
+        }, $uses->all());
+        return new Context($namespace, $aliases);
     }
 
     private $useParser;

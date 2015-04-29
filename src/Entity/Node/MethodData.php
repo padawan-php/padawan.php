@@ -42,7 +42,7 @@ class MethodData {
         if($this->return instanceof FQCN){
             return $this->return->toString();
         }
-        return "none";
+        return "void";
     }
     public function isPublic() {
         return (bool) ($this->type & ClassData::MODIFIER_PUBLIC);

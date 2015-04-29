@@ -9,11 +9,13 @@ use Entity\FQCN;
 describe('CommentParser', function(){
     beforeEach(function(){
         $this->useParser = new UseParser;
-        $this->useParser->setUses(
-            new Uses(
-                $this->useParser->parseFQCN('Entity\Node')
-            )
+        $this->uses = new Uses(
+            $this->useParser->parseFQCN('Entity\Node')
         );
+        $this->useParser->setUses(
+            $this->uses
+        );
+        $this->uses->add($this->useParser->parseFQCN(Comment::class));
         $this->parser = new CommentParser($this->useParser);
         $this->simpleDoc = <<<'DOCBLOCK'
 /**

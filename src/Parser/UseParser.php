@@ -17,12 +17,19 @@ class UseParser {
         }
     }
     public function parseType($type){
+        $pureFQCN = $this->parseFQCN($type);
+        if($pureFQCN->isScalar()){
+            return $pureFQCN;
+        }
+        if(strpos($type, '\\') === 0){
+            return $pureFQCN;
+        }
         $fqcn = $this->uses->find($type);
         if(!empty($fqcn)){
             return $fqcn;
         }
         return $this->uses->getFQCN()->join(
-            $this->parseFQCN($type)
+            $pureFQCN
         );
     }
     public function getFQCN(Name $node = null){
@@ -39,14 +46,23 @@ class UseParser {
         return $fqcn;
     }
     public function parseFQCN($fqcn){
-        $regex = '/(.*)(?=\\\\(\w+)$)|(.*)/';
-        $ret = preg_match($regex, $fqcn, $matches);
-        if(!$ret) {
-            throw new \Exception("Error while parsing FQCN");
+        $fqcn = trim($fqcn, '\\');
+        if(empty($fqcn)){
+            return new FQCN('');
         }
+        $parts = explode('\\', $fqcn);
+        $name = array_pop($parts);
+        $regex = '/(\w+)(\\[\\])?/';
+        preg_match($regex, $name, $matches);
+        if(count($matches) === 0){
+            throw new \Exception("Could not parse FQCN for empty class name: " . $fqcn);
+        }
+        $name = $matches[1];
+        $isArray = count($matches) === 3 && $matches[2] = '[]';
         return new FQCN(
-            count($matches) == 3 ? $matches[2] : $matches[3],
-            count($matches) == 3 ? $matches[1] : ""
+            $name,
+            $parts,
+            $isArray
         );
     }
     public function getUses(){
