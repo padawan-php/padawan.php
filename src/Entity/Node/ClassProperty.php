@@ -3,11 +3,23 @@
 namespace Entity\Node;
 
 class ClassProperty {
-    public $name        = "";
+    public $name;
     public $modifier    = 0;
     public $type        = "";
     public $defauls     = "";
     public $doc         = "";
+
+    public function __construct($name=""){
+        $this->name = $name;
+    }
+
+    public function getType(){
+        return $this->type;
+    }
+
+    public function setType(FQCN $fqcn){
+        $this->type = $fqcn;
+    }
 
     public function isPublic() {
         return (bool) ($this->modifier & ClassData::MODIFIER_PUBLIC);

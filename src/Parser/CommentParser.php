@@ -24,7 +24,6 @@ class CommentParser {
         $text = $doc;
         if(is_array($doc)){
             $doc = array_shift($doc);
-            var_dump($doc);
             $text = $doc->getText();
         }
         $comment = new Comment(

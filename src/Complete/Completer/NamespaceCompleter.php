@@ -9,7 +9,7 @@ use Entity\Completion\Entry;
 class NamespaceCompleter{
     public function getEntries(Project $project, Context $context){
         $entries = [];
-        $postfix = trim($context->getPostfix());
+        $postfix = trim($context->getData());
         foreach($project->getIndex()->getFQCNs() AS $fqcn){
             $namespace = $fqcn->getNamespace();
             if(!empty($postfix) && strpos($namespace, $postfix) === false){

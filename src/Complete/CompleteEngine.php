@@ -76,8 +76,8 @@ class CompleteEngine {
         ];
     }
     protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
-        $context = $this->contextResolver->getContext($badLine, $column);
-        return $this->completer->getEntries($project, $context, $scope);
+        $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
+        return $this->completer->getEntries($project, $context);
     }
     /**
      * @TODO

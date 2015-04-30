@@ -16,6 +16,11 @@ class Project{
     public function getRootDir(){
         return $this->getRootFolder();
     }
+
+    /**
+     * Returns project's index
+     * @return Index
+     */
     public function getIndex(){
         return $this->index;
     }

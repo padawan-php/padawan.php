@@ -2,7 +2,7 @@
 
 namespace Entity;
 
-class FQCN {
+class FQCN extends FQN {
 
     public function __get($key){
         if($key === "className"){
@@ -13,17 +13,7 @@ class FQCN {
         }
     }
     public function __construct($className, $namespace = "", $isArray=false){
-        if($namespace){
-            if(!is_array($namespace)){
-                $this->parts = explode("\\", $namespace);
-            }
-            else{
-                $this->parts = $namespace;
-            }
-        }
-        else {
-            $this->parts = [];
-        }
+        parent::__construct($namespace);
         $this->_isArray = $isArray;
         $this->_isScalar = false;
         if(count($this->parts) === 0){
@@ -36,37 +26,25 @@ class FQCN {
                 break;
             }
         }
-        $this->parts[] = $className;
+        $this->addPart($className);
     }
-    public function join(FQCN $join){
-        $result = new FQCN($this->getClassName(), $this->getNamespace());
-        $resultParts = $result->getParts();
+    public function join(FQN $join){
+        $result = new self($join->getLast());
+        $resultParts = $this->getParts();
         $joiningParts = $join->getParts();
-        if($result->getClassName() === $joiningParts[0]){
+        if($this->getLast() === $join->getFirst()){
             array_shift($joiningParts);
         }
         $result->setParts(array_merge($resultParts, $joiningParts));
         return $result;
     }
     public function getClassName(){
-        return $this->parts[count($this->parts) - 1];
+        return $this->getLast();
     }
     public function getNamespace(){
-        $parts = $this->parts;
+        $parts = $this->getParts();
         array_pop($parts);
         return implode("\\", $parts);
-    }
-    public function getParts(){
-        return $this->parts;
-    }
-    public function setParts(array $parts){
-        $this->parts = $parts;
-    }
-    public function toString(){
-        return implode("\\", $this->parts);
-    }
-    public function __toString(){
-        return $this->toString();
     }
     public function isArray(){
         return $this->_isArray;
@@ -75,7 +53,6 @@ class FQCN {
         return $this->_isScalar;
     }
 
-    private $parts;
     private $_isArray;
     private $_isScalar;
 }

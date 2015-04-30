@@ -12,4 +12,10 @@ class PropertiesCollection {
     public function all(){
         return $this->map;
     }
+    public function get($propName){
+        if(array_key_exists($propName, $this->map)){
+            return $this->map[$propName];
+        }
+        return null;
+    }
 }

@@ -19,7 +19,7 @@ class MethodData {
 
     public function getSignature(){
         return sprintf("(%s) : %s",
-            $this->getParamsStr(), $this->getReturn()
+            $this->getParamsStr(), $this->getReturnStr()
         );
     }
 
@@ -38,11 +38,17 @@ class MethodData {
         }
         return implode(", ", $paramsStr);
     }
-    public function getReturn(){
+    public function getReturnStr(){
         if($this->return instanceof FQCN){
             return $this->return->toString();
         }
-        return "void";
+        return "mixed";
+    }
+    public function getReturn(){
+        return $this->return;
+    }
+    public function setReturn(FQCN $fqcn){
+        $this->return = $fqcn;
     }
     public function isPublic() {
         return (bool) ($this->type & ClassData::MODIFIER_PUBLIC);

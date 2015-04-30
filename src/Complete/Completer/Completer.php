@@ -18,7 +18,7 @@ class Completer{
         $this->namespaceCompleter = $namespaceCompleter;
         $this->objectCompleter = $objectCompleter;
     }
-    public function getEntries(Project $project, Context $context, Scope $scope){
+    public function getEntries(Project $project, Context $context){
         if($context->isNamespace()){
             return $this->getAllNamespaces($project, $context);
         }
@@ -29,7 +29,7 @@ class Completer{
             return $this->getAllInterfaces($project, $context);
         }
         elseif($context->isThis() || $context->isObject()){
-            return $this->getObjectCompletion($project, $context, $scope);
+            return $this->getObjectCompletion($project, $context);
         }
         return [];
     }
@@ -42,8 +42,8 @@ class Completer{
     protected function getAllInterfaces(Project $project, Context $context){
         return $this->interfaceNameCompleter->getEntries($project, $context);
     }
-    protected function getObjectCompletion(Project $project, Context $context, Scope $scope){
-        return $this->objectCompleter->getEntries($project, $context, $scope);
+    protected function getObjectCompletion(Project $project, Context $context){
+        return $this->objectCompleter->getEntries($project, $context);
     }
 
     private $classNameCompleter;

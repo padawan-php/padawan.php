@@ -4,38 +4,73 @@ namespace Complete\Resolver;
 
 use Entity\Completion\Token;
 use Entity\Completion\Context;
+use Entity\Completion\Scope;
+use Entity\Index;
 use Parser\ErrorFreePhpParser;
+use Psr\Log\LoggerInterface;
 
 class ContextResolver{
-    public function __construct(ErrorFreePhpParser $parser){
+    public function __construct(
+        ErrorFreePhpParser $parser,
+        NodeTypeResolver $typeResolver,
+        LoggerInterface $logger
+    ){
         $this->parser = $parser;
+        $this->typeResolver = $typeResolver;
+        $this->logger = $logger;
     }
-    public function getContext($badLine){
+    public function getContext($badLine, Index $index, Scope $scope = null){
         if(empty($badLine)){
             throw new \Exception("Could not define empty line context");
         }
+        if(empty($scope)){
+            $scope = new Scope;
+        }
 
-        $token = $this->getCompletionToken($badLine);
-        $context = new Context($token, $token->symbol);
-        return $this->defineContextType($context, $token);
+        $token = $this->getLastToken($badLine);
+        $this->logger->addDebug(sprintf('Found token \'%s\' with type %s', $token->getSymbol(), $token->getType()));
+        return $this->createContext($scope, $token, $badLine, $index);
     }
-    protected function getCompletionToken($badLine){
-        $token = new Token;
-        $token->type = -1;
-        $token->parent = $token;
-        if(strpos($badLine, '<?php') === false
-            || strpos($badLine, '<?') === false
-        ){
-            $badLine = '<?php ' . $badLine;
-        }
-        $symbols = token_get_all($badLine);
-        $symbols = array_slice($symbols, 1);
-        foreach($symbols AS $symbol){
-            $token = $this->addSymbol($token, $symbol);
-        }
+
+    /**
+     * @return Token
+     */
+    protected function getLastToken($badLine){
+        $symbols = token_get_all($this->prepareLine($badLine));
+        $token = null;
+        array_shift($symbols);
+        do {
+            $token = $this->addSymbolForToken(array_pop($symbols), $token);
+        } while(!$token->isReady() && count($symbols));
         return $token;
     }
-    protected function addSymbol(Token $parent, $symbol){
+
+    protected function createContext(Scope $scope, Token $token, $badLine, Index $index){
+        $context = new Context($scope, $token);
+        $nodes = $this->parser->parse($this->prepareLine($badLine));
+
+        if($token->isObjectOperator() || $token->isStaticOperator()){
+            if(is_array($nodes)){
+                $workingNode = array_pop($nodes);
+            }
+            else {
+                $workingNode = $nodes;
+            }
+            $context->setData(
+                $this->typeResolver->getChainType($workingNode, $index, $scope)
+            );
+        }
+        if($token->isUseOperator()
+            || $token->isNamespaceOperator()
+            || $token->isNewOperator()
+        ){
+            $context->setData(trim($token->getSymbol()));
+        }
+
+        return $context;
+    }
+
+    protected function addSymbolForToken($symbol, Token $token = null){
         if(is_array($symbol)){
             $code = $symbol[0];
             $symbol = $symbol[1];
@@ -43,96 +78,25 @@ class ContextResolver{
         else {
             $code = $symbol;
         }
-        if($code == T_WHITESPACE){
-            return $parent;
+        if(empty($token)){
+            $token = new Token($code, $symbol);
         }
-        if($code === T_STRING || $code === T_NS_SEPARATOR){
-            $parent->symbol .= $symbol;
-            return $parent;
-        }
-        $token = new Token;
-        if($this->isBreakSymbol($code)){
-            while($parent->type != -1){
-                $parent = $parent->parent;
-            }
-            return $parent;
-        }
-        switch($code){
-        case T_VARIABLE:
-            $token->symbol = $symbol;
-        case T_NAMESPACE:
-        case T_USE:
-        case T_NEW:
-        case T_EXTENDS:
-        case T_IMPLEMENTS:
-        case T_OBJECT_OPERATOR:
-            $token->type = self::$MAP[$code];
-            break;
-        case ')':
-        case ']':
-            $token = $parent->parent;
-            break;
-        default:
-            return $parent;
-        }
-        if($token){
-            $parent->addChild($token);
+        else {
+            $token->add($code, $symbol);
         }
         return $token;
     }
-    protected function defineContextType(Context $context, Token $token){
-        switch($token->type){
-        case self::S_VAR:
-            $context->addType(Context::TYPE_VAR);
-            break;
-        case self::S_OBJECT:
-            if($token->parent->symbol === '$this'){
-                $context->addType(Context::TYPE_THIS);
-            }
-            else {
-                $context->addType(Context::TYPE_OBJECT);
-            }
-            break;
-        case self::S_STATIC:
-            $context->addType(Context::TYPE_CLASS_STATIC);
-            break;
-        case self::S_NAMESPACE:
-            $context->addType(Context::TYPE_NAMESPACE);
-            break;
-        case self::S_USE:
-            $context->addType(Context::TYPE_USE);
-        case self::S_NEW:
-        case self::S_EXTENDS:
-            $context->addType(Context::TYPE_CLASSNAME);
-            break;
-        case self::S_IMPLEMENTS:
-            $context->addType(Context::TYPE_INTERFACENAME);
-            break;
+
+    protected function prepareLine($badLine){
+        if(strpos($badLine, '<?php') === false
+            || strpos($badLine, '<?') === false
+        ){
+            $badLine = '<?php ' . $badLine;
         }
-        return $context;
+        return $badLine;
     }
-    private function isBreakSymbol($symbol){
-        return in_array($symbol, [';', ',', '=', '-']);
-    }
-    const S_VAR                 = '$';
-    const S_OBJECT              = '->';
-    const S_STATIC              = '::';
-    const S_USE                 = 'use';
-    const S_NAMESPACE           = 'namespace';
-    const S_NEW                 = 'new';
-    const S_EXTENDS             = 'extends';
-    const S_IMPLEMENTS          = 'implements';
 
-    public static $MAP          = [
-        T_VARIABLE              => self::S_VAR,
-        T_OBJECT_OPERATOR       => self::S_OBJECT,
-        T_STATIC                => self::S_STATIC,
-        T_USE                   => self::S_USE,
-        T_NAMESPACE             => self::S_NAMESPACE,
-        T_NEW                   => self::S_NEW,
-        T_EXTENDS               => self::S_EXTENDS,
-        T_IMPLEMENTS            => self::S_IMPLEMENTS
-    ];
-
+    private $logger;
     private $parser;
+    private $typeResolver;
 }

@@ -15,8 +15,6 @@ class ClassData{
     const MODIFIER_FINAL     = 32;
     public $interfaces      = [];
     public $parentClasses   = [];
-    public $methods;
-    public $properties;
     public $constants       = [];
     /** @var Uses */
     public $uses;
@@ -32,8 +30,8 @@ class ClassData{
     public function __construct(FQCN $fqcn, $file){
         $this->fqcn = $fqcn;
         $this->file = $file;
-        $this->methods = new MethodsCollection();
-        $this->properties = new PropertiesCollection();
+        $this->methods = new MethodsCollection($this);
+        $this->properties = new PropertiesCollection($this);
     }
     public function getParentClass(){
         return "";
@@ -55,8 +53,16 @@ class ClassData{
         $this->properties->add($prop);
     }
     public function addConst($constName){
-        if(!in_array($constName, $this->constants)){
-            $this->constants[] = $constName;
+        $this->constants[$constName] = $constName;
+    }
+    public function __get($name){
+        if($name === 'methods'){
+            return $this->methods;
+        }
+        elseif($name === 'properties'){
+            return $this->properties;
         }
     }
+    private $methods;
+    private $properties;
 }
