@@ -48,7 +48,7 @@ describe('UseParser', function(){
                 'Node',
                 'Uses'
             ]);
-            expect($fqcn->isArray())->to->equal(true);
+            expect($fqcn->isArray())->to->be->true;
         });
         it('works with empty string', function(){
             $fqcn = $this->useParser->parseFQCN('');
@@ -65,11 +65,11 @@ describe('UseParser', function(){
                 });
                 it('creates non-array fqcn from ' . $scalar, function() use ($scalar){
                     $fqcn = $this->useParser->parseFQCN($scalar);
-                    expect($fqcn->isArray())->to->equal(false);
+                    expect($fqcn->isArray())->to->be->false;
                 });
                 it('creates scalar fqcn from ' . $scalar, function() use ($scalar){
                     $fqcn = $this->useParser->parseFQCN($scalar);
-                    expect($fqcn->isScalar())->to->equal(true);
+                    expect($fqcn->isScalar())->to->be->true;
                 });
             }
         });
@@ -89,7 +89,7 @@ describe('UseParser', function(){
         });
         it('works with scalars', function(){
             $fqcn = $this->useParser->parseType('string');
-            expect($fqcn->isScalar())->to->equal(true);
+            expect($fqcn->isScalar())->to->be->true;
         });
         it('works with absolute names', function(){
             $fqcn = $this->useParser->parseType('\Entity\Project');
