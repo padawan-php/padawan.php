@@ -4,14 +4,19 @@ namespace Command;
 
 class CompleteCommand extends AbstractCommand {
 
+    /**
+     * Runs command
+     *
+     * @return array
+     */
     public function run(array $arguments = []){
         $project = $arguments["project"];
-        $contentManager = $this->get("Complete\ContentManager");
+        $completeEngine = $this->get("Complete\CompleteEngine");
         $column = $arguments['column'];
         $file = $arguments['filepath'];
         $line = $arguments['line'];
         $content = $arguments['contents'];
-        $completion = $contentManager->createCompletion(
+        $completion = $completeEngine->createCompletion(
             $project,
             $content,
             $line,

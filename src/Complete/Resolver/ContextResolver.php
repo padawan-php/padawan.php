@@ -4,13 +4,17 @@ namespace Complete\Resolver;
 
 use Entity\Completion\Token;
 use Entity\Completion\Context;
+use Parser\ErrorFreePhpParser;
 
 class ContextResolver{
+    public function __construct(ErrorFreePhpParser $parser){
+        $this->parser = $parser;
+    }
     public function getContext($badLine){
         if(empty($badLine)){
             throw new \Exception("Could not define empty line context");
         }
-        printf("\nBad line: %s\n", $badLine);
+
         $token = $this->getCompletionToken($badLine);
         $context = new Context($token, $token->symbol);
         return $this->defineContextType($context, $token);
@@ -129,4 +133,6 @@ class ContextResolver{
         T_EXTENDS               => self::S_EXTENDS,
         T_IMPLEMENTS            => self::S_IMPLEMENTS
     ];
+
+    private $parser;
 }

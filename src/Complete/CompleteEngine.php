@@ -15,7 +15,7 @@ use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
 use Psr\Log\LoggerInterface;
 
-class ContentManager {
+class CompleteEngine {
     public function __construct(
         Parser $parser,
         IndexGenerator $generator,
