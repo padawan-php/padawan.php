@@ -24,6 +24,7 @@ class CommentParser {
         $text = $doc;
         if(is_array($doc)){
             $doc = array_shift($doc);
+            var_dump($doc);
             $text = $doc->getText();
         }
         $comment = new Comment(
@@ -71,6 +72,7 @@ class CommentParser {
     protected function createVar(Tag $tag){
         $name = trim($tag->getVariableName(), '$');
         $param = new Variable($name);
+        $param->setType($this->getFQCN($tag->getType()));
         return $param;
     }
     /**
@@ -108,5 +110,6 @@ class CommentParser {
         return new Context($namespace, $aliases);
     }
 
+    /** @property UseParser */
     private $useParser;
 }

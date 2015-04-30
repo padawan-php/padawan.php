@@ -3,7 +3,9 @@
 namespace Complete\Completer;
 
 use Entity\Project;
+use Entity\FQCN;
 use Entity\Node\MethodData;
+use Entity\Node\ClassProperty;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 use Entity\Completion\Scope;
@@ -46,8 +48,7 @@ class ObjectCompleter {
             $entries[] = $entry;
         }
         foreach($class->properties->all() AS $property){
-            $entry = new Entry($property->name);
-            $entries[] = $entry;
+            $entries[] = $this->createEntryForProperty($property);
         }
         return $entries;
     }
@@ -73,8 +74,7 @@ class ObjectCompleter {
             $entries[] = $entry;
         }
         foreach($class->properties->all() AS $property){
-            $entry = new Entry($property->name);
-            $entries[] = $entry;
+            $entries[] = $this->createEntryForProperty($property);
         }
         return $entries;
     }
@@ -92,5 +92,14 @@ class ObjectCompleter {
         );
     }
 
+    protected function createEntryForProperty(ClassProperty $prop){
+        $type = $prop->type instanceof FQCN ? $prop->type->toString() : 'mixed';
+        return new Entry(
+            $prop->name,
+            $type
+        );
+    }
+
+    /** @property LoggerInterface */
     private $logger;
 }
