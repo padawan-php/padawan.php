@@ -8,6 +8,7 @@ use Entity\Completion\Scope;
 use Entity\Index;
 use Parser\ErrorFreePhpParser;
 use Psr\Log\LoggerInterface;
+use PhpParser\Node\Expr\Variable;
 
 class ContextResolver{
     public function __construct(
@@ -56,9 +57,10 @@ class ContextResolver{
             else {
                 $workingNode = $nodes;
             }
-            $context->setData(
-                $this->typeResolver->getChainType($workingNode, $index, $scope)
-            );
+            $context->setData([
+                $this->typeResolver->getChainType($workingNode, $index, $scope),
+                $workingNode instanceof Variable && $workingNode->name === 'this'
+            ]);
         }
         if($token->isUseOperator()
             || $token->isNamespaceOperator()
@@ -93,6 +95,7 @@ class ContextResolver{
         ){
             $badLine = '<?php ' . $badLine;
         }
+        $badLine = str_replace(['elseif', 'else', 'catch'], '', $badLine);
         return $badLine;
     }
 

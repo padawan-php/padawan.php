@@ -46,6 +46,9 @@ class Scope {
     }
     public function setUses(Uses $uses = null){
         $this->uses = $uses;
+        if($this->parent instanceof Scope){
+            $this->parent->setUses($uses);
+        }
     }
     public function getUses(){
         return $this->uses;

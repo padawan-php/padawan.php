@@ -82,12 +82,14 @@ class MethodData {
     public function isMagic(){
         return in_array($this->name, [
             '__construct',
+            '__destruct',
             '__get',
             '__set',
             '__isset',
             '__unset',
             '__toString',
-            '__call'
+            '__call',
+            '__clone'
         ]);
     }
     public function setType($type){

@@ -6,7 +6,7 @@ use Entity\Project;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 
-class InterfaceNameCompleter{
+class InterfaceNameCompleter implements CompleterInterface {
     public function getEntries(Project $project, Context $context){
         $entries = [];
         foreach($project->getIndex()->getInterfaces() as $interface){

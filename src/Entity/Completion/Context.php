@@ -60,11 +60,14 @@ class Context {
     public function addType($type){
         $this->type = $this->type | $type;
     }
+    /**
+     * @return Scope
+     */
+    public function getScope(){
+        return $this->scope;
+    }
     public function getToken(){
         return $this->token;
-    }
-    public function getPostfix(){
-        return $this->postfix;
     }
     public function isEmpty(){
         return $this->type === 0;

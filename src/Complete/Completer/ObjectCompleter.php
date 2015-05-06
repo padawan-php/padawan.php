@@ -10,6 +10,7 @@ use Entity\Node\InterfaceData;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 use Entity\Completion\Scope;
+use Entity\Collection\Specification;
 use Psr\Log\LoggerInterface;
 
 class ObjectCompleter {
@@ -17,7 +18,8 @@ class ObjectCompleter {
         $this->logger = $logger;
     }
     public function getEntries(Project $project, Context $context){
-        $fqcn = $context->getData();
+        /** @var FQCN $fqcn */
+        list($fqcn, $isThis) = $context->getData();
         $this->logger->addDebug('creating entries');
         if(!($fqcn instanceof FQCN)){
             return [];
@@ -32,8 +34,9 @@ class ObjectCompleter {
             return [];
         }
         $entries = [];
+        $spec = new Specification($isThis ? 'private' : 'public');
         if($class->methods !== null){
-            foreach($class->methods->all() AS $method){
+            foreach($class->methods->all($spec) AS $method){
                 $entry = $this->createEntryForMethod($method);
                 $entries[] = $entry;
             }
@@ -42,7 +45,7 @@ class ObjectCompleter {
             return $entries;
         }
         if($class->properties !== null){
-            foreach($class->properties->all() AS $property){
+            foreach($class->properties->all($spec) AS $property){
                 $entries[] = $this->createEntryForProperty($property);
             }
         }

@@ -6,7 +6,7 @@ use Entity\Project;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 
-class NamespaceCompleter{
+class NamespaceCompleter implements CompleterInterface {
     public function getEntries(Project $project, Context $context){
         $entries = [];
         $postfix = trim($context->getData());

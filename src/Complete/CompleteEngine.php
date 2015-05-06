@@ -8,7 +8,7 @@ use Parser\Parser;
 use Generator\IndexGenerator;
 use Entity\Completion\Entry;
 use Entity\Completion\Context;
-use Complete\Completer\Completer;
+use Complete\Completer\CompleterFactory;
 use Complete\Resolver\ContextResolver;
 use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
@@ -20,7 +20,7 @@ class CompleteEngine {
         Parser $parser,
         IndexGenerator $generator,
         ContextResolver $contextResolver,
-        Completer $completer,
+        CompleterFactory $completer,
         IndexProcessor $indexProcessor,
         ScopeProcessor $scopeProcessor,
         LoggerInterface $logger
@@ -28,7 +28,7 @@ class CompleteEngine {
         $this->parser           = $parser;
         $this->generator        = $generator;
         $this->contextResolver  = $contextResolver;
-        $this->completer        = $completer;
+        $this->completerFactory = $completer;
         $this->indexProcessor   = $indexProcessor;
         $this->scopeProcessor   = $scopeProcessor;
         $this->logger           = $logger;
@@ -77,7 +77,11 @@ class CompleteEngine {
     }
     protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
-        return $this->completer->getEntries($project, $context);
+        $completer = $this->completerFactory->getCompleter($context);
+        if($completer){
+            return $completer->getEntries($project, $context);
+        }
+        return [];
     }
     /**
      * @TODO
@@ -150,7 +154,7 @@ class CompleteEngine {
     private $parser;
     private $generator;
     private $contextResolver;
-    private $completer;
+    private $completerFactory;
     private $indexProcessor;
     private $scopeProcessor;
     private $cachePool;

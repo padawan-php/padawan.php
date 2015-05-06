@@ -38,7 +38,7 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
             return NodeTraverserInterface::DONT_TRAVERSE_CHILDREN;
         }
         if($node instanceof Class_){
-            $this->scope = new Scope($this->scope);
+            $this->createScope();
             $var = new Variable('this');
             $var->setType($this->scope->getFQCN());
             $this->scope->addVar($var);
@@ -136,6 +136,11 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     }
     public function setIndex(Index $index){
         $this->index = $index;
+    }
+
+    protected function createScope(){
+        $this->scope = new Scope($this->scope);
+        $this->scope->setUses($this->useParser->getUses());
     }
 
     /** @var ClassData[]|InterfaceData[] */
