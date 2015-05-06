@@ -22,18 +22,15 @@ Padawan.php is an http server that parses your project and gives you
 completions.
 Padawan.php reads autoload classmap of a composer project, parses
 doc-comments and functions declarations of each class and creates index
-from them. After that it autoupdated index and give you completion
-as you send requests to http.
+from them. After that it autoupdates index and give you completion
+as you type.
 
-* See documentation of current word, be it class name, method or property. It is
-  context aware.
-* Go to definition of a symbol. Also context aware.
-* Automatically add use statement of current completed word. Also added plugin
-  command of this action.
+### Demo video
+See this short video to see how it works with vim(image is clickable):
+[![ScreenShot](http://i1.ytimg.com/vi/Y54P2N1T6-I/maxresdefault.jpg)](https://www.youtube.com/watch?v=Y54P2N1T6-I)
 
-
-Why not original plugin
------------------------
+Why not the original plugin
+---------------------------
 
 The M2mdas's plugin is pretty good, but have some core bugs due to
 self-written parser:
@@ -50,13 +47,12 @@ So, I decided to write my own plugin.
 Roadmap
 -------
 
-As of now this plugin sucks, but I'm working hard on it and these features are
+As of now this plugin can do basic things
 now in progress:
 
-* Fix bugs with symbol type detection
+* Fix interfaces parsing
 * Fix plugin user interface
-* Add doc-comment parsing
-* Add class inheritance indexing
+* Add plugins for editors(vim, emacs)
 * Add plugins support
 * Add symfony2 plugin
 
