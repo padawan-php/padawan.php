@@ -113,7 +113,7 @@ class IndexGenerator
         $all = count($classMap);
         foreach($index->getClassMap() as $fqcn => $file) {
             $start = microtime(1);
-            $this->processFile($index, $fqcn, $file);
+            $this->processFile($index, $fqcn, $file, false, false);
             $end = microtime(1) - $start;
             $this->getLogger()->addDebug("Indexing: [$end]s");
             $this->getLogger()->addDebug("Memory: ". memory_get_usage());
@@ -126,7 +126,9 @@ class IndexGenerator
         gc_enable();
     }
 
-    public function processFile(Index $index, $fqcn, $file, $rewrite=false){
+    public function processFile(Index $index, $fqcn, $file,
+        $rewrite=false, $createCache=true
+    ){
         $this->getLogger()
             ->addInfo("processing $file");
 
@@ -143,7 +145,7 @@ class IndexGenerator
         $parser = $this->getClassUtils()->getParser();
         $parser->addProcessor($processor);
         $nodes = $this->getClassUtils()->getParser()
-            ->parseFile($fqcn, $file);
+            ->parseFile($fqcn, $file, $createCache);
         $end = microtime(1) - $startParser;
         $this->getLogger()
             ->addInfo("Parsing: [$end]s");
@@ -155,16 +157,10 @@ class IndexGenerator
         $this->getLogger()->addDebug('Processing nodes ' . count($nodes));
         foreach($nodes as $node){
             if($node instanceof ClassData){
-                $this->getLogger()->addDebug('Class');
                 $index->addClass($node, $fqcn->toString());
-
-                $this->populateExtendsIndex($index, $node->fqcn, $node->parentClasses);
-                $this->populateImplementsIndex($index, $node->fqcn, $node->interfaces);
             }
             elseif($node instanceof InterfaceData){
-                $this->getLogger()->addDebug('Interface');
                 $index->addInterface($node, $fqcn->toString());
-                $this->populateImplementsIndex($index, $node->fqcn, $node->interfaces);
             }
         }
     }

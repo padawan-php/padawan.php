@@ -3,6 +3,7 @@
 namespace Parser\Processor;
 
 use Parser\UseParser;
+use Parser\CommentParser;
 use Entity\FQCN;
 use Entity\Index;
 use Entity\Node\Variable;
@@ -10,6 +11,7 @@ use Entity\Completion\Scope;
 use Complete\Resolver\NodeTypeResolver;
 use PhpParser\NodeTraverserInterface;
 use PhpParser\Node;
+use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
@@ -19,11 +21,13 @@ use PhpParser\NodeVisitorAbstract;
 class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     public function __construct(
         UseParser $useParser,
-        NodeTypeResolver $typeResolver
+        NodeTypeResolver $typeResolver,
+        CommentParser $commentParser
     ){
         $this->resultNodes      = [];
         $this->useParser        = $useParser;
         $this->typeResolver     = $typeResolver;
+        $this->commentParser    = $commentParser;
     }
     public function setLine($line){
         $this->line = $line;
@@ -48,11 +52,6 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     }
     public function leaveNode(Node $node){
         if(!$this->isIn($node, $this->line)){
-            //if($node instanceof Class_ || $node instanceof ClassMethod){
-                //if(!empty($this->scope) && !empty($this->scope->getParent())){
-                    //$this->scope = $this->scope->getParent();
-                //}
-            //}
         }
     }
     public function setFileInfo(FQCN $fqcn, $file){
@@ -86,18 +85,15 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     public function createScopeFromMethod(ClassMethod $node){
         $index = $this->getIndex();
         if(empty($index)){
-            echo "empty index\n";
             return;
         }
         $fqcn = $this->scope->getFQCN();
         $classData = $index->findClassByFQCN($fqcn);
         if(empty($classData)){
-            printf("Empty class in %s\n", $fqcn->toString());
             return;
         }
         $method = $classData->methods->get($node->name);
         if(empty($method)){
-            printf("Empty method in %s::%s\n", $fqcn->toString(), $node->name);
             return;
         }
         foreach($method->arguments AS $param){
@@ -105,10 +101,20 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         }
     }
     public function addVarToScope(Assign $node){
+        if(!$node->var instanceof NodeVar){
+            return;
+        }
         $var = new Variable($node->var->name);
-        $var->setType($this->typeResolver->getType(
-            $node->expr, $this->getIndex(), $this->scope
-        ));
+        $comment = $this->commentParser->parse($node->getAttribute('comments'));
+        if($comment->getVar($var->getName())){
+            $type = $comment->getVar($var->getName())->getType();
+        }
+        else {
+            $type = $this->typeResolver->getType(
+                $node->expr, $this->getIndex(), $this->scope
+            );
+        }
+        $var->setType($type);
         $this->scope->addVar($var);
     }
     public function parseUse(Use_ $node, $fqcn, $file){
@@ -141,4 +147,5 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     /** @property Scope */
     private $scope;
     private $typeResolver;
+    private $commentParser;
 }

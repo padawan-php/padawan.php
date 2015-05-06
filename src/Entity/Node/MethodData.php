@@ -24,7 +24,13 @@ class MethodData {
     }
 
     public function addParam(MethodParam $param){
-        $this->arguments[] = $param;
+        if(array_key_exists($param->getName(), $this->arguments)){
+            $var = $this->arguments[$param->getName()];
+            if(empty($param->getType())){
+                $param->setType($var->getType());
+            }
+        }
+        $this->arguments[$param->getName()] = $param;
     }
     public function getParamsStr(){
         $paramsStr = [];
@@ -72,6 +78,17 @@ class MethodData {
 
     public function isStatic() {
         return (bool) ($this->type & ClassData::MODIFIER_STATIC);
+    }
+    public function isMagic(){
+        return in_array($this->name, [
+            '__construct',
+            '__get',
+            '__set',
+            '__isset',
+            '__unset',
+            '__toString',
+            '__call'
+        ]);
     }
     public function setType($type){
         $this->type = $type;

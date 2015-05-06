@@ -22,6 +22,10 @@ class FQCN extends FQN {
             case "string":
             case "float":
             case "array":
+            case "mixed":
+            case "void":
+            case "object":
+            case "bool":
                 $this->_isScalar = true;
                 break;
             }

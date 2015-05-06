@@ -8,6 +8,7 @@ use phpDocumentor\Reflection\DocBlock\Context;
 use Entity\Node\Comment;
 use Entity\Node\MethodParam;
 use Entity\Node\Variable;
+use Entity\Node\ClassProperty;
 
 class CommentParser {
 
@@ -41,25 +42,35 @@ class CommentParser {
      */
     protected function parseDoc(Comment $comment, $text){
         $context = $this->getContext();
-        $block = new DocBlock($text, $context);
-        foreach($block->getTags() AS $tag){
-            switch($tag->getName()){
-            case "param":
-                $comment->addVar(
-                    $this->createMethodParam($tag)
-                );
-                break;
-            case "var":
-                $comment->addVar(
-                    $this->createVar($tag)
-                );
-                break;
-            case "return":
-                $comment->setReturn(
-                    $this->getFQCN($tag->getType())
-                );
-                break;
+        try{
+            $block = new DocBlock($text, $context);
+            foreach($block->getTags() AS $tag){
+                switch($tag->getName()){
+                case "param":
+                    $comment->addVar(
+                        $this->createMethodParam($tag)
+                    );
+                    break;
+                case "var":
+                    $comment->addVar(
+                        $this->createVar($tag)
+                    );
+                    break;
+                case "return":
+                    $comment->setReturn(
+                        $this->getFQCN($tag->getType())
+                    );
+                    break;
+                case "property":
+                    $comment->addProperty(
+                        $this->createProperty($tag)
+                    );
+                    break;
+                }
             }
+        }
+        catch(\Exception $e){
+
         }
     }
     protected function createMethodParam(Tag $tag){
@@ -74,6 +85,17 @@ class CommentParser {
         $param->setType($this->getFQCN($tag->getType()));
         return $param;
     }
+    protected function createProperty(Tag $tag){
+        $name = trim($tag->getVariableName(), '$');
+        if(empty($name)){
+            $name = '-$';
+        }
+        $prop = new ClassProperty;
+        $prop->name = $name;
+        $prop->setType($this->getFQCN($tag->getType()));
+        return $prop;
+    }
+
     /**
      * Creates FQN by type string
      *
@@ -83,6 +105,7 @@ class CommentParser {
     protected function getFQCN($type){
         return $this->useParser->parseType($type);
     }
+
     /**
      * @return string
      */
@@ -97,6 +120,7 @@ class CommentParser {
         }
         return implode("\n", $lines);
     }
+
     /**
      * @return Context
      */

@@ -26,20 +26,25 @@ class Parser{
         $this->astPool          = [];
         $this->logger           = $logger;
     }
-    public function parseFile(FQCN $fqcn, $file){
+    public function parseFile(FQCN $fqcn, $file, $createCache=true){
         $file = $this->path->getAbsolutePath($file);
         $content = $this->path->read($file);
-        return $this->parseContent($fqcn, $file, $content);
+        return $this->parseContent($fqcn, $file, $content, $createCache);
     }
-    public function parseContent(FQCN $fqcn, $file, $content){
-        $hash = hash('md5', $content);
-        if(!array_key_exists($file, $this->astPool)){
-            $this->astPool[$file] = [0,0];
+    public function parseContent(FQCN $fqcn, $file, $content, $createCache=true){
+        if($createCache){
+            $hash = hash('md5', $content);
+            if(!array_key_exists($file, $this->astPool)){
+                $this->astPool[$file] = [0,0];
+            }
+            list($oldHash, $ast) = $this->astPool[$file];
         }
         $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
         $this->useParser->setUses($uses);
-        list($oldHash, $ast) = $this->astPool[$file];
-        if($oldHash !== $hash || empty($ast)){
+        $this->logger->addDebug(sprintf('Cache status: %s', (
+            $createCache ? 'active' : 'disabled'
+        )));
+        if(!$createCache || $oldHash !== $hash || empty($ast)){
             try{
                 $ast = $this->parser->parse($content);
             }
@@ -47,7 +52,9 @@ class Parser{
                 printf("Parsing failed in file %s\n", $file);
                 return [];
             }
-            $this->astPool[$file] = [$hash, $ast];
+            if($createCache){
+                $this->astPool[$file] = [$hash, $ast];
+            }
         }
         $this->setFileInfo($fqcn, $file);
         $this->logger->addInfo(sprintf("Traversing with %s processors",

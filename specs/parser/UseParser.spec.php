@@ -55,7 +55,11 @@ describe('UseParser', function(){
             expect($fqcn)->to->be->an->instanceof(FQCN::class);
         });
         describe('Scalar types', function(){
-            $scalars = ['string', 'int', 'float', 'array'];
+            $scalars = [
+                'string', 'int', 'float',
+                'array', 'bool', 'object',
+                'void', 'mixed'
+            ];
             foreach($scalars AS $scalar){
                 it('creates valid parts from ' . $scalar, function() use ($scalar){
                     $fqcn = $this->useParser->parseFQCN($scalar);

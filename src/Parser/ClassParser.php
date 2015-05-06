@@ -9,8 +9,15 @@ use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\PropertyProperty;
 use PhpParser\Node\Stmt\ClassConst;
+use PhpParser\Node\Name;
 
+/**
+ * SomeComment
+ */
 class ClassParser{
+    /**
+     * @property ClassParser
+     */
     private $docParser;
     private $methodsParser;
     private $propertiesParser;
@@ -34,18 +41,18 @@ class ClassParser{
 
     public function parse(Class_ $node, Entity\FQCN $fqcn, $file){
         $classData = new Node\ClassData($fqcn, $file);
-        if($node->extends){
-            $classData->setParentClass(
-                $this->useParser->getFQCN($node->extends)->toString()
+        if($node->extends instanceof Name){
+            $classData->setParent(
+                $this->useParser->getFQCN($node->extends)
             );
         }
         foreach($node->implements AS $interfaceName){
             $classData->addInterface(
-                $this->useParser->getFQCN($interfaceName)->toString()
+                $this->useParser->getFQCN($interfaceName)
             );
         }
         $classData->startLine = $node->getAttribute("startLine");
-        $classData->doc = $this->parseDocComments(
+        $this->parseDocComments(
             $classData,
             $node->getAttribute("comments")
         );
@@ -56,7 +63,7 @@ class ClassParser{
             elseif($child instanceof Property){
                 foreach($child->props AS $prop){
                     $classData->addProp(
-                        $this->parseProperty($prop, $child->type)
+                        $this->parseProperty($prop, $child->type, $child->getAttribute('comments'))
                     );
                 }
             }
@@ -84,18 +91,21 @@ class ClassParser{
      *
      * @return ClassProperty
      */
-    protected function parseProperty(PropertyProperty $node, $modifier)
+    protected function parseProperty(PropertyProperty $node, $modifier, $comments)
     {
-        return $this->propertiesParser->parse($node, $modifier);
+        return $this->propertiesParser->parse($node, $modifier, $comments);
     }
 
 
     /**
      * Parses doc comments trough $docParser
+     *
+     * @param \Entity\Node\ClassData $classData
      */
     protected function parseDocComments($classData, $node)
     {
-        $classData->doc = $this->docParser->parse($node);
+        /** @var \Entity\Node\Comment $comment */
+        $comment = $this->docParser->parse($node);
+        $classData->doc = $comment->getDoc();
     }
-
 }

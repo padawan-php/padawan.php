@@ -17,7 +17,7 @@ class InterfaceData {
     public function __construct(FQCN $fqcn, $file){
         $this->fqcn = $fqcn;
         $this->file = $file;
-        $this->methods = new MethodsCollection;
+        $this->methods = new MethodsCollection($this);
     }
     public function addMethod(MethodData $method){
         $this->methods->add($method);

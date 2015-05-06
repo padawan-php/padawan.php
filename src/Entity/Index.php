@@ -8,6 +8,7 @@ use Entity\Node\ClassData;
 class Index {
     private $fqcns              = [];
     private $classes            = [];
+    private $interfaces         = [];
     private $classMap           = [];
     private $flippedClassMap    = [];
     private $extends            = [];
@@ -17,9 +18,10 @@ class Index {
     public function getFQCNs(){
         return $this->fqcns;
     }
-    public function addFQCN(FQCN $fqcn){
-        $this->fqcns[$fqcn->toString()] = $fqcn;
-    }
+
+    /**
+     * @return FQCN
+     */
     public function findFQCNByFile($file){
         if(!array_key_exists($file, $this->flippedClassMap)){
             return null;
@@ -34,16 +36,9 @@ class Index {
         return $this->fqcns[$fqcnStr];
     }
 
-    public function getInterfaces(){
-        return $this->interfaces;
-    }
-    public function addInterface(InterfaceData $interface){
-        $this->interfaces[$interface->fqcn->toString()] = $interface;
-    }
-
-    public function getClasses(){
-        return $this->classes;
-    }
+    /**
+     * @return ClassData
+     */
     public function findClassByFQCN(FQCN $fqcn){
         $str = $fqcn->toString();
         if(array_key_exists($str, $this->classes)){
@@ -51,11 +46,44 @@ class Index {
         }
         return null;
     }
-    public function addClass(ClassData $class, $key = null){
-        if($key)
-            $this->classes[$key] = $class;
-        else
-            $this->classes[$class->fqcn->toString()] = $class;
+
+    /**
+     * @return InterfaceData
+     */
+    public function findInterfaceByFQCN(FQCN $fqcn){
+        $str = $fqcn->toString();
+        if(array_key_exists($str, $this->interfaces)){
+            return $this->interfaces[$str];
+        }
+    }
+    public function findClassChildren(FQCN $class){
+        if(!array_key_exists($class->toString(), $this->extends)
+            || !is_array($this->extends[$class->toString()])
+        ){
+            $this->extends[$class->toString()] = [];
+        }
+        return $this->extends[$class->toString()];
+    }
+    public function getClasses(){
+        return $this->classes;
+    }
+    public function addClass(ClassData $class){
+        $this->classes[$class->fqcn->toString()] = $class;
+        if(!empty($class->getParent())){
+            $this->addExtend($class, $class->getParent());
+        }
+        foreach($this->findClassChildren($class->fqcn) AS $child){
+            $child->setParent($class);
+        }
+    }
+    public function addInterface(InterfaceData $interface){
+        $this->interfaces[$interface->fqcn->toString()] = $interface;
+    }
+    public function getInterfaces(){
+        return $this->interfaces;
+    }
+    public function addFQCN(FQCN $fqcn){
+        $this->fqcns[$fqcn->toString()] = $fqcn;
     }
 
     public function getClassMap(){
@@ -64,27 +92,27 @@ class Index {
     public function getFlippedClassMap(){
         return $this->classMap;
     }
-    public function setClassMap(array $classMap){
-        $this->classMap = $classMap;
-        $this->flippedClassMap = array_flip($classMap);
+    public function getImplements(){
+        return $this->implements;
     }
     public function getExtends(){
         return $this->extends;
     }
-    public function addExtend($class, $parent){
-        if(!array_key_exists($parent, $this->extends)
-            || !is_array($this->extends[$parent])){
-            $this->extends[$parent] = [];
-        }
-        if(!in_array($class, $this->extends[$parent])){
-            $this->extends[$parent][] = $class;
+
+    public function setClassMap(array $classMap){
+        $this->classMap = $classMap;
+        $this->flippedClassMap = array_flip($classMap);
+    }
+    protected function addExtend(ClassData $class, FQCN $parent){
+        $this->findClassChildren($parent);
+        $this->extends[$parent->toString()][$class->fqcn->toString()] = $class;
+        $parentClass = $this->findClassByFQCN($parent);
+        if($parentClass instanceof ClassData){
+            $class->setParent($parentClass);
         }
     }
 
-    public function getImplements(){
-        return $this->implements;
-    }
-    public function addImplement($class, $interface){
+    protected function addImplement($class, $interface){
         if(!array_key_exists($interface, $this->implements)
             || !is_array($this->implements[$interface])){
             $this->implements[$interface] = [];

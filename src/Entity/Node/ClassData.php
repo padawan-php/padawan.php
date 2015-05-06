@@ -14,13 +14,11 @@ class ClassData{
     const MODIFIER_ABSTRACT  = 16;
     const MODIFIER_FINAL     = 32;
     public $interfaces      = [];
-    public $parentClasses   = [];
     public $constants       = [];
     /** @var Uses */
     public $uses;
 
     /**
-     *
      * @var FQCN
      */
     public $fqcn;
@@ -28,18 +26,23 @@ class ClassData{
     public $startLine       = 0;
     public $file            = "";
     public function __construct(FQCN $fqcn, $file){
+        $this->constants = [];
         $this->fqcn = $fqcn;
         $this->file = $file;
         $this->methods = new MethodsCollection($this);
         $this->properties = new PropertiesCollection($this);
     }
-    public function getParentClass(){
-        return "";
+    /**
+     * @return ClassData
+     */
+    public function getParent(){
+        return $this->parent;
     }
-    public function setParentClass($parentClass){
-        if(!in_array($parentClass, $this->parentClasses)){
-            array_unshift($this->parentClasses, $parentClass);
-        }
+    public function getName(){
+        return $this->fqcn->getClassName();
+    }
+    public function setParent($parent){
+        $this->parent = $parent;
     }
     public function addInterface($interface){
         if(!in_array($interface, $this->interfaces)){
@@ -63,6 +66,8 @@ class ClassData{
             return $this->properties;
         }
     }
+
+    private $parent;
     private $methods;
     private $properties;
 }

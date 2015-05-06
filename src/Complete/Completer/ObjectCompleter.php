@@ -6,6 +6,7 @@ use Entity\Project;
 use Entity\FQCN;
 use Entity\Node\MethodData;
 use Entity\Node\ClassProperty;
+use Entity\Node\InterfaceData;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
 use Entity\Completion\Scope;
@@ -24,12 +25,21 @@ class ObjectCompleter {
         $index = $project->getIndex();
         $this->logger->addDebug('Creating completion for ' . $fqcn->toString());
         $class = $index->findClassByFQCN($fqcn);
+        if(empty($class)){
+            $class = $index->findInterfaceByFQCN($fqcn);
+        }
+        if(empty($class)){
+            return [];
+        }
         $entries = [];
         if($class->methods !== null){
             foreach($class->methods->all() AS $method){
                 $entry = $this->createEntryForMethod($method);
                 $entries[] = $entry;
             }
+        }
+        if($class instanceof InterfaceData){
+            return $entries;
         }
         if($class->properties !== null){
             foreach($class->properties->all() AS $property){

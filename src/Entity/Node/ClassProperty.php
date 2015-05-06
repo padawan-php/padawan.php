@@ -2,6 +2,8 @@
 
 namespace Entity\Node;
 
+use Entity\FQCN;
+
 class ClassProperty {
     public $name;
     public $modifier    = 0;
