@@ -28,9 +28,7 @@ class UseParser {
         if(!empty($fqcn)){
             return $fqcn;
         }
-        return $this->uses->getFQCN()->join(
-            $pureFQCN
-        );
+        return $this->createFQCN($pureFQCN);
     }
     public function getFQCN(Name $node = null){
         if($node === null)
@@ -42,8 +40,7 @@ class UseParser {
         if($fqcn){
             return $fqcn;
         }
-        $fqcn = $this->uses->getFQCN()->join($this->parseFQCN($node->toString()));
-        return $fqcn;
+        return $this->createFQCN($node->toString());
     }
     public function parseFQCN($fqcn){
         $fqcn = trim($fqcn, '\\');
@@ -70,5 +67,9 @@ class UseParser {
     }
     public function setUses(Uses $uses = null){
         $this->uses = $uses;
+    }
+    protected function createFQCN($fqcn){
+        $fqn = $this->uses->getFQCN()->join($this->parseFQCN($fqcn));
+        return new FQCN($fqn->getLast(), $fqn->getTail());
     }
 }

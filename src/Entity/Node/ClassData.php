@@ -3,6 +3,7 @@
 namespace Entity\Node;
 
 use Entity\FQCN;
+use Entity\FQN;
 use Entity\Collection\MethodsCollection;
 use Entity\Collection\PropertiesCollection;
 

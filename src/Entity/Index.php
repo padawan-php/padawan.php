@@ -100,7 +100,9 @@ class Index {
             $this->addExtend($class, $class->getParent());
         }
         foreach($class->getInterfaces() as $interface){
-            $this->addImplement($class, $interface);
+            if($interface instanceof FQCN){
+                $this->addImplement($class, $interface);
+            }
         }
         foreach($this->findClassChildren($class->fqcn) AS $child){
             $child->setParent($class);
@@ -110,7 +112,7 @@ class Index {
     public function addInterface(InterfaceData $interface){
         $this->interfaces[$interface->fqcn->toString()] = $interface;
         foreach($this->findInterfaceChildrenClasses($interface->fqcn) as $child){
-            $child->addInterface($interface);
+            $this->addImplement($child, $interface->fqcn);
         }
     }
 
@@ -144,13 +146,10 @@ class Index {
         }
     }
 
-    protected function addImplement(ClassData $class, FQCN $interface){
-        if(!array_key_exists($interface->toString(), $this->implements)
-            || !is_array($this->implements[$interface->toString()])){
-            $this->implements[$interface->toString()] = [];
-        }
-        $this->implements[$interface->toString()][$class->fqcn->toString()] = $class;
-        $interface = $this->findInterfaceByFQCN($interface);
+    protected function addImplement(ClassData $class, FQCN $fqcn){
+        $this->findInterfaceChildrenClasses($fqcn);
+        $this->implements[$fqcn->toString()][$class->fqcn->toString()] = $class;
+        $interface = $this->findInterfaceByFQCN($fqcn);
         if($interface instanceof InterfaceData){
             $class->addInterface($interface);
         }

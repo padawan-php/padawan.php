@@ -156,12 +156,12 @@ class IndexGenerator
         $this->getLogger()->addDebug('Processing nodes ' . count($nodes));
         foreach($nodes as $node){
             if($node instanceof ClassData){
-                $this->getLogger()->addDebug('Processing node ' . $node->name);
+                $this->getLogger()->addDebug('Processing node ' . $node->fqcn->toString());
                 $index->addFQCN($node->fqcn);
                 $index->addClass($node);
             }
             elseif($node instanceof InterfaceData){
-                $this->getLogger()->addDebug('Processing node ' . $node->name);
+                $this->getLogger()->addDebug('Processing node ' . $node->fqcn->toString());
                 $index->addFQCN($node->fqcn);
                 $index->addInterface($node);
             }

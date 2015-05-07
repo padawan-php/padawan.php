@@ -38,6 +38,11 @@ class FQN {
         $parts = $this->getParts();
         return array_pop($parts);
     }
+    public function getTail(){
+        $parts = $this->getParts();
+        array_pop($parts);
+        return $parts;
+    }
     public function getParts(){
         if(is_array($this->parts)){
             return $this->parts;

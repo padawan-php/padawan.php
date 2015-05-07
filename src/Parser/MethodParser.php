@@ -17,11 +17,13 @@ class MethodParser{
      */
     public function __construct(
         UseParser $useParser,
-        CommentParser $commentParser
+        CommentParser $commentParser,
+        ParamParser $paramParser
     )
     {
         $this->useParser        = $useParser;
         $this->commentParser    = $commentParser;
+        $this->paramParser      = $paramParser;
     }
 
     /**
@@ -57,17 +59,13 @@ class MethodParser{
         return $method;
     }
     protected function parseMethodArgument(Param $node){
-        $param = new MethodParam($node->name);
-        if($node->type instanceof Name)
-            $param->setFQCN($this->useParser->getFQCN($node->type));
-        else{
-            $param->setType($node->type);
-        }
-        return $param;
+        return $this->paramParser->parse($node);
     }
 
     /** @var UseParser $useParser */
     private $useParser;
     /** @property CommentParser $commentParser */
     private $commentParser;
+    /** @var ParamParser */
+    private $paramParser;
 }

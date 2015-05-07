@@ -41,7 +41,6 @@ class ClassParser{
 
     public function parse(Class_ $node, Entity\FQN $fqn, $file){
         $fqcn = new Entity\FQCN($node->name, $fqn);
-        print_r('Parsing class: ' . $fqcn->toString() . "\n");
         $classData = new Node\ClassData($fqcn, $file);
         if($node->extends instanceof Name){
             $classData->setParent(
