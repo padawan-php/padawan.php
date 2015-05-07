@@ -38,7 +38,7 @@ class ObjectCompleter {
         if($class->methods !== null){
             foreach($class->methods->all($spec) AS $method){
                 $entry = $this->createEntryForMethod($method);
-                $entries[] = $entry;
+                $entries[$method->name] = $entry;
             }
         }
         if($class instanceof InterfaceData){
@@ -46,9 +46,10 @@ class ObjectCompleter {
         }
         if($class->properties !== null){
             foreach($class->properties->all($spec) AS $property){
-                $entries[] = $this->createEntryForProperty($property);
+                $entries[$property->name] = $this->createEntryForProperty($property);
             }
         }
+        ksort($entries);
         return $entries;
     }
 

@@ -57,17 +57,17 @@ class MethodsCollection{
         if($this->class instanceof ClassData){
             $parent = $this->class->getParent();
             if($parent instanceof ClassData){
-                $methods = array_merge(
-                    $parent->methods->all(new Specification(
+                $parentM = $parent->methods->all(new Specification(
                         $spec->getParentMode(),
                         $spec->isStatic(),
                         $spec->isMagic()
-                    )),
+                    ));
+                $methods = array_merge(
+                    $parentM,
                     $methods
                 );
             }
         }
-        sort($methods);
         return $methods;
     }
 }
