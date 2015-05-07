@@ -3,6 +3,8 @@
 namespace Entity\Node;
 
 use Entity\FQCN;
+use Entity\Node\ClassProperty;
+use Entity\Node\Variable;
 
 class Comment {
 
@@ -24,20 +26,39 @@ class Comment {
     }
 
     /**
-     * @return Property
+     * @return ClassProperty
      */
     public function getProperty($name){
+        $prop = null;
         if(array_key_exists($name, $this->properties)){
-            return $this->properties[$name];
+            $prop = $this->properties[$name];
         }
+        if(!$prop instanceof ClassProperty && array_key_exists('', $this->properties)){
+            $prop = $this->properties[''];
+        }
+        if(empty($prop)){
+            $var = $this->getVar($name);
+            if($var instanceof Variable){
+                $prop = new ClassProperty;
+                $prop->name = $var->getName();
+                $prop->setType($var->getType());
+            }
+        }
+        return $prop;
     }
+
     /**
      * @return Variable
      */
     public function getVar($name){
+        $var = null;
         if(array_key_exists($name, $this->vars)){
-            return $this->vars[$name];
+            $var = $this->vars[$name];
         }
+        if($var instanceof Variable && array_key_exists('', $this->vars)){
+            $var = $this->vars[''];
+        }
+        return $var;
     }
     public function setReturn(FQCN $fqcn){
         $this->return = $fqcn;

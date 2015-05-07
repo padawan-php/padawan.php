@@ -37,7 +37,12 @@ class ContextResolver{
      * @return Token
      */
     protected function getLastToken($badLine){
-        $symbols = token_get_all($this->prepareLine($badLine));
+        try {
+            $symbols = @token_get_all($this->prepareLine($badLine));
+        }
+        catch(\Exception $e){
+            $symbols = [0,0];
+        }
         $token = null;
         array_shift($symbols);
         do {

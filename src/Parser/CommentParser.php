@@ -87,9 +87,6 @@ class CommentParser {
     }
     protected function createProperty(Tag $tag){
         $name = trim($tag->getVariableName(), '$');
-        if(empty($name)){
-            $name = '-$';
-        }
         $prop = new ClassProperty;
         $prop->name = $name;
         $prop->setType($this->getFQCN($tag->getType()));

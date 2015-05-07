@@ -32,12 +32,21 @@ class ClassData{
         $this->methods = new MethodsCollection($this);
         $this->properties = new PropertiesCollection($this);
     }
+
     /**
      * @return ClassData
      */
     public function getParent(){
         return $this->parent;
     }
+
+    /**
+     * @return InterfaceData[]
+     */
+    public function getInterfaces(){
+        return $this->interfaces;
+    }
+
     public function getName(){
         return $this->fqcn->getClassName();
     }
@@ -45,9 +54,8 @@ class ClassData{
         $this->parent = $parent;
     }
     public function addInterface($interface){
-        if(!in_array($interface, $this->interfaces)){
-            $this->interfaces[] = $interface;
-        }
+        $fqcn = $interface instanceof InterfaceData ? $interface->fqcn : $interface;
+        $this->interfaces[$fqcn->toString()] = $interface;
     }
     public function addMethod(MethodData $method){
         $this->methods->add($method);

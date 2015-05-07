@@ -44,7 +44,6 @@ class Index {
         if(array_key_exists($str, $this->classes)){
             return $this->classes[$str];
         }
-        return null;
     }
 
     /**
@@ -56,6 +55,10 @@ class Index {
             return $this->interfaces[$str];
         }
     }
+
+    /**
+     * @return ClassData[]
+     */
     public function findClassChildren(FQCN $class){
         if(!array_key_exists($class->toString(), $this->extends)
             || !is_array($this->extends[$class->toString()])
@@ -64,24 +67,53 @@ class Index {
         }
         return $this->extends[$class->toString()];
     }
+
+    /**
+     * @return ClassData[]
+     */
+    public function findInterfaceChildrenClasses(FQCN $interface){
+        if(!array_key_exists($interface->toString(), $this->implements)
+            || !is_array($this->implements[$interface->toString()])
+        ){
+            $this->implements[$interface->toString()] = [];
+        }
+        return $this->implements[$interface->toString()];
+    }
+
+    /**
+     * @return ClassData[]
+     */
     public function getClasses(){
         return $this->classes;
     }
+
+    /**
+     * @return InterfaceData[]
+     */
+    public function getInterfaces(){
+        return $this->interfaces;
+    }
+
     public function addClass(ClassData $class){
         $this->classes[$class->fqcn->toString()] = $class;
         if(!empty($class->getParent())){
             $this->addExtend($class, $class->getParent());
         }
+        foreach($class->getInterfaces() as $interface){
+            $this->addImplement($class, $interface);
+        }
         foreach($this->findClassChildren($class->fqcn) AS $child){
             $child->setParent($class);
         }
     }
+
     public function addInterface(InterfaceData $interface){
         $this->interfaces[$interface->fqcn->toString()] = $interface;
+        foreach($this->findInterfaceChildrenClasses($interface->fqcn) as $child){
+            $child->addInterface($interface);
+        }
     }
-    public function getInterfaces(){
-        return $this->interfaces;
-    }
+
     public function addFQCN(FQCN $fqcn){
         $this->fqcns[$fqcn->toString()] = $fqcn;
     }
@@ -112,13 +144,15 @@ class Index {
         }
     }
 
-    protected function addImplement($class, $interface){
-        if(!array_key_exists($interface, $this->implements)
-            || !is_array($this->implements[$interface])){
-            $this->implements[$interface] = [];
+    protected function addImplement(ClassData $class, FQCN $interface){
+        if(!array_key_exists($interface->toString(), $this->implements)
+            || !is_array($this->implements[$interface->toString()])){
+            $this->implements[$interface->toString()] = [];
         }
-        if(!in_array($class, $this->implements[$interface])){
-            $this->implements[$interface][] = $class;
+        $this->implements[$interface->toString()][$class->fqcn->toString()] = $class;
+        $interface = $this->findInterfaceByFQCN($interface);
+        if($interface instanceof InterfaceData){
+            $class->addInterface($interface);
         }
     }
 

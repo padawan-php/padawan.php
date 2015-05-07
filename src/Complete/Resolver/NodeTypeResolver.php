@@ -116,6 +116,9 @@ class NodeTypeResolver {
     protected function getMethodType($name, FQCN $type, Index $index){
         $class = $index->findClassByFQCN($type);
         if(empty($class)){
+            $class = $index->findInterfaceByFQCN($type);
+        }
+        if(empty($class)){
             return null;
         }
         $method = $class->methods->get($name);
@@ -136,6 +139,8 @@ class NodeTypeResolver {
         return $prop->getType();
     }
 
+    /** @property LoggerInterface */
     private $logger;
+    /** @property UseParser */
     private $useParser;
 }

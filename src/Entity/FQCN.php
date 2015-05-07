@@ -26,6 +26,9 @@ class FQCN extends FQN {
             case "void":
             case "object":
             case "bool":
+            case "null":
+            case "false":
+            case "true":
                 $this->_isScalar = true;
                 break;
             }
@@ -49,6 +52,13 @@ class FQCN extends FQN {
         $parts = $this->getParts();
         array_pop($parts);
         return implode("\\", $parts);
+    }
+    public function toString(){
+        $str = parent::toString();
+        if($this->isArray()){
+            $str .= '[]';
+        }
+        return $str;
     }
     public function isArray(){
         return $this->_isArray;

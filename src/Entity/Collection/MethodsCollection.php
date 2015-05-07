@@ -21,7 +21,7 @@ class MethodsCollection{
             unset($this->methods[$method->name]);
         }
     }
-    public function get($name, Specifiaction $spec = null){
+    public function get($name, Specification $spec = null){
         if($spec === null){
             $spec = new Specification;
         }

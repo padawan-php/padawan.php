@@ -174,26 +174,5 @@ class IndexGenerator
         $index = $project->getIndex();
         $index->setClassMap($classMap);
     }
-    protected function populateExtendsIndex(Index $index, FQCN $fqcn, array $parentClasses = []){
-        if(empty($parentClasses))
-            return;
-        foreach ($parentClasses as $parentClass) {
-            if(empty($parentClass)) {
-                continue;
-            }
-            $index->addExtend($fqcn->toString(), $parentClass);
-        }
-    }
-
-    protected function populateImplementsIndex(Index $index, FQCN $fqcn, array $interfaces = []){
-        if(empty($interfaces))
-            return;
-        foreach ($interfaces as $interface) {
-            if(empty($interface)) {
-                return;
-            }
-            $index->addImplement($fqcn->toString(), $interface);
-        }
-    }
 }
 

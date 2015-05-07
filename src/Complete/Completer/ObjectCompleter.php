@@ -21,7 +21,7 @@ class ObjectCompleter {
         /** @var FQCN $fqcn */
         list($fqcn, $isThis) = $context->getData();
         $this->logger->addDebug('creating entries');
-        if(!($fqcn instanceof FQCN)){
+        if(!$fqcn instanceof FQCN){
             return [];
         }
         $index = $project->getIndex();

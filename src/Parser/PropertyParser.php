@@ -8,7 +8,6 @@ use PhpParser\Node\Stmt\PropertyProperty as Property;
 class PropertyParser{
 
     public function __construct(CommentParser $commentParser){
-
         $this->commentParser = $commentParser;
     }
 
@@ -31,12 +30,6 @@ class PropertyParser{
             $comments
         );
         $var = $comment->getProperty($prop->name);
-        if(empty($var)){
-            $var = $comment->getProperty('-$');
-        }
-        if(empty($var)){
-            $var = $comment->getVar($prop->name);
-        }
         if(!empty($var)){
             $prop->doc = $comment->getDoc();
             $prop->type = $var->getType();
@@ -45,7 +38,7 @@ class PropertyParser{
     }
 
     /**
-     * @property CommentParser
+     * @var CommentParser
      */
     private $commentParser;
 }
