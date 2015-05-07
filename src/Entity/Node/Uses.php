@@ -2,6 +2,7 @@
 
 namespace Entity\Node;
 
+use Entity\FQN;
 use Entity\FQCN;
 
 class Uses {
@@ -9,7 +10,7 @@ class Uses {
     private $reversed;
     private $fqcn;
 
-    public function __construct(FQCN $fqcn = null){
+    public function __construct(FQN $fqcn = null){
         $this->fqcn = $fqcn;
     }
 

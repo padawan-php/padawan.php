@@ -149,18 +149,19 @@ class IndexGenerator
         $end = microtime(1) - $startParser;
         $this->getLogger()
             ->addInfo("Parsing: [$end]s");
-        $this->processFileNodes($index, $fqcn, $nodes);
+        $this->processFileNodes($index, $nodes);
         $index->addParsedFile($file);
     }
-    public function processFileNodes(Index $index, FQCN $fqcn, $nodes){
-        $index->addFQCN($fqcn);
+    public function processFileNodes(Index $index, $nodes){
         $this->getLogger()->addDebug('Processing nodes ' . count($nodes));
         foreach($nodes as $node){
             if($node instanceof ClassData){
-                $index->addClass($node, $fqcn->toString());
+                $index->addFQCN($node->fqcn);
+                $index->addClass($node, $node->fqcn->toString());
             }
             elseif($node instanceof InterfaceData){
-                $index->addInterface($node, $fqcn->toString());
+                $index->addFQCN($node->fqcn);
+                $index->addInterface($node, $node->fqcn->toString());
             }
         }
     }

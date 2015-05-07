@@ -2,6 +2,7 @@
 
 namespace Parser;
 
+use Entity\FQN;
 use Entity\FQCN;
 use Entity\Node\Uses;
 use Utils\PathResolver;
@@ -26,12 +27,12 @@ class Parser{
         $this->astPool          = [];
         $this->logger           = $logger;
     }
-    public function parseFile(FQCN $fqcn, $file, $createCache=true){
+    public function parseFile(FQN $fqcn, $file, $createCache=true){
         $file = $this->path->getAbsolutePath($file);
         $content = $this->path->read($file);
         return $this->parseContent($fqcn, $file, $content, $createCache);
     }
-    public function parseContent(FQCN $fqcn, $file, $content, $createCache=true){
+    public function parseContent(FQN $fqcn, $file, $content, $createCache=true){
         if($createCache){
             $hash = hash('md5', $content);
             if(!array_key_exists($file, $this->astPool)){
@@ -39,7 +40,14 @@ class Parser{
             }
             list($oldHash, $ast) = $this->astPool[$file];
         }
-        $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
+        var_dump($fqcn->toString());
+        if($fqcn instanceof FQCN){
+            $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
+        }
+        else {
+            $uses = new Uses($fqcn);
+            $fqcn = new FQCN('', $fqcn->getParts());
+        }
         $this->useParser->setUses($uses);
         $this->logger->addDebug(sprintf('Cache status: %s', (
             $createCache ? 'active' : 'disabled'
@@ -49,7 +57,7 @@ class Parser{
                 $ast = $this->parser->parse($content);
             }
             catch(\Exception $e){
-                printf("Parsing failed in file %s\n", $file);
+                $this->logger->addError(sprintf("Parsing failed in file %s\n", $file));
                 return [];
             }
             if($createCache){
