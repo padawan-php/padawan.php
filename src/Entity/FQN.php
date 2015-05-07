@@ -6,7 +6,10 @@ class FQN {
 
     public function __construct($namespace = ""){
         if($namespace){
-            if(!is_array($namespace)){
+            if($namespace instanceof FQN){
+                $this->parts = $namespace->getParts();
+            }
+            elseif(!is_array($namespace)){
                 $this->parts = explode("\\", $namespace);
             }
             else{

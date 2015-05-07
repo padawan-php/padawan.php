@@ -136,7 +136,6 @@ class CompleteEngine {
             $nodes = $parser->parseContent($fqcn, $file, $content);
             $this->generator->processFileNodes(
                 $project->getIndex(),
-                $fqcn,
                 $nodes
             );
             $scopeNodes = $this->scopeProcessor->getResultNodes();

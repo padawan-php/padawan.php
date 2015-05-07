@@ -2,10 +2,10 @@
 
 namespace Parser\Processor;
 
-use Entity\FQCN;
+use Entity\Node\Uses;
 
 interface ProcessorInterface {
-    public function setFileInfo(FQCN $fqcn, $file);
+    public function setFileInfo(Uses $fqcn, $file);
     public function getResultNodes();
     public function clearResultNodes();
 }

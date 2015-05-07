@@ -43,6 +43,10 @@ class Uses {
         return $this->fqcn;
     }
 
+    public function setFQCN(FQN $fqcn){
+        $this->fqcn = $fqcn;
+    }
+
     /**
      * Adds FQCN to uses map
      */

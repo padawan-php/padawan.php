@@ -6,6 +6,7 @@ use Parser\UseParser;
 use Parser\CommentParser;
 use Entity\FQCN;
 use Entity\Index;
+use Entity\Node\Uses;
 use Entity\Node\Variable;
 use Entity\Completion\Scope;
 use Complete\Resolver\NodeTypeResolver;
@@ -38,6 +39,12 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
             return NodeTraverserInterface::DONT_TRAVERSE_CHILDREN;
         }
         if($node instanceof Class_){
+            $this->scope->setFQCN(
+                new FQCN(
+                    $node->name,
+                    $this->scope->getUses()->getFQCN()
+                )
+            );
             $this->createScope();
             $var = new Variable('this');
             $var->setType($this->scope->getFQCN());
@@ -54,9 +61,9 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         if(!$this->isIn($node, $this->line)){
         }
     }
-    public function setFileInfo(FQCN $fqcn, $file){
+    public function setFileInfo(Uses $uses, $file){
         $this->scope = new Scope($this->scope);
-        $this->scope->setFQCN($fqcn);
+        $this->scope->setUses($uses);
     }
     public function clearResultNodes(){
         $this->resultNodes = [];

@@ -9,6 +9,7 @@ use Utils\PathResolver;
 use PhpParser\Parser AS ASTGenerator;
 use PhpParser\NodeTraverser AS Traverser;
 use Psr\Log\LoggerInterface;
+use Parser\NamespaceParser;
 
 class Parser{
 
@@ -17,12 +18,14 @@ class Parser{
         PathResolver $path,
         Traverser $traverser,
         UseParser $useParser,
+        NamespaceParser $namespaceParser,
         LoggerInterface $logger
     ){
         $this->path             = $path;
         $this->parser           = $parser;
         $this->traverser        = $traverser;
         $this->useParser        = $useParser;
+        $this->namespaceParser  = $namespaceParser;
         $this->processors       = [];
         $this->astPool          = [];
         $this->logger           = $logger;
@@ -40,7 +43,6 @@ class Parser{
             }
             list($oldHash, $ast) = $this->astPool[$file];
         }
-        var_dump($fqcn->toString());
         if($fqcn instanceof FQCN){
             $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
         }
@@ -48,7 +50,8 @@ class Parser{
             $uses = new Uses($fqcn);
             $fqcn = new FQCN('', $fqcn->getParts());
         }
-        $this->useParser->setUses($uses);
+        $this->setUses($uses);
+        $this->setFileInfo($uses, $file);
         $this->logger->addDebug(sprintf('Cache status: %s', (
             $createCache ? 'active' : 'disabled'
         )));
@@ -64,7 +67,6 @@ class Parser{
                 $this->astPool[$file] = [$hash, $ast];
             }
         }
-        $this->setFileInfo($fqcn, $file);
         $this->logger->addInfo(sprintf("Traversing with %s processors",
             count($this->processors)
         ));
@@ -73,6 +75,10 @@ class Parser{
         $this->clearProcessors();
         $this->logger->addInfo('Found ' . count($nodes) . ' nodes');
         return $nodes;
+    }
+    public function setUses(Uses $uses){
+        $this->useParser->setUses($uses);
+        $this->namespaceParser->setUses($uses);
     }
     public function parseFQCN($fqcn){
         return $this->useParser->parseFQCN($fqcn);
@@ -95,9 +101,9 @@ class Parser{
         return $nodes;
     }
 
-    protected function setFileInfo(FQCN $fqcn, $file){
+    protected function setFileInfo(Uses $uses, $file){
         foreach($this->processors AS $processor){
-            $processor->setFileInfo($fqcn, $file);
+            $processor->setFileInfo($uses, $file);
         }
     }
 
@@ -112,4 +118,7 @@ class Parser{
     private $processors;
     private $astPool;
     private $logger;
+    /** @var NamespaceParser */
+    private $namespaceParser;
+    private $useParser;
 }
