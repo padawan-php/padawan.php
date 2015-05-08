@@ -24,7 +24,7 @@ class Specification {
             return false;
         }
         if($node instanceof MethodData){
-            if($node->isMagic() !== $this->magic){
+            if($node->isMagic() && !$this->magic){
                 return false;
             }
         }

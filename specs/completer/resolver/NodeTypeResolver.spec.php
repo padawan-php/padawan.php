@@ -18,6 +18,7 @@ use Monolog\Handler\NullHandler;
 function createClass($classFQN, $fqcn){
     $class = new ClassData($classFQN, 'dummy/path/class.php');
     $method = new MethodData('method2');
+    $method->setType(ClassData::MODIFIER_PUBLIC);
     $param = new ClassProperty('param2');
     $param->type = $fqcn;
     $method->setReturn($fqcn);
