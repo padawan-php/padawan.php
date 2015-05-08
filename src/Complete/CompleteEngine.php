@@ -14,6 +14,7 @@ use Complete\Resolver\ContextResolver;
 use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
+use Parser\Processor\ProcessorInterface;
 use Psr\Log\LoggerInterface;
 
 class CompleteEngine {
@@ -102,7 +103,6 @@ class CompleteEngine {
     }
 
     /**
-     *
      * @return Scope
      */
     protected function processFileContent(Project $project, $lines, $line, $file){
@@ -127,18 +127,18 @@ class CompleteEngine {
         }
         if(empty($scopeNodes)) {
             $this->indexProcessor->clearResultNodes();
-            $this->scopeProcessor->clearResultNodes();
-            $this->scopeProcessor->setIndex($project->getIndex());
-            $this->scopeProcessor->setLine($line);
             $parser = $this->parser;
             $parser->addProcessor($this->indexProcessor);
-            $parser->addProcessor($this->scopeProcessor);
             $nodes = $parser->parseContent($fqcn, $file, $content);
             $this->generator->processFileNodes(
                 $project->getIndex(),
                 $nodes
             );
-            $scopeNodes = $this->scopeProcessor->getResultNodes();
+            $this->scopeProcessor->setIndex($project->getIndex());
+            $this->scopeProcessor->setLine($line);
+            $this->scopeProcessor->clearResultNodes();
+            $parser->addProcessor($this->scopeProcessor);
+            $scopeNodes = $parser->parseContent($fqcn, $file, $content);
             $contentHash = hash('sha1', $content);
             $this->cachePool[$file] = [$contentHash, $nodes, $scopeNodes];
         }
@@ -155,7 +155,9 @@ class CompleteEngine {
     private $generator;
     private $contextResolver;
     private $completerFactory;
+    /** @property IndexProcessor */
     private $indexProcessor;
+    /** @property ScopeProcessor */
     private $scopeProcessor;
     private $cachePool;
     private $logger;

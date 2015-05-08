@@ -22,4 +22,14 @@ class InterfaceData {
     public function addMethod(MethodData $method){
         $this->methods->add($method);
     }
+    public function getInterfaces(){
+        return $this->interfaces;
+    }
+    public function addInterface($interface){
+        $fqcn = $interface;
+        if($interface instanceof InterfaceData){
+            $fqcn = $interface->fqcn;
+        }
+        $this->interfaces[$fqcn->toString()] = $interface;
+    }
 }

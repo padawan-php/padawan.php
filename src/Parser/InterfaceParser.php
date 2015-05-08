@@ -10,8 +10,12 @@ use PhpParser\Node\Stmt\ClassMethod;
 
 class InterfaceParser {
 
-    public function __construct(MethodParser $methodParser){
+    public function __construct(
+        MethodParser $methodParser,
+        UseParser $useParser
+    ){
         $this->methodParser = $methodParser;
+        $this->useParser    = $useParser;
     }
 
     /**
@@ -22,19 +26,26 @@ class InterfaceParser {
     public function parse(Interface_ $node, FQN $fqn, $file)
     {
         $fqcn = new FQCN($node->name, $fqn);
-        $interace = new InterfaceData($fqcn, $file);
+        $interface = new InterfaceData($fqcn, $file);
+        foreach($node->extends AS $interfaceName){
+            $interface->addInterface(
+                $this->useParser->getFQCN($interfaceName)
+            );
+        }
         foreach($node->stmts AS $child){
             if($child instanceof ClassMethod){
-                $interace->addMethod($this->parseMethod($child));
+                $interface->addMethod($this->parseMethod($child));
             }
         }
-        return $interace;
+        return $interface;
     }
 
     protected function parseMethod(ClassMethod $node){
         return $this->methodParser->parse($node);
     }
 
+    /** @var UseParser */
+    private $useParser;
     /**
      * @property MethodParser
      */

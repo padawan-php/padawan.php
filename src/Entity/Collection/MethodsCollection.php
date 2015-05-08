@@ -8,6 +8,7 @@ use Entity\Node\InterfaceData;
 
 class MethodsCollection{
     private $methods = [];
+    /** @property ClassData */
     private $class;
 
     public function __construct($class){
@@ -32,16 +33,24 @@ class MethodsCollection{
             }
             return null;
         }
-        if($this->class instanceof InterfaceData){
-            return;
+        $parentSpec =new Specification(
+            $spec->getParentMode(),
+            $spec->isStatic(),
+            $spec->isMagic()
+        );
+        if($this->class instanceof ClassData){
+            $parent = $this->class->getParent();
+            if($parent instanceof ClassData){
+                return $parent->methods->get($name, $parentSpec);
+            }
         }
-        $parent = $this->class->getParent();
-        if($parent instanceof ClassData){
-            return $parent->methods->get($name, new Specification(
-                $spec->getParentMode(),
-                $spec->isStatic(),
-                $spec->isMagic()
-            ));
+        foreach($this->class->getInterfaces() as $interface){
+            if($interface instanceof InterfaceData){
+                $method = $interface->methods->get($name, $parentSpec);
+                if($method instanceof MethodData){
+                    return $method;
+                }
+            }
         }
     }
     public function all(Specification $spec = null){
@@ -54,18 +63,25 @@ class MethodsCollection{
                 $methods[$method->name] = $method;
             }
         }
+        $parentSpec = new Specification(
+            $spec->getParentMode(),
+            $spec->isStatic(),
+            $spec->isMagic()
+        );
         if($this->class instanceof ClassData){
             $parent = $this->class->getParent();
             if($parent instanceof ClassData){
-                $parentM = $parent->methods->all(new Specification(
-                        $spec->getParentMode(),
-                        $spec->isStatic(),
-                        $spec->isMagic()
-                    ));
+                $parentM = $parent->methods->all($parentSpec);
                 $methods = array_merge(
                     $parentM,
                     $methods
                 );
+            }
+        }
+        foreach($this->class->getInterfaces() as $interface){
+            if($interface instanceof InterfaceData){
+                $parentM = $interface->methods->all( $parentSpec);
+                $methods = array_merge($parentM, $methods);
             }
         }
         return $methods;

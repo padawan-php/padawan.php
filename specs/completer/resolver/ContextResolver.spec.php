@@ -87,6 +87,7 @@ describe('ContextResolver', function(){
                 expect($context->isObject())->to->be->false;
             });
             it('hasn\'t type object after object operator with TString and space', function(){
+                /** @var Context $context */
                 $context = $this->resolver->getContext('$var->param ');
                 expect($context->isObject())->to->be->false;
             });

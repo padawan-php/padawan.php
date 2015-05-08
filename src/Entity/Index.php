@@ -96,7 +96,7 @@ class Index {
 
     public function addClass(ClassData $class){
         $this->classes[$class->fqcn->toString()] = $class;
-        if(!empty($class->getParent())){
+        if($class->getParent() instanceof FQCN){
             $this->addExtend($class, $class->getParent());
         }
         foreach($class->getInterfaces() as $interface){
@@ -113,6 +113,11 @@ class Index {
         $this->interfaces[$interface->fqcn->toString()] = $interface;
         foreach($this->findInterfaceChildrenClasses($interface->fqcn) as $child){
             $this->addImplement($child, $interface->fqcn);
+        }
+        foreach($interface->getInterfaces() as $parent){
+            if($parent instanceof FQCN){
+                $this->addImplement($interface, $parent);
+            }
         }
     }
 
@@ -146,7 +151,7 @@ class Index {
         }
     }
 
-    protected function addImplement(ClassData $class, FQCN $fqcn){
+    protected function addImplement($class, FQCN $fqcn){
         $this->findInterfaceChildrenClasses($fqcn);
         $this->implements[$fqcn->toString()][$class->fqcn->toString()] = $class;
         $interface = $this->findInterfaceByFQCN($fqcn);
