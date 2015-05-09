@@ -17,7 +17,7 @@ But as of now it is completely new project with different design and principles
 Currently it have basic completion for classes and methods based on doc comments
 and methods signature.
 
-See this short video to see what it can already do(image is clickable)
+Watch this short video to see what it can already do(image is clickable)
 [![ScreenShot](http://i1.ytimg.com/vi/Y54P2N1T6-I/maxresdefault.jpg)](https://www.youtube.com/watch?v=Y54P2N1T6-I)
 
 Project
