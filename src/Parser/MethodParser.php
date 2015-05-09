@@ -4,6 +4,7 @@ namespace Parser;
 
 use Entity\Node\MethodData;
 use Entity\Node\MethodParam;
+use Entity\Node\Comment;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Param;
 use PhpParser\Node\Name;
@@ -39,15 +40,20 @@ class MethodParser{
         $method->setType($node->type);
         $comments = $node->getAttribute("comments");
         if(is_array($comments)){
-            /** @var \Entity\Node\Comment $comment */
+            /** @var Comment */
             $comment = $this->commentParser->parse(
                 $comments[count($comments)-1]->getText()
             );
-            $method->doc = $comment->getDoc();
-            $method->return = $comment->getReturn();
-            foreach($comment->getVars() as $var){
-                if($var instanceof MethodParam){
-                    $method->addParam($var);
+            if($comment->isInheritDoc()){
+                $method->doc = Comment::INHERIT_MARK;
+            }
+            else {
+                $method->doc = $comment->getDoc();
+                $method->return = $comment->getReturn();
+                foreach($comment->getVars() as $var){
+                    if($var instanceof MethodParam){
+                        $method->addParam($var);
+                    }
                 }
             }
         }

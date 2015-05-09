@@ -22,7 +22,6 @@ use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\Class_;
-use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Expr\Closure;
 
@@ -31,15 +30,13 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         UseParser $useParser,
         NodeTypeResolver $typeResolver,
         CommentParser $commentParser,
-        ParamParser $paramParser,
-        NamespaceParser $namespaceParser
+        ParamParser $paramParser
     ){
         $this->resultNodes      = [];
         $this->useParser        = $useParser;
         $this->typeResolver     = $typeResolver;
         $this->commentParser    = $commentParser;
         $this->paramParser      = $paramParser;
-        $this->namespaceParser  = $namespaceParser;
     }
     public function setLine($line){
         $this->line = $line;
@@ -51,9 +48,6 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         }
         if($node instanceof Class_){
             $this->createScopeFromClass($node);
-        }
-        elseif($node instanceof Namespace_){
-            $this->namespaceParser->parse($node);
         }
         elseif($node instanceof ClassMethod){
             $this->createScopeFromMethod($node);
@@ -204,5 +198,4 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
     private $commentParser;
     /** @property ParamParser */
     private $paramParser;
-    private $namespaceParser;
 }

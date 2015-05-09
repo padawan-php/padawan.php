@@ -3,7 +3,6 @@
 namespace Parser;
 
 use Entity\FQN;
-use Entity\FQCN;
 use Entity\Node\Uses;
 use Utils\PathResolver;
 use PhpParser\Parser AS ASTGenerator;
@@ -30,12 +29,12 @@ class Parser{
         $this->astPool          = [];
         $this->logger           = $logger;
     }
-    public function parseFile(FQN $fqcn, $file, $createCache=true){
+    public function parseFile($file, Uses $uses = null, $createCache=true){
         $file = $this->path->getAbsolutePath($file);
         $content = $this->path->read($file);
-        return $this->parseContent($fqcn, $file, $content, $createCache);
+        return $this->parseContent($file, $content, $uses, $createCache);
     }
-    public function parseContent(FQN $fqcn, $file, $content, $createCache=true){
+    public function parseContent($file, $content, Uses $uses = null, $createCache=true){
         if($createCache){
             $hash = hash('md5', $content);
             if(!array_key_exists($file, $this->astPool)){
@@ -43,12 +42,8 @@ class Parser{
             }
             list($oldHash, $ast) = $this->astPool[$file];
         }
-        if($fqcn instanceof FQCN){
-            $uses = new Uses($this->parseFQCN($fqcn->getNamespace()));
-        }
-        else {
-            $uses = new Uses($fqcn);
-            $fqcn = new FQCN('', $fqcn->getParts());
+        if(!$uses instanceof Uses){
+            $uses = new Uses(new FQN);
         }
         $this->setUses($uses);
         $this->setFileInfo($uses, $file);
@@ -77,8 +72,12 @@ class Parser{
         return $nodes;
     }
     public function setUses(Uses $uses){
+        $this->uses = $uses;
         $this->useParser->setUses($uses);
         $this->namespaceParser->setUses($uses);
+    }
+    public function getUses(){
+        return $this->uses;
     }
     public function parseFQCN($fqcn){
         return $this->useParser->parseFQCN($fqcn);
@@ -121,4 +120,5 @@ class Parser{
     /** @var NamespaceParser */
     private $namespaceParser;
     private $useParser;
+    private $uses;
 }

@@ -53,6 +53,17 @@ class ClassData{
     }
     public function setParent($parent){
         $this->parent = $parent;
+        if($parent instanceof ClassData){
+            foreach($this->methods->all() as $method){
+                if($method->doc === Comment::INHERIT_MARK){
+                    $parentMethod = $parent->methods->get($method->name);
+                    if($parentMethod instanceof MethodData){
+                        $method->doc = $parentMethod->doc;
+                        $method->setReturn($parentMethod->getReturn());
+                    }
+                }
+            }
+        }
     }
     public function addInterface($interface){
         $fqcn = $interface instanceof InterfaceData ? $interface->fqcn : $interface;

@@ -35,6 +35,10 @@ class FQCN extends FQN {
         }
         $this->addPart($className);
     }
+
+    /**
+     * @inheritdoc
+     */
     public function join(FQN $join){
         $result = new self($join->getLast());
         $resultParts = $this->getParts();

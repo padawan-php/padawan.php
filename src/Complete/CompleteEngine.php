@@ -129,20 +129,25 @@ class CompleteEngine {
             $this->indexProcessor->clearResultNodes();
             $parser = $this->parser;
             $parser->addProcessor($this->indexProcessor);
-            $nodes = $parser->parseContent($fqcn, $file, $content);
+            $nodes = $parser->parseContent($file, $content);
             $this->generator->processFileNodes(
                 $project->getIndex(),
                 $nodes
             );
+            /** @var \Entity\Node\Uses */
+            $uses = $parser->getUses();
             $this->scopeProcessor->setIndex($project->getIndex());
             $this->scopeProcessor->setLine($line);
             $this->scopeProcessor->clearResultNodes();
             $parser->addProcessor($this->scopeProcessor);
-            $scopeNodes = $parser->parseContent($fqcn, $file, $content);
+            $scopeNodes = $parser->parseContent($file, $content, $uses);
             $contentHash = hash('sha1', $content);
             $this->cachePool[$file] = [$contentHash, $nodes, $scopeNodes];
         }
-        return $scopeNodes[0];
+        if(count($scopeNodes)){
+            return $scopeNodes[0];
+        }
+        return null;
     }
 
     private function isValidCache($file, $content){
@@ -151,7 +156,9 @@ class CompleteEngine {
         return $hash === $contentHash;
     }
 
+    /** @var Parser */
     private $parser;
+    /** @property IndexGenerator */
     private $generator;
     private $contextResolver;
     private $completerFactory;

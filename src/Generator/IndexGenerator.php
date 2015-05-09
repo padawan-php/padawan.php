@@ -113,8 +113,9 @@ class IndexGenerator
         $all = count($classMap);
         foreach($index->getClassMap() as $fqcn => $file) {
             $start = microtime(1);
-            $this->processFile($index, $fqcn, $file, false, false);
+            $this->processFile($index, $file, false, false);
             $end = microtime(1) - $start;
+
             $this->getLogger()->addDebug("Indexing: [$end]s");
             $this->getLogger()->addDebug("Memory: ". memory_get_usage());
             $globalTime += $end;
@@ -126,16 +127,11 @@ class IndexGenerator
         gc_enable();
     }
 
-    public function processFile(Index $index, $fqcn, $file,
+    public function processFile(Index $index, $file,
         $rewrite=false, $createCache=true
     ){
         $this->getLogger()
             ->addInfo("processing $file");
-
-        $fqcn = $this->getClassUtils()->getParser()
-            ->parseFQCN($fqcn);
-        $this->getLogger()
-            ->addInfo(sprintf("FQCN: %s", $fqcn->toString()));
         if($index->isParsed($file) && !$rewrite){
             return;
         }
@@ -145,7 +141,7 @@ class IndexGenerator
         $parser = $this->getClassUtils()->getParser();
         $parser->addProcessor($processor);
         $nodes = $this->getClassUtils()->getParser()
-            ->parseFile($fqcn, $file, $createCache);
+            ->parseFile($file, null, $createCache);
         $end = microtime(1) - $startParser;
         $this->getLogger()
             ->addInfo("Parsing: [$end]s");

@@ -53,7 +53,7 @@ class MethodData {
     public function getReturn(){
         return $this->return;
     }
-    public function setReturn(FQCN $fqcn){
+    public function setReturn(FQCN $fqcn = null){
         $this->return = $fqcn;
     }
     public function isPublic() {

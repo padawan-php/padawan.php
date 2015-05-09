@@ -20,6 +20,12 @@ class FQN {
             $this->parts = [];
         }
     }
+
+    /**
+     * Joins FQN to the clone of the current FQN and returns it
+     *
+     * @return FQN
+     */
     public function join(FQN $join){
         $result = new self();
         $resultParts = $this->getParts();

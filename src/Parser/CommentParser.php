@@ -15,6 +15,7 @@ class CommentParser {
     public function __construct(UseParser $useParser){
         $this->useParser = $useParser;
     }
+
     /**
      * Parses DocComment block
      *
@@ -65,6 +66,9 @@ class CommentParser {
                     $comment->addProperty(
                         $this->createProperty($tag)
                     );
+                    break;
+                case "inheritdoc":
+                    $comment->markInheritDoc();
                     break;
                 }
             }
