@@ -9,6 +9,7 @@ require "vendor/autoload.php";
 
 $noFsIO = false;
 $port = 15155;
+$host = 'localhost';
 
 foreach($argv AS $arg){
     if($arg === '--no-io'){
@@ -18,6 +19,9 @@ foreach($argv AS $arg){
         list($name, $value) = explode('=', $arg);
         if($name === '--port'){
             $port = $value;
+        }
+        elseif($name === '--host'){
+            $host = $value;
         }
     }
 }
@@ -54,8 +58,8 @@ $http = new React\Http\Server($socket);
 
 $http->on('request', $handler);
 
-$socket->listen($port);
+$socket->listen($port, $host);
 
-echo "Started http server on {$port}\n";
+echo "Started http server on {$host}:{$port}\n";
 
 $loop->run();
