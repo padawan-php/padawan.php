@@ -1,1 +1,1 @@
-web: php bin/server.php --no-io
+web: php bin/server.php --no-io --port=$PORT

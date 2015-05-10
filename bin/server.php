@@ -8,10 +8,17 @@ require "app/config/bin.php";
 require "vendor/autoload.php";
 
 $noFsIO = false;
+$port = 15155;
 
 foreach($argv AS $arg){
     if($arg === '--no-io'){
         $noFsIO = true;
+    }
+    elseif(strpos($arg, '=') !== false){
+        list($name, $value) = explode('=', $arg);
+        if($name === '--port'){
+            $port = $value;
+        }
     }
 }
 
