@@ -69,7 +69,7 @@ class CompleteEngine {
             , (microtime(1) - $start)));
         }
         elseif(!empty($content)) {
-            $this->updateFileIndex($project, $content, $file);
+            $this->processFileContent($project, $content, $line, $file);
         }
 
         return [

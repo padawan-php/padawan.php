@@ -1,12 +1,29 @@
 #!/usr/bin/env php
 <?php
 
+use React\Http\Response;
+use React\Http\Request;
+
 require "app/config/bin.php";
 require "vendor/autoload.php";
-$app = new App;
-$handler = function ($request, $response) use ($app){
+
+$noFsIO = false;
+
+foreach($argv AS $arg){
+    if($arg === '--no-io'){
+        $noFsIO = true;
+    }
+}
+
+$app = new App($noFsIO);
+$handler = function ($request, Response $response) use ($app){
     $start = microtime(1);
     printf("%s %s\n", $request->getMethod(), $request->getPath());
+    if($request->getMethod() !== 'POST'){
+        $app->setResponseHeaders($response);
+        $response->end('');
+        return;
+    }
     $headers = $request->getHeaders();
     $body = new \stdClass;
     $body->data = "";

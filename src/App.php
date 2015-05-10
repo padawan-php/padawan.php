@@ -2,14 +2,17 @@
 
 use Entity\Project;
 use Entity\Index;
+use Command\ErrorCommand;
 
 class App {
     private $router;
     private $container;
     private $projectsPool = [];
     private $currentProject = null;
+    private $noFsIO         = false;
 
-    public function __construct(){
+    public function __construct($noFsIO){
+        $this->noFsIO = $noFsIO;
         $this->router = new Router;
     }
     public function handle($request, $response, $data){
@@ -17,6 +20,9 @@ class App {
             ->getCommand(
                 $this->getCommandName($request)
             );
+        if($command instanceof ErrorCommand){
+            return $command->run([]);
+        }
         $this->container = $command->getContainer();
         $arguments = $this->parseQuery($request->getQuery(), $data);
         $arguments["project"] = $this->loadProject($arguments);
@@ -59,7 +65,9 @@ class App {
                 $project = $this->projectsPool[$rootDir];
             }
             else{
-                $project = $this->container->get("IO\Reader")->read($rootDir);
+                if(!$this->noFsIO){
+                    $project = $this->container->get("IO\Reader")->read($rootDir);
+                }
                 if(empty($project)){
                     $project = $this->createEmptyProject($rootDir);
                 }
@@ -73,10 +81,13 @@ class App {
         $project = new Project(new Index, $rootDir);
         return $project;
     }
-    protected function setResponseHeaders($response){
+    public function setResponseHeaders($response){
         try {
             $response->writeHead(200, [
-                'content-type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Access-Control-Allow-Headers' => 'Origin, Content-Type',
+                'Access-Control-Allow-Origin' => '*',
+                'Origin' => 'http://localhost:10000'
             ]);
         }
         catch(\Exception $e){
