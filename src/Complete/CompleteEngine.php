@@ -116,10 +116,10 @@ class CompleteEngine {
             return;
         }
         $fqcn = $project->getIndex()->findFQCNByFile($file);
-        if(!$fqcn instanceof FQN){
+        if (!$fqcn instanceof FQN) {
             $fqcn = new FQN();
         }
-        if(!array_key_exists($file, $this->cachePool)){
+        if (!array_key_exists($file, $this->cachePool)) {
             $this->cachePool[$file] = [0, [], []];
         }
         if($this->isValidCache($file, $content)){

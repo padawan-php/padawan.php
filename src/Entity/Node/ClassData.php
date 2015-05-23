@@ -6,6 +6,7 @@ use Entity\FQCN;
 use Entity\FQN;
 use Entity\Collection\MethodsCollection;
 use Entity\Collection\PropertiesCollection;
+use Entity\Collection\ConstCollection;
 
 class ClassData{
     const MODIFIER_PUBLIC    =  1;
@@ -15,7 +16,6 @@ class ClassData{
     const MODIFIER_ABSTRACT  = 16;
     const MODIFIER_FINAL     = 32;
     public $interfaces      = [];
-    public $constants       = [];
     /** @var Uses */
     public $uses;
 
@@ -27,9 +27,9 @@ class ClassData{
     public $startLine       = 0;
     public $file            = "";
     public function __construct(FQCN $fqcn, $file){
-        $this->constants = [];
         $this->fqcn = $fqcn;
         $this->file = $file;
+        $this->constants = new ConstCollection($this);
         $this->methods = new MethodsCollection($this);
         $this->properties = new PropertiesCollection($this);
     }
@@ -76,7 +76,7 @@ class ClassData{
         $this->properties->add($prop);
     }
     public function addConst($constName){
-        $this->constants[$constName] = $constName;
+        $this->constants->add($constName);
     }
     public function __get($name){
         if($name === 'methods'){
@@ -85,9 +85,17 @@ class ClassData{
         elseif($name === 'properties'){
             return $this->properties;
         }
+        elseif($name === 'constants'){
+            return $this->constants;
+        }
     }
 
+    /** @var ClassData */
     private $parent;
+    /** @var MethodsCollection */
     private $methods;
+    /** @var PropertiesCollection */
     private $properties;
+    /** @var ConstCollection */
+    private $constants;
 }

@@ -24,7 +24,7 @@ class MethodsCollection{
     }
     public function get($name, Specification $spec = null){
         if($spec === null){
-            $spec = new Specification('private', false, true);
+            $spec = new Specification('private', true, true);
         }
         if(array_key_exists($name, $this->methods)){
             $method = $this->methods[$name];

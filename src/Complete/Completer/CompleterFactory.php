@@ -12,12 +12,14 @@ class CompleterFactory {
         InterfaceNameCompleter $interfaceNameCompleter,
         NamespaceCompleter $namespaceCompleter,
         ObjectCompleter $objectCompleter,
+        StaticCompleter $staticCompleter,
         UseCompleter $useCompleter
     ){
         $this->classNameCompleter = $classNameCompleter;
         $this->interfaceNameCompleter = $interfaceNameCompleter;
         $this->namespaceCompleter = $namespaceCompleter;
         $this->objectCompleter = $objectCompleter;
+        $this->staticCompleter = $staticCompleter;
         $this->useCompleter = $useCompleter;
     }
     public function getCompleter(Context $context){
@@ -36,6 +38,9 @@ class CompleterFactory {
         elseif($context->isThis() || $context->isObject()){
             return $this->objectCompleter;
         }
+        elseif($context->isClassStatic()){
+            return $this->staticCompleter;
+        }
         return null;
     }
 
@@ -43,5 +48,6 @@ class CompleterFactory {
     private $interfaceNameCompleter;
     private $namespaceCompleter;
     private $objectCompleter;
+    private $staticCompleter;
     private $useCompleter;
 }

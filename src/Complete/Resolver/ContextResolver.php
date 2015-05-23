@@ -6,19 +6,24 @@ use Entity\Completion\Token;
 use Entity\Completion\Context;
 use Entity\Completion\Scope;
 use Entity\Index;
+use Entity\FQCN;
 use Parser\ErrorFreePhpParser;
+use Parser\UseParser;
 use Psr\Log\LoggerInterface;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Name;
 
 class ContextResolver{
     public function __construct(
         ErrorFreePhpParser $parser,
         NodeTypeResolver $typeResolver,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        UseParser $useParser
     ){
         $this->parser = $parser;
         $this->typeResolver = $typeResolver;
         $this->logger = $logger;
+        $this->useParser = $useParser;
     }
     public function getContext($badLine, Index $index, Scope $scope = null){
         if(empty($badLine)){
@@ -62,9 +67,27 @@ class ContextResolver{
             else {
                 $workingNode = $nodes;
             }
+            $isThis = false;
+            if($workingNode instanceof Variable && $workingNode->name === 'this')
+            {
+                $isThis = true;
+            }
+            if(
+                $workingNode instanceof Name
+            )
+            {
+                $nodeFQCN = $this->useParser->getFQCN($workingNode);
+                if(
+                    $scope->getFQCN() instanceof FQCN
+                    && $nodeFQCN->toString() === $scope->getFQCN()->toString()
+                )
+                {
+                    $isThis = true;
+                }
+            }
             $context->setData([
                 $this->typeResolver->getChainType($workingNode, $index, $scope),
-                $workingNode instanceof Variable && $workingNode->name === 'this'
+                $isThis
             ]);
         }
         if($token->isUseOperator()
@@ -107,4 +130,5 @@ class ContextResolver{
     private $logger;
     private $parser;
     private $typeResolver;
+    private $useParser;
 }

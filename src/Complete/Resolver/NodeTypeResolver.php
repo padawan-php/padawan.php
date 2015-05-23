@@ -7,8 +7,11 @@ use Entity\FQCN;
 use Entity\FQN;
 use Entity\Completion\Scope;
 use Parser\UseParser;
+use PhpParser\Node\Name;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Expr\PropertyFetch;
+use PhpParser\Node\Expr\StaticPropertyFetch;
+use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
 use Psr\Log\LoggerInterface;
@@ -34,7 +37,9 @@ class NodeTypeResolver {
     public function getType($node, Index $index, Scope $scope){
         if($node instanceof Variable
             || $node instanceof PropertyFetch
+            || $node instanceof StaticPropertyFetch
             || $node instanceof MethodCall
+            || $node instanceof StaticCall
         ){
             return $this->getChainType($node, $index, $scope);
         }
@@ -42,9 +47,6 @@ class NodeTypeResolver {
             return $this->useParser->getFQCN($node->class);
         }
         return null;
-    }
-    public function getNewType($node, Index $index, Scope $scope){
-
     }
 
     /**
@@ -75,19 +77,28 @@ class NodeTypeResolver {
                 }
                 $type = $this->getPropertyType($block['name'], $type, $index);
             }
+            elseif($block['type'] === 'class'){
+                $type = $block['name'];
+            }
         }
         return $type;
     }
     protected function createChain($node){
         $chain = [];
         while(!($node instanceof Variable)){
-            if($node instanceof PropertyFetch){
+            if(
+                $node instanceof PropertyFetch
+                || $node instanceof StaticPropertyFetch
+            ){
                 $chain[] = [
                     'type' => 'property',
                     'name' => $node->name
                 ];
             }
-            elseif($node instanceof MethodCall){
+            elseif(
+                $node instanceof MethodCall
+                || $node instanceof StaticCall
+            ){
                 $chain[] = [
                     'type' => 'method',
                     'name' => $node->name
@@ -98,10 +109,19 @@ class NodeTypeResolver {
             }
             $node = $node->var;
         }
+        if(property_exists($node, 'class')){
+            $node = $node->class;
+        }
         if($node instanceof Variable){
             $chain[] = [
                 'type' => 'var',
                 'name' => $node->name
+            ];
+        }
+        elseif($node instanceof Name){
+            $chain[] = [
+                'type' => 'class',
+                'name' => $this->useParser->getFQCN($node)
             ];
         }
         return array_reverse($chain);

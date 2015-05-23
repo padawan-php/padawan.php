@@ -4,8 +4,10 @@
 use React\Http\Response;
 use React\Http\Request;
 
-require "app/config/bin.php";
-require "vendor/autoload.php";
+define("ROOT", dirname(__DIR__));
+
+require ROOT . "/app/config/bin.php";
+require ROOT . "/vendor/autoload.php";
 
 $noFsIO = false;
 $port = 15155;

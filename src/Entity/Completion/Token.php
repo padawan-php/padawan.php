@@ -19,6 +19,7 @@ class Token {
             $this->addType(self::T_CONTINUE_PROCESS);
             break;
         case T_VARIABLE:
+        case T_DOUBLE_COLON:
         case T_OBJECT_OPERATOR:
             if($this->isWhitespace()){
                 $this->addType(self::T_UNKNOWN);
@@ -112,6 +113,13 @@ class Token {
         }
     }
 
+    /**
+     * @return Token
+     */
+    protected static function test(){
+
+    }
+
     const T_UNKNOWN             = -1;
     const T_CONTINUE_PROCESS    = 1;
     const T_TERMINATE           = 2;
@@ -128,7 +136,7 @@ class Token {
     protected static $MAP = [
         T_VARIABLE              => Token::T_VAR,
         T_OBJECT_OPERATOR       => Token::T_OBJECT_OPERATOR,
-        T_STATIC                => Token::T_STATIC_OPERATOR,
+        T_DOUBLE_COLON          => Token::T_STATIC_OPERATOR,
         T_USE                   => Token::T_USE_OPERATOR,
         T_NAMESPACE             => Token::T_NAMESPACE_OPERATOR,
         T_NEW                   => Token::T_NEW_OPERATOR,
