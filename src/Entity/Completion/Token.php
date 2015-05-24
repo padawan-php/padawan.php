@@ -113,13 +113,6 @@ class Token {
         }
     }
 
-    /**
-     * @return Token
-     */
-    protected static function test(){
-
-    }
-
     const T_UNKNOWN             = -1;
     const T_CONTINUE_PROCESS    = 1;
     const T_TERMINATE           = 2;

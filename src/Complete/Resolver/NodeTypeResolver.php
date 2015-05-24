@@ -58,6 +58,7 @@ class NodeTypeResolver {
      * @return FQCN|null
      */
     public function getChainType($node, Index $index, Scope $scope){
+        /** @var FQCN */
         $type = null;
         $chain = $this->createChain($node);
         foreach($chain AS $block){
@@ -79,6 +80,15 @@ class NodeTypeResolver {
             }
             elseif($block['type'] === 'class'){
                 $type = $block['name'];
+                if(
+                    $type->getClassName() === 'self'
+                    || $type->getClassName() === 'static'
+                ){
+                    $type = $scope->getFQCN();
+                }
+                elseif($type->getClassName() === 'parent'){
+                    $type = $this->getParentType($scope->getFQCN(), $index);
+                }
             }
         }
         return $type;
@@ -157,6 +167,17 @@ class NodeTypeResolver {
             return null;
         }
         return $prop->getType();
+    }
+    protected function getParentType(FQCN $type, Index $index){
+        $class = $index->findClassByFQCN($type);
+        if(empty($class)){
+            return null;
+        }
+        $parent = $class->getParent();
+        if(empty($parent)){
+            return null;
+        }
+        return $parent->fqcn;
     }
 
     /** @property LoggerInterface */

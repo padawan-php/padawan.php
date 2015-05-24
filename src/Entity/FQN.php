@@ -68,5 +68,6 @@ class FQN {
         return $this->toString();
     }
 
+    public static $test;
     private $parts;
 }

@@ -28,7 +28,7 @@ class Specification {
                 return false;
             }
         }
-        if($node->isStatic() !== $this->showStatic){
+        if($this->showStatic < 2 && $node->isStatic() != $this->showStatic){
             return false;
         }
         return true;

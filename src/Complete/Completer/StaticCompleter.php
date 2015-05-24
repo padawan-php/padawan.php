@@ -34,7 +34,7 @@ class StaticCompleter {
             return [];
         }
         $entries = [];
-        $spec = new Specification($isThis ? 'private' : 'public', true);
+        $spec = new Specification($isThis ? 'private' : 'public', 1);
         if($class->methods !== null){
             foreach($class->methods->all($spec) AS $method){
                 $entry = $this->createEntryForMethod($method);
@@ -76,7 +76,7 @@ class StaticCompleter {
     protected function createEntryForProperty(ClassProperty $prop){
         $type = $prop->type instanceof FQCN ? $prop->type->toString() : 'mixed';
         return new Entry(
-            $prop->name,
+            '$' . $prop->name,
             $type
         );
     }

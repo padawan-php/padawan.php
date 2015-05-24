@@ -39,7 +39,7 @@ class PropertiesCollection {
     }
     public function get($propName, Specification $spec = null){
         if($spec === null){
-            $spec = new Specification;
+            $spec = new Specification('private', 2, false);
         }
         if(array_key_exists($propName, $this->map)){
             $prop = $this->map[$propName];
