@@ -2,6 +2,7 @@ Padawan.php for composer projects
 =================================
 
 [![Build Status](https://travis-ci.org/mkusher/padawan.php.svg?branch=master)](https://travis-ci.org/mkusher/padawan.php)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
 
 Smart php intelligent code completion server for composer projects.
 It tries to be a [Jedi](https://github.com/davidhalter/jedi-vim),
