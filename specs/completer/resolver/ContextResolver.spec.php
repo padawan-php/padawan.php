@@ -9,6 +9,7 @@ use Entity\Completion\Context;
 use Entity\Index;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 describe('ContextResolver', function(){
     beforeEach(function(){
@@ -16,7 +17,7 @@ describe('ContextResolver', function(){
         $logger->pushHandler(new NullHandler);
         $this->index = new Index;
         $this->parser = new ErrorFreePhpParser(new Lexer);
-        $this->typeResolver = new NodeTypeResolver($logger, new UseParser);
+        $this->typeResolver = new NodeTypeResolver($logger, new UseParser, new EventDispatcher);
         $this->resolver = new ContextResolver($this->parser, $this->typeResolver, $logger);
         $this->dummyLine = '$obj->getMethod()->';
     });

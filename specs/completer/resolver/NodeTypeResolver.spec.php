@@ -14,6 +14,7 @@ use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\MethodCall;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 function createClass($classFQN, $fqcn){
     $class = new ClassData($classFQN, 'dummy/path/class.php');
@@ -31,7 +32,7 @@ describe('NodeTypeResolver', function(){
     beforeEach(function(){
         $logger = new Logger('spec');
         $logger->pushHandler(new NullHandler);
-        $this->resolver = new NodeTypeResolver($logger, new UseParser);
+        $this->resolver = new NodeTypeResolver($logger, new UseParser, new EventDispatcher);
         $this->scope = new Scope;
         $this->index = new Index;
         $this->var = new Variable('test');

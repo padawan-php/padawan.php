@@ -1,5 +1,6 @@
 {
     "name": "mkusher/padawan.php",
+    "description": "Smart php completion server",
     "authors": [
         {
             "name": "Aleh Kashnikau",
@@ -9,6 +10,7 @@
     "autoload":{
         "psr-4":{"":"src/"}
     },
+    "license": "MIT",
     "require": {
         "phine/path": "~1.0",
         "nikic/php-parser": "~1.1",
