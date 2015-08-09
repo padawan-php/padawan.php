@@ -60,28 +60,21 @@ class ContextResolver{
         $context = new Context($scope, $token);
         $nodes = $this->parser->parse($this->prepareLine($badLine));
 
-        if($token->isObjectOperator() || $token->isStaticOperator()){
-            if(is_array($nodes)){
+        if ($token->isObjectOperator() || $token->isStaticOperator()) {
+            if (is_array($nodes)) {
                 $workingNode = array_pop($nodes);
-            }
-            else {
+            } else {
                 $workingNode = $nodes;
             }
             $isThis = false;
-            if($workingNode instanceof Variable && $workingNode->name === 'this')
-            {
+            if ($workingNode instanceof Variable && $workingNode->name === 'this') {
                 $isThis = true;
             }
-            if(
-                $workingNode instanceof Name
-            )
-            {
+            if ($workingNode instanceof Name) {
                 $nodeFQCN = $this->useParser->getFQCN($workingNode);
-                if(
-                    $scope->getFQCN() instanceof FQCN
+                if ($scope->getFQCN() instanceof FQCN
                     && $nodeFQCN->toString() === $scope->getFQCN()->toString()
-                )
-                {
+                ) {
                     $isThis = true;
                 }
             }
@@ -90,10 +83,10 @@ class ContextResolver{
                 $isThis
             ]);
         }
-        if($token->isUseOperator()
+        if ($token->isUseOperator()
             || $token->isNamespaceOperator()
             || $token->isNewOperator()
-        ){
+        ) {
             $context->setData(trim($token->getSymbol()));
         }
 

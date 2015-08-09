@@ -1,2 +1,4 @@
 vendor/
 logs/
+composer.lock
+plugins.json

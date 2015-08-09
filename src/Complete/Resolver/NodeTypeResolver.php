@@ -15,15 +15,25 @@ use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
 use Psr\Log\LoggerInterface;
+use Entity\Chain;
+use Entity\Chain\MethodCall as ChainMethodCall;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class NodeTypeResolver {
+class NodeTypeResolver
+{
+
+    const BLOCK_START = 'type.block.before';
+    const BLOCK_END = 'type.block.after';
+    const TYPE_RESOLVED = 'type.resolving.after';
 
     public function __construct(
         LoggerInterface $logger,
-        UseParser $useParser
-    ){
+        UseParser $useParser,
+        EventDispatcher $dispatcher
+    ) {
         $this->logger = $logger;
         $this->useParser = $useParser;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -34,16 +44,16 @@ class NodeTypeResolver {
      * @param Scope $scope
      * @return FQCN|null
      */
-    public function getType($node, Index $index, Scope $scope){
-        if($node instanceof Variable
+    public function getType($node, Index $index, Scope $scope)
+    {
+        if ($node instanceof Variable
             || $node instanceof PropertyFetch
             || $node instanceof StaticPropertyFetch
             || $node instanceof MethodCall
             || $node instanceof StaticCall
-        ){
+        ) {
             return $this->getChainType($node, $index, $scope);
-        }
-        elseif($node instanceof New_) {
+        } elseif ($node instanceof New_) {
             return $this->useParser->getFQCN($node->class);
         }
         return null;
@@ -57,88 +67,85 @@ class NodeTypeResolver {
      * @param Scope $scope
      * @return FQCN|null
      */
-    public function getChainType($node, Index $index, Scope $scope){
+    public function getChainType($node, Index $index, Scope $scope)
+    {
         /** @var FQCN */
         $type = null;
         $chain = $this->createChain($node);
-        foreach($chain AS $block){
-            $this->logger->addDebug('looking for type of ' . $block['name']);
-            if($block['type'] === 'var'){
-                $type = $this->getVarType($block['name'], $scope);
-            }
-            elseif($block['type'] === 'method'){
-                if(!($type instanceof FQN)){
-                    return null;
+        $block = $chain;
+        while ($block instanceof Chain) {
+            $this->logger->addDebug('looking for type of ' . $block->getName());
+            $event = new TypeResolveEvent($block, $type);
+            $this->dispatcher->dispatch(self::BLOCK_START, $event);
+            if ($block->getType() === 'var') {
+                $type = $this->getVarType($block->getName(), $scope);
+            } elseif ($block->getType() === 'method') {
+                if (!($type instanceof FQN)) {
+                    $type = null;
+                    break;
                 }
-                $type = $this->getMethodType($block['name'], $type, $index);
-            }
-            elseif($block['type'] === 'property'){
-                if(!($type instanceof FQN)){
-                    return null;
+                $type = $this->getMethodType($block->getName(), $type, $index);
+            } elseif ($block->getType() === 'property') {
+                if (!($type instanceof FQN)) {
+                    $type = null;
+                    break;
                 }
-                $type = $this->getPropertyType($block['name'], $type, $index);
-            }
-            elseif($block['type'] === 'class'){
-                $type = $block['name'];
-                if(
-                    $type->getClassName() === 'self'
+                $type = $this->getPropertyType($block->getName(), $type, $index);
+            } elseif ($block->getType() === 'class') {
+                $type = $block->getName();
+                if ($type->getClassName() === 'self'
                     || $type->getClassName() === 'static'
-                ){
+                ) {
                     $type = $scope->getFQCN();
-                }
-                elseif($type->getClassName() === 'parent'){
+                } elseif ($type->getClassName() === 'parent') {
                     $type = $this->getParentType($scope->getFQCN(), $index);
                 }
             }
+            $event = new TypeResolveEvent($block, $type);
+            $this->dispatcher->dispatch(self::BLOCK_END, $event);
+            $type = $event->getType();
+            $block = $block->getChild();
         }
+        $event = new TypeResolveEvent($chain, $type);
+        $this->dispatcher->dispatch(self::TYPE_RESOLVED, $event);
         return $type;
     }
-    protected function createChain($node){
-        $chain = [];
-        while(!($node instanceof Variable)){
-            if(
-                $node instanceof PropertyFetch
+
+    /**
+     * @return Chain
+     */
+    protected function createChain($node)
+    {
+        $chain = null;
+        while (!($node instanceof Variable)) {
+            if ($node instanceof PropertyFetch
                 || $node instanceof StaticPropertyFetch
-            ){
-                $chain[] = [
-                    'type' => 'property',
-                    'name' => $node->name
-                ];
-            }
-            elseif(
-                $node instanceof MethodCall
+            ) {
+                $chain = new Chain($chain, $node->name, 'property');
+            } elseif ($node instanceof MethodCall
                 || $node instanceof StaticCall
-            ){
-                $chain[] = [
-                    'type' => 'method',
-                    'name' => $node->name
-                ];
+            ) {
+                $chain = new ChainMethodCall($chain, $node->name, $node->args);
             }
-            if(empty($node) || !property_exists($node, 'var')){
+            if (empty($node) || !property_exists($node, 'var')) {
                 break;
             }
             $node = $node->var;
         }
-        if(property_exists($node, 'class')){
+        if (!empty($node) && property_exists($node, 'class')) {
             $node = $node->class;
         }
-        if($node instanceof Variable){
-            $chain[] = [
-                'type' => 'var',
-                'name' => $node->name
-            ];
+        if ($node instanceof Variable) {
+            $chain = new Chain($chain, $node->name, 'var');
+        } elseif ($node instanceof Name) {
+            $chain = new Chain($chain, $this->useParser->getFQCN($node), 'class');
         }
-        elseif($node instanceof Name){
-            $chain[] = [
-                'type' => 'class',
-                'name' => $this->useParser->getFQCN($node)
-            ];
-        }
-        return array_reverse($chain);
+        return $chain;
     }
-    protected function getVarType($name, Scope $scope){
+    protected function getVarType($name, Scope $scope)
+    {
         $var = $scope->getVar($name);
-        if(empty($var)){
+        if (empty($var)) {
             return null;
         }
         return $var->getType();
@@ -184,4 +191,6 @@ class NodeTypeResolver {
     private $logger;
     /** @property UseParser */
     private $useParser;
+    /** @var EventDispatcher */
+    private $dispatcher;
 }

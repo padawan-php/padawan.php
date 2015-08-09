@@ -3,33 +3,34 @@
 namespace Command;
 
 use DI\ContainerBuilder;
+use DI\Container;
 
-abstract class AbstractCommand implements CommandInterface{
-    protected static $container;
-    public function __construct(){
-        $this->createContainer();
+abstract class AbstractCommand implements CommandInterface
+{
+    public function __construct(Container $container)
+    {
+        $this->container = $container;
     }
-    public function get($serviceName){
-        return self::$container->get($serviceName);
+    public function get($serviceName)
+    {
+        return $this->getContainer()->get($serviceName);
     }
-    public function getContainer(){
-        return self::$container;
+    /**
+     * @return \DI\Container
+     */
+    public function getContainer()
+    {
+        return $this->container;
     }
-    protected function createContainer(){
-        if(!empty(self::$container)){
-            return;
-        }
-        $builder = new ContainerBuilder;
-        $builder->setDefinitionCache(new \Doctrine\Common\Cache\ArrayCache);
-        $builder->addDefinitions(dirname(__DIR__) . '/DI/config.php');
-        self::$container = $builder->build();
-    }
-    protected function isVerbose($arguments){
+    protected function isVerbose($arguments)
+    {
         $verbose = false;
-        if(count($arguments) > 0 && $arguments[0] == '-verbose') {
+        if (count($arguments) > 0 && $arguments[0] == '-verbose') {
             array_shift($arguments);
             $verbose = true;
         }
         return $verbose;
     }
+    /** @var Container */
+    protected $container;
 }

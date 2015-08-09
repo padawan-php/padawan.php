@@ -3,6 +3,7 @@
 
 use React\Http\Response;
 use React\Http\Request;
+use Application\HTTP\App;
 
 define("ROOT", dirname(__DIR__));
 
@@ -13,23 +14,21 @@ $noFsIO = false;
 $port = 15155;
 $host = 'localhost';
 
-foreach($argv AS $arg){
-    if($arg === '--no-io'){
+foreach ($argv as $arg) {
+    if ($arg === '--no-io') {
         $noFsIO = true;
-    }
-    elseif(strpos($arg, '=') !== false){
+    } elseif (strpos($arg, '=') !== false) {
         list($name, $value) = explode('=', $arg);
-        if($name === '--port'){
+        if ($name === '--port') {
             $port = $value;
-        }
-        elseif($name === '--host'){
+        } elseif ($name === '--host') {
             $host = $value;
         }
     }
 }
 
 $app = new App($noFsIO);
-$handler = function ($request, Response $response) use ($app){
+$handler = function ($request, Response $response) use ($app) {
     $start = microtime(1);
     printf("%s %s\n", $request->getMethod(), $request->getPath());
     if($request->getMethod() !== 'POST'){
@@ -42,9 +41,13 @@ $handler = function ($request, Response $response) use ($app){
     $body->data = "";
     $body->receivedLength = 0;
     $body->dataLength = $headers['Content-Length'];
-    $request->on("data", function($data) use (
-        $request, $response, $app, $body, $start
-    ){
+    $request->on("data", function ($data) use (
+        $request,
+        $response,
+        $app,
+        $body,
+        $start
+    ) {
         $body->data .= $data;
         $body->receivedLength += strlen($data);
         if($body->receivedLength >= $body->dataLength){

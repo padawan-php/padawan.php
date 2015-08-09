@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+
+require(dirname(__DIR__) . "/vendor/autoload.php");
+
+set_time_limit(0);
+ini_set('memory_limit', '2048M');
+ini_set('display_errors', 'stderr');
+
+$arguments = [];
+$app = new \Application\CLI\App(false);
+$app->handle(array_slice($argv, 1), null, []);

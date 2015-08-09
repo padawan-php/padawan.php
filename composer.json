@@ -15,7 +15,8 @@
         "monolog/monolog": "~1.13",
         "mnapoli/php-di": "~4.4",
         "react/react": "0.4.*",
-        "phpdocumentor/reflection-docblock": "~2.0"
+        "phpdocumentor/reflection-docblock": "~2.0",
+        "symfony/event-dispatcher": "^2.6"
     },
     "require-dev": {
         "behat/behat": "~3.0",

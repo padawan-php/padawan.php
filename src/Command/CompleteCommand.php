@@ -11,7 +11,7 @@ class CompleteCommand extends AbstractCommand {
      */
     public function run(array $arguments = []){
         $project = $arguments["project"];
-        $completeEngine = $this->get("Complete\CompleteEngine");
+        $completeEngine = $this->getContainer()->get("Complete\CompleteEngine");
         $column = $arguments['column'];
         $file = $arguments['filepath'];
         $line = $arguments['line'];

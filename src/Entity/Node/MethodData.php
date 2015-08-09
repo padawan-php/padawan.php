@@ -11,7 +11,7 @@ class MethodData {
     public $type        = 0;
     public $startLine   = 0;
     public $endLine     = 0;
-    public $return      = "";
+    public $return      = null;
 
     public function __construct($name){
         $this->name = $name;
