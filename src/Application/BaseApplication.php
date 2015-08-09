@@ -7,7 +7,7 @@ use Entity\Index;
 use Command\ErrorCommand;
 use DI\Container;
 use DI\ContainerBuilder;
-use Plugin\Package;
+use Plugin\Loader;
 
 abstract class BaseApplication
 {
@@ -15,7 +15,7 @@ abstract class BaseApplication
     {
         $this->noFsIO = $noFsIO;
         $this->createContainer();
-        $this->pluginsPackage = $this->container->get(Package::class);
+        $this->pluginsLoader = $this->container->get(Loader::class);
         $this->loadPlugins();
     }
     public function handle($request, $response, $data)
@@ -68,21 +68,7 @@ abstract class BaseApplication
     }
     protected function loadPlugins()
     {
-        $plugins = $this->pluginsPackage->getPluginsList();
-        foreach ($plugins as $pluginName) {
-            $parts = explode("/", $pluginName);
-            $className = implode("\\", array_map(function ($part) {
-                return ucfirst($part);
-            }, $parts));
-            $className .= "\\Plugin";
-            try {
-                /** @var \Plugin\PluginInterface */
-                $plugin = $this->container->get($className);
-                $plugin->init();
-            } catch (\Exception $e) {
-                printf("Plugin Error: %s\n", $e->getMessage());
-            }
-        }
+        return $this->pluginsLoader->load();
     }
     abstract protected function getCommandName($request);
     protected function createContainer()
@@ -94,8 +80,8 @@ abstract class BaseApplication
     }
 
     protected $router;
-    /** @var Package */
-    protected $pluginsPackage;
+    /** @var Loader */
+    protected $pluginsLoader;
     static protected $projectsPool = [];
     static protected $currentProject = null;
     /** @var Container */

@@ -7,7 +7,7 @@
         }
     ],
     "autoload":{
-        "psr-0":{"":"src/"}
+        "psr-4":{"":"src/"}
     },
     "require": {
         "phine/path": "~1.0",
