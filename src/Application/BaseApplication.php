@@ -82,8 +82,8 @@ abstract class BaseApplication
     protected $router;
     /** @var Loader */
     protected $pluginsLoader;
-    static protected $projectsPool = [];
-    static protected $currentProject = null;
+    protected $projectsPool = [];
+    protected $currentProject = null;
     /** @var Container */
     protected $container;
     protected $noFsIO = false;

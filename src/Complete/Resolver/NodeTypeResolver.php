@@ -52,11 +52,25 @@ class NodeTypeResolver
             || $node instanceof MethodCall
             || $node instanceof StaticCall
         ) {
-            return $this->getChainType($node, $index, $scope);
+            return $this->getLastChainNodeType($node, $index, $scope);
         } elseif ($node instanceof New_) {
             return $this->useParser->getFQCN($node->class);
         }
         return null;
+    }
+
+    /**
+     * Calculates type of the passed last node in chain
+     *
+     * @param PhpParser\Node $node
+     * @param Index $index
+     * @param Scope $scope
+     * @return FQCN[]
+     */
+    public function getLastChainNodeType($node, Index $index, Scope $scope)
+    {
+        $types = $this->getChainType($node, $index, $scope);
+        return array_pop($types);
     }
 
     /**
@@ -65,12 +79,13 @@ class NodeTypeResolver
      * @param PhpParser\Node $node
      * @param Index $index
      * @param Scope $scope
-     * @return FQCN|null
+     * @return FQCN[]
      */
     public function getChainType($node, Index $index, Scope $scope)
     {
         /** @var FQCN */
         $type = null;
+        $types = [];
         $chain = $this->createChain($node);
         $block = $chain;
         while ($block instanceof Chain) {
@@ -81,13 +96,13 @@ class NodeTypeResolver
                 $type = $this->getVarType($block->getName(), $scope);
             } elseif ($block->getType() === 'method') {
                 if (!($type instanceof FQN)) {
-                    $type = null;
+                    $types[] = null;
                     break;
                 }
                 $type = $this->getMethodType($block->getName(), $type, $index);
             } elseif ($block->getType() === 'property') {
                 if (!($type instanceof FQN)) {
-                    $type = null;
+                    $types[] = null;
                     break;
                 }
                 $type = $this->getPropertyType($block->getName(), $type, $index);
@@ -105,10 +120,11 @@ class NodeTypeResolver
             $this->dispatcher->dispatch(self::BLOCK_END, $event);
             $type = $event->getType();
             $block = $block->getChild();
+            $types[] = $type;
         }
         $event = new TypeResolveEvent($chain, $type);
         $this->dispatcher->dispatch(self::TYPE_RESOLVED, $event);
-        return $type;
+        return $types;
     }
 
     /**

@@ -32,6 +32,9 @@ class Token {
             $this->removeType(self::T_CONTINUE_PROCESS);
             $this->addType(self::$MAP[$code]);
             break;
+        case '(':
+            $this->addType(self::T_METHOD_CALL);
+            break;
         case ';':
         case ',':
         case '=':
@@ -103,6 +106,11 @@ class Token {
         return (bool) ($this->type & self::T_WHITESPACE);
     }
 
+    public function isMethodCall()
+    {
+        return (bool) ($this->type & self::T_METHOD_CALL);
+    }
+
     protected function addType($type){
         $this->type |= $type;
     }
@@ -125,6 +133,7 @@ class Token {
     const T_NEW_OPERATOR        = 256;
     const T_VAR                 = 512;
     const T_WHITESPACE          = 1024;
+    const T_METHOD_CALL         = 2048;
 
     protected static $MAP = [
         T_VARIABLE              => Token::T_VAR,
@@ -134,6 +143,6 @@ class Token {
         T_NAMESPACE             => Token::T_NAMESPACE_OPERATOR,
         T_NEW                   => Token::T_NEW_OPERATOR,
         T_EXTENDS               => Token::T_EXTENDS_OPERATOR,
-        T_IMPLEMENTS            => Token::T_IMPLEMENTS_OPERATOR
+        T_IMPLEMENTS            => Token::T_IMPLEMENTS_OPERATOR,
     ];
 }

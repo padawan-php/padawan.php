@@ -50,7 +50,7 @@ describe('NodeTypeResolver', function(){
         it('returns variable type from scope', function(){
             $node = new NodeVar;
             $node->name = $this->var->getName();
-            expect($this->resolver->getChainType($node, $this->index, $this->scope))
+            expect($this->resolver->getLastChainNodeType($node, $this->index, $this->scope))
                 ->to->equal($this->var->getType());
         });
         describe('Properties', function(){
@@ -61,12 +61,12 @@ describe('NodeTypeResolver', function(){
             });
             it('returns null for unknown property', function(){
                 $this->node->name = 'param';
-                expect($this->resolver->getChainType($this->node, $this->index, $this->scope))
+                expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->be->null;
             });
             it('returns type for known property', function(){
                 $this->node->name = 'param2';
-                expect($this->resolver->getChainType($this->node, $this->index, $this->scope))
+                expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->equal($this->anotherFQCN);
             });
         });
@@ -78,12 +78,12 @@ describe('NodeTypeResolver', function(){
             });
             it('returns null for unknown method', function(){
                 $this->node->name = 'method';
-                expect($this->resolver->getChainType($this->node, $this->index, $this->scope))
+                expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->be->null;
             });
             it('returns type for known method', function(){
                 $this->node->name = 'method2';
-                expect($this->resolver->getChainType($this->node, $this->index, $this->scope))
+                expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->equal($this->anotherFQCN);
             });
         });
@@ -102,7 +102,7 @@ describe('NodeTypeResolver', function(){
                 $node = new PropertyFetch;
                 $node->var = $this->node;
                 $node->name = 'param2';
-                expect($this->resolver->getChainType($node, $this->index, $this->scope))
+                expect($this->resolver->getLastChainNodeType($node, $this->index, $this->scope))
                     ->to->equal($this->var->getType());
             });
         });

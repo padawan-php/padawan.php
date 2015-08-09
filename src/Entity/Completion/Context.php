@@ -12,91 +12,92 @@ class Context {
     const T_THIS             = 64;
     const T_CLASS_STATIC     = 128;
     const T_CLASS_METHODS    = 256;
+    const T_METHOD_CALL      = 512;
 
     private $type            = 0;
     private $token;
     private $scope;
     private $data;
 
-    public function __construct(Scope $scope, Token $token){
+    public function __construct(Scope $scope, Token $token) {
         $this->scope = $scope;
         $this->setToken($token);
     }
-    public function setToken(Token $token){
+    public function setToken(Token $token) {
         $this->token = $token;
-        if($token->isVar()){
+        if ($token->isVar()) {
             $this->addType(Context::T_VAR);
-        }
-        elseif($token->isObjectOperator()){
+        } elseif ($token->isObjectOperator()) {
             $this->addType(Context::T_OBJECT);
-        }
-        elseif($token->isStaticOperator()){
+        } elseif ($token->isStaticOperator()) {
             $this->addType(Context::T_CLASS_STATIC);
-        }
-        elseif($token->isNamespaceOperator()){
+        } elseif ($token->isNamespaceOperator()) {
             $this->addType(Context::T_NAMESPACE);
-        }
-        elseif($token->isUseOperator()){
+        } elseif ($token->isUseOperator()) {
             $this->addType(Context::T_USE);
             $this->addType(Context::T_CLASSNAME);
-        }
-        elseif($token->isNewOperator()){
+        } elseif ($token->isNewOperator()) {
             $this->addType(Context::T_CLASSNAME);
-        }
-        elseif($token->isExtendsOperator()){
+        } elseif ($token->isExtendsOperator()) {
             $this->addType(Context::T_CLASSNAME);
-        }
-        elseif($token->isImplementsOperator()){
+        } elseif ($token->isImplementsOperator()) {
             $this->addType(Context::T_INTERFACENAME);
+        } elseif ($token->isMethodCall()) {
+            $this->addType(Context::T_METHOD_CALL);
         }
     }
 
-    public function setData($data){
+    public function setData($data) {
         $this->data = $data;
     }
-    public function getData(){
+    public function getData() {
         return $this->data;
     }
-    public function addType($type){
+    public function addType($type) {
         $this->type = $this->type | $type;
     }
     /**
      * @return Scope
      */
-    public function getScope(){
+    public function getScope() {
         return $this->scope;
     }
-    public function getToken(){
+    public function getToken() {
         return $this->token;
     }
-    public function isEmpty(){
+    public function isEmpty() {
         return $this->type === 0;
     }
-    public function isVar(){
+    public function isVar() {
         return (bool) ($this->type & self::T_VAR);
     }
-    public function isUse(){
+    public function isUse() {
         return (bool) ($this->type & self::T_USE);
     }
-    public function isNamespace(){
+    public function isNamespace() {
         return (bool) ($this->type & self::T_NAMESPACE);
     }
-    public function isObject(){
+    public function isObject() {
         return (bool) ($this->type & self::T_OBJECT);
     }
-    public function isClassName(){
+    public function isClassName() {
         return (bool) ($this->type & self::T_CLASSNAME);
     }
-    public function isInterfaceName(){
+    public function isInterfaceName() {
         return (bool) ($this->type & self::T_INTERFACENAME);
     }
-    public function isThis(){
+    public function isThis() {
         return (bool) ($this->type & self::T_THIS);
     }
-    public function isClassStatic(){
+    public function isClassStatic() {
         return (bool) ($this->type & self::T_CLASS_STATIC);
     }
-    public function isClassMethods(){
+    public function isClassMethods()
+    {
         return (bool) ($this->type & self::T_CLASS_METHODS);
+    }
+    public function isMethodCall()
+    {
+        return (bool) ($this->type & self::T_METHOD_CALL);
     }
 }

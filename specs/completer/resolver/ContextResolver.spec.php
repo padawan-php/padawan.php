@@ -87,10 +87,20 @@ describe('ContextResolver', function(){
                 $context = $this->resolver->getContext('$var->param;');
                 expect($context->isObject())->to->be->false;
             });
+            it('hasn\'t type object after object operator with (', function(){
+                $context = $this->resolver->getContext('$var->param(');
+                expect($context->isObject())->to->be->false;
+            });
             it('hasn\'t type object after object operator with TString and space', function(){
                 /** @var Context $context */
                 $context = $this->resolver->getContext('$var->param ');
                 expect($context->isObject())->to->be->false;
+            });
+        });
+        describe("Method call", function () {
+            it('has type method call after (', function () {
+                $context = $this->resolver->getContext('$var->method(');
+                expect($context->isMethodCall())->to->be->true;
             });
         });
     });

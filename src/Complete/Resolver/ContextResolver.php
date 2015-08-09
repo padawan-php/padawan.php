@@ -43,7 +43,7 @@ class ContextResolver{
      */
     protected function getLastToken($badLine){
         try {
-            $symbols = @token_get_all($this->prepareLine($badLine));
+            $symbols = @token_get_all($this->prepareLine($badLine, $wrapFunctionCall));
         }
         catch(\Exception $e){
             $symbols = [0,0];
@@ -60,7 +60,7 @@ class ContextResolver{
         $context = new Context($scope, $token);
         $nodes = $this->parser->parse($this->prepareLine($badLine));
 
-        if ($token->isObjectOperator() || $token->isStaticOperator()) {
+        if ($token->isObjectOperator() || $token->isStaticOperator() || $token->isMethodCall()) {
             if (is_array($nodes)) {
                 $workingNode = array_pop($nodes);
             } else {
@@ -78,9 +78,11 @@ class ContextResolver{
                     $isThis = true;
                 }
             }
+            $types = $this->typeResolver->getChainType($workingNode, $index, $scope);
             $context->setData([
-                $this->typeResolver->getChainType($workingNode, $index, $scope),
-                $isThis
+                array_pop($types),
+                $isThis,
+                $types
             ]);
         }
         if ($token->isUseOperator()
@@ -110,13 +112,17 @@ class ContextResolver{
         return $token;
     }
 
-    protected function prepareLine($badLine){
-        if(strpos($badLine, '<?php') === false
+    protected function prepareLine($badLine, $wrapFunctionCall = true)
+    {
+        if (strpos($badLine, '<?php') === false
             || strpos($badLine, '<?') === false
-        ){
+        ) {
             $badLine = '<?php ' . $badLine;
         }
         $badLine = str_replace(['elseif', 'else', 'catch'], '', $badLine);
+        if ($wrapFunctionCall && $badLine[strlen($badLine)-1] === '(') {
+            $badLine .= ')';
+        }
         return $badLine;
     }
 
