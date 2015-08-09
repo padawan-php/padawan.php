@@ -2,7 +2,6 @@
 
 namespace Complete\Completer;
 
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Entity\Completion\Context;
 use Entity\Completion\Scope;
 use Entity\Project;
@@ -14,8 +13,7 @@ class CompleterFactory {
         NamespaceCompleter $namespaceCompleter,
         ObjectCompleter $objectCompleter,
         StaticCompleter $staticCompleter,
-        UseCompleter $useCompleter,
-        EventDispatcher $dispatcher
+        UseCompleter $useCompleter
     ) {
         $this->classNameCompleter = $classNameCompleter;
         $this->interfaceNameCompleter = $interfaceNameCompleter;
@@ -23,11 +21,9 @@ class CompleterFactory {
         $this->objectCompleter = $objectCompleter;
         $this->staticCompleter = $staticCompleter;
         $this->useCompleter = $useCompleter;
-        $this->dispatcher = $dispatcher;
     }
     public function getCompleter(Context $context)
     {
-        $event = new CustomCompleterEvent($context);
         if ($context->isNamespace()) {
             return $this->namespaceCompleter;
         } elseif ($context->isUse()) {
@@ -40,10 +36,8 @@ class CompleterFactory {
             return $this->objectCompleter;
         } elseif ($context->isClassStatic()) {
             return $this->staticCompleter;
-        } else {
-            $this->dispatcher->dispatch(self::CUSTOM_COMPLETER, $event);
         }
-        return $event->completer;
+        return null;
     }
 
     private $classNameCompleter;
@@ -52,7 +46,4 @@ class CompleterFactory {
     private $objectCompleter;
     private $staticCompleter;
     private $useCompleter;
-    private $dispatcher;
-
-    const CUSTOM_COMPLETER = 'completer.custom';
 }

@@ -56,12 +56,17 @@ class Context {
     public function addType($type) {
         $this->type = $this->type | $type;
     }
+
     /**
      * @return Scope
      */
     public function getScope() {
         return $this->scope;
     }
+
+    /**
+     * @return Token
+     */
     public function getToken() {
         return $this->token;
     }

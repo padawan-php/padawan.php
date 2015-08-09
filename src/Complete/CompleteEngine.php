@@ -10,11 +10,13 @@ use Generator\IndexGenerator;
 use Entity\Completion\Entry;
 use Entity\Completion\Context;
 use Complete\Completer\CompleterFactory;
+use Complete\Completer\CompleterInterface;
 use Complete\Resolver\ContextResolver;
 use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
 use Parser\Processor\ProcessorInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Psr\Log\LoggerInterface;
 
 class CompleteEngine {
@@ -25,7 +27,8 @@ class CompleteEngine {
         CompleterFactory $completer,
         IndexProcessor $indexProcessor,
         ScopeProcessor $scopeProcessor,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        EventDispatcher $dispatcher
     ){
         $this->parser           = $parser;
         $this->generator        = $generator;
@@ -35,6 +38,7 @@ class CompleteEngine {
         $this->scopeProcessor   = $scopeProcessor;
         $this->logger           = $logger;
         $this->cachePool        = [];
+        $this->dispatcher       = $dispatcher;
     }
     public function createCompletion(
         Project $project,
@@ -80,7 +84,12 @@ class CompleteEngine {
     protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
         $completer = $this->completerFactory->getCompleter($context);
-        if($completer){
+        if (!$completer) {
+            $event = new CustomCompleterEvent($project, $context);
+            $this->dispatcher->dispatch(self::CUSTOM_COMPLETER, $event);
+            $completer = $event->completer;
+        }
+        if ($completer) {
             return $completer->getEntries($project, $context);
         }
         return [];
@@ -168,4 +177,8 @@ class CompleteEngine {
     private $scopeProcessor;
     private $cachePool;
     private $logger;
+    /** @var EventDispatcher */
+    private $dispatcher;
+
+    const CUSTOM_COMPLETER = 'completer.custom';
 }

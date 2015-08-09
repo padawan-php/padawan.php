@@ -9,7 +9,7 @@ use Entity\Completion\Entry;
 class ClassNameCompleter implements CompleterInterface {
     public function getEntries(Project $project, Context $context){
         $entries = [];
-        $postfix = trim($context->getData());
+        $postfix = trim("");
         foreach($project->getIndex()->getClasses() as $fqcn => $class){
             if(!empty($postfix) && strpos($fqcn, $postfix) === false){
                 continue;

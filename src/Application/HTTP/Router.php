@@ -24,7 +24,7 @@ class Router implements RouterInterface
         } elseif ($commandName == 'save') {
             $command = new \Command\SaveCommand($container);
         } else {
-            $command = new \Command\ErrorCommand($container);
+            $command = new \Command\ErrorCommand();
         }
         return $command;
     }
