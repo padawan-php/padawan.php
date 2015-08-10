@@ -88,6 +88,9 @@ class CompleteEngine {
             $event = new CustomCompleterEvent($project, $context);
             $this->dispatcher->dispatch(self::CUSTOM_COMPLETER, $event);
             $completer = $event->completer;
+            if ($completer) {
+                $this->logger->debug(sprintf("Using custom completer %s", get_class($completer)));
+            }
         }
         if ($completer) {
             return $completer->getEntries($project, $context);
@@ -176,6 +179,7 @@ class CompleteEngine {
     /** @property ScopeProcessor */
     private $scopeProcessor;
     private $cachePool;
+    /** @var LoggerInterface */
     private $logger;
     /** @var EventDispatcher */
     private $dispatcher;

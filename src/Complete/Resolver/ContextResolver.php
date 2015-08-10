@@ -82,7 +82,8 @@ class ContextResolver{
             $context->setData([
                 array_pop($types),
                 $isThis,
-                $types
+                $types,
+                $workingNode
             ]);
         }
         if ($token->isUseOperator()
