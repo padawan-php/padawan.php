@@ -7,14 +7,15 @@ use Entity\Index;
 use Command\ErrorCommand;
 use DI\Container;
 use Application\BaseApplication;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class App extends BaseApplication
 {
-
     public function __construct($noFsIO)
     {
         $this->router = new Router;
         parent::__construct($noFsIO);
+        $this->dispatcher = $this->container->get(EventDispatcher::class);
     }
     public function handle($request, $response, $data)
     {
@@ -25,7 +26,11 @@ class App extends BaseApplication
     protected function getArguments($request, $response, $data)
     {
         $arguments = $this->parseQuery($request->getQuery(), $data);
-        $arguments["project"] = $this->loadProject($arguments);
+        $project = $this->loadProject($arguments);
+        $this->dispatcher->dispatch('project.load', new ProjectLoadEvent(
+            $project
+        ));
+        $arguments["project"] = $project;
         return $arguments;
     }
     protected function setResponseHeaders($response)
@@ -88,4 +93,6 @@ class App extends BaseApplication
         $project = new Project(new Index, $rootDir);
         return $project;
     }
+
+    private $dispatcher;
 }

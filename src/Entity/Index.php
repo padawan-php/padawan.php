@@ -5,7 +5,8 @@ namespace Entity;
 use Entity\Node\InterfaceData;
 use Entity\Node\ClassData;
 
-class Index {
+class Index
+{
     private $fqcns              = [];
     private $classes            = [];
     private $interfaces         = [];
@@ -15,14 +16,16 @@ class Index {
     private $implements         = [];
     private $parsedFiles        = [];
 
-    public function getFQCNs(){
+    public function getFQCNs()
+    {
         return $this->fqcns;
     }
 
     /**
      * @return FQCN
      */
-    public function findFQCNByFile($file){
+    public function findFQCNByFile($file)
+    {
         if(!array_key_exists($file, $this->flippedClassMap)){
             return null;
         }

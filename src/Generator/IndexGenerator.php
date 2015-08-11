@@ -12,9 +12,12 @@ use Utils\Composer;
 use Utils\ClassUtils;
 use Psr\Log\LoggerInterface;
 use Parser\Processor\IndexProcessor;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class IndexGenerator
 {
+    const BEFORE_GENERATION = 'index.before_generation';
+    const AFTER_GENERATION = 'index.after_generation';
     /**
      * Array of plugin classes
      * @var array
@@ -63,15 +66,18 @@ class IndexGenerator
      */
     protected $processor;
 
+    /** @var EventDispatcher */
+    protected $dispatcher;
+
     public function __construct(
         PathResolver $path,
         Composer $composer,
         ClassUtils $class,
         LoggerInterface $logger,
         IndexProcessor $processor,
+        EventDispatcher $dispatcher,
         $verbose = false
-    )
-    {
+    ) {
         $this->path             = $path;
         $this->composer         = $composer;
         $this->classUtils       = $class;
@@ -79,6 +85,7 @@ class IndexGenerator
         $this->plugins          = array();
         $this->verbose          = $verbose;
         $this->processor        = $processor;
+        $this->dispatcher       = $dispatcher;
     }
 
     public function getComposerUtils(){
@@ -95,10 +102,15 @@ class IndexGenerator
 
     public function generateIndex(Project $project)
     {
+        $event = new IndexGenerationEvent($project);
+        $this->dispatcher->dispatch(self::BEFORE_GENERATION, $event);
+
         $index = $project->getIndex();
         $this->populateClassMapIndex($project);
 
         $this->generateProjectIndex($index);
+
+        $this->dispatcher->dispatch(self::AFTER_GENERATION, $event);
 
         return $index;
     }
