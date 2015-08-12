@@ -14,6 +14,7 @@ use PhpParser\Node\Expr\StaticPropertyFetch;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\Assign;
 use Psr\Log\LoggerInterface;
 use Entity\Chain;
 use Entity\Chain\MethodCall as ChainMethodCall;
@@ -133,6 +134,9 @@ class NodeTypeResolver
     protected function createChain($node)
     {
         $chain = null;
+        if ($node instanceof Assign) {
+            $node = $node->expr;
+        }
         while (!($node instanceof Variable)) {
             if ($node instanceof PropertyFetch
                 || $node instanceof StaticPropertyFetch
