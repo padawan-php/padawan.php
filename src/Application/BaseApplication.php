@@ -48,10 +48,6 @@ abstract class BaseApplication
     {
         if ($this->currentProject) {
             $project = $this->currentProject;
-            exec(sprintf(
-                "cd % && composer dumpautoload -o > /dev/null &",
-                $project->getRootDir()
-            ));
         }
     }
 
