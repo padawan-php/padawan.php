@@ -23,6 +23,8 @@ class Router implements RouterInterface
             $command = new \Command\CompleteCommand($container);
         } elseif ($commandName == 'save') {
             $command = new \Command\SaveCommand($container);
+        } elseif ($commandName == 'kill') {
+            $command = new \Command\KillCommand();
         } else {
             $command = new \Command\ErrorCommand();
         }
