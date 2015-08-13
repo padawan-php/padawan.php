@@ -46,9 +46,7 @@ abstract class BaseApplication
 
     public function after()
     {
-        if ($this->currentProject) {
-            $project = $this->currentProject;
-        }
+        return;
     }
 
     protected function getArguments()
