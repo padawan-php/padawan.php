@@ -12,7 +12,6 @@ require ROOT . "/vendor/autoload.php";
 
 $noFsIO = false;
 $port = 15155;
-$host = 'localhost';
 
 foreach ($argv as $arg) {
     if ($arg === '--no-io') {
