@@ -49,7 +49,7 @@ abstract class BaseApplication
         return;
     }
 
-    protected function getArguments()
+    protected function getArguments($request, $response, $data)
     {
         return [];
     }
