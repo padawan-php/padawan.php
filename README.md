@@ -47,9 +47,20 @@ Plugins for editors
 
 1. [Vim](https://github.com/mkusher/padawan.vim)
 
-If you wish to write your own plugin, this YCMD completer example may serve
-as a source of inspiration. You are welcome to open an issue if
-you have any questions.
+If you wish to write your own plugin, vim plugin example may serve
+as a source of inspiration. Look at
+[wiki page](https://github.com/mkusher/padawan.php/wiki/Editor-plugins) for
+some documentation.
+You are welcome to open an issue if you have any questions.
+
+Plugins(extensions) for padawan.php
+-----------------------------------
+
+Padawan.php can be extended by plugins, there are:
+- Symfony2 plugin
+- PHP-DI plugin
+
+Look at [full plugins list](https://github.com/mkusher/padawan.php/wiki/Plugins-list)
 
 Why not the original plugin
 ===========================
@@ -70,9 +81,8 @@ Roadmap
 
 Now in progress:
 
-* Add plugins for editors(vim, emacs and etc.)
-* Add plugins support
-* Add symfony2 plugin
+* Add plugins for editors(emacs, sublime text, atom and etc.)
+* Extend type guessing
 
 License
 -------
