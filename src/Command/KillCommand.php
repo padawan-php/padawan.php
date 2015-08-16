@@ -4,7 +4,7 @@ namespace Command;
 
 class KillCommand implements CommandInterface
 {
-    public function execute()
+    public function run()
     {
         die();
     }

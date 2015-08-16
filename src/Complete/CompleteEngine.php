@@ -16,7 +16,6 @@ use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
 use Parser\Processor\ProcessorInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Psr\Log\LoggerInterface;
 
 class CompleteEngine {
@@ -27,9 +26,8 @@ class CompleteEngine {
         CompleterFactory $completer,
         IndexProcessor $indexProcessor,
         ScopeProcessor $scopeProcessor,
-        LoggerInterface $logger,
-        EventDispatcher $dispatcher
-    ){
+        LoggerInterface $logger
+    ) {
         $this->parser           = $parser;
         $this->generator        = $generator;
         $this->contextResolver  = $contextResolver;
@@ -38,7 +36,6 @@ class CompleteEngine {
         $this->scopeProcessor   = $scopeProcessor;
         $this->logger           = $logger;
         $this->cachePool        = [];
-        $this->dispatcher       = $dispatcher;
     }
     public function createCompletion(
         Project $project,
@@ -83,15 +80,7 @@ class CompleteEngine {
     }
     protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
-        $completer = $this->completerFactory->getCompleter($context);
-        if (!$completer) {
-            $event = new CustomCompleterEvent($project, $context);
-            $this->dispatcher->dispatch(self::CUSTOM_COMPLETER, $event);
-            $completer = $event->completer;
-            if ($completer) {
-                $this->logger->debug(sprintf("Using custom completer %s", get_class($completer)));
-            }
-        }
+        $completer = $this->completerFactory->getCompleter($context, $project);
         if ($completer) {
             return $completer->getEntries($project, $context);
         }
@@ -181,8 +170,4 @@ class CompleteEngine {
     private $cachePool;
     /** @var LoggerInterface */
     private $logger;
-    /** @var EventDispatcher */
-    private $dispatcher;
-
-    const CUSTOM_COMPLETER = 'completer.custom';
 }

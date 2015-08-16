@@ -62,8 +62,8 @@ $http = new React\Http\Server($socket);
 
 $http->on('request', $handler);
 
-$socket->listen($port, $host);
+$socket->listen($port);
 
-echo "Started http server on {$host}:{$port}\n";
+echo "Started http server on 127.0.0.1:{$port}\n";
 
 $loop->run();
