@@ -81,8 +81,11 @@ Roadmap
 
 Now in progress:
 
+* Implement `go to definition`, `go to assingment`, `show documentation`
 * Add plugins for editors(emacs, sublime text, atom and etc.)
-* Extend type guessing
+* Extend type guessing(process classes' contructors, class doc-comment, foreach loops)
+* Implement index updating
+* Add support for non-composer projects
 
 License
 -------
