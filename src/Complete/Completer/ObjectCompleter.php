@@ -68,7 +68,7 @@ class ObjectCompleter {
     }
 
     protected function createEntryForProperty(ClassProperty $prop){
-        $type = $prop->type instanceof FQCN ? $prop->type->toString() : 'mixed';
+        $type = $prop->type instanceof FQCN ? $prop->type->getClassName() : 'mixed';
         return new Entry(
             $prop->name,
             $type

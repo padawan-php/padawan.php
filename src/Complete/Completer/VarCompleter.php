@@ -7,6 +7,7 @@ use Entity\Completion\Scope;
 use Entity\Project;
 use Entity\Node\Variable;
 use Entity\Completion\Entry;
+use Entity\FQCN;
 
 class VarCompleter implements CompleterInterface
 {
@@ -17,8 +18,12 @@ class VarCompleter implements CompleterInterface
 
     protected function createEntry(Variable $var)
     {
+        $type = $var->getType() instanceof FQCN ?
+            $var->getType()->toString() :
+            $var->getType();
         return new Entry(
-            $var->getName()
+            $var->getName(),
+            $type
         );
     }
 }

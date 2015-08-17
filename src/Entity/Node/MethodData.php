@@ -35,9 +35,14 @@ class MethodData {
     public function getParamsStr(){
         $paramsStr = [];
         foreach($this->arguments as $argument){
+            /** @var MethodParam $argument */
             $curParam = [];
             if($argument->getType()){
-                $curParam[] = $argument->getType();
+                if ($argument->getType() instanceof FQCN) {
+                    $curParam[] = $argument->getType()->getClassName();
+                } else {
+                    $curParam[] = $argument->getType();
+                }
             }
             $curParam[] = sprintf("$%s", $argument->getName());
             $paramsStr[] = implode(" ", $curParam);
@@ -46,7 +51,7 @@ class MethodData {
     }
     public function getReturnStr(){
         if($this->return instanceof FQCN){
-            return $this->return->toString();
+            return $this->return->getClassName();
         }
         return "mixed";
     }
