@@ -46,6 +46,7 @@ Plugins for editors
 -------------------
 
 1. [Vim](https://github.com/mkusher/padawan.vim)
+2. [Sublime Text 3](https://github.com/mkusher/padawan.sublime)
 
 If you wish to write your own plugin, vim plugin example may serve
 as a source of inspiration. Look at
