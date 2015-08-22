@@ -27,7 +27,7 @@ class PathResolver
         $upsNumber = count($fromParts) - $i;
         return $this->join(array_merge(
             $addDot ? ['.'] : [],
-            array_fill(0, $upsNumber, '..'),
+            $upsNumber ? array_fill(0, $upsNumber, '..') : [],
             $pathToCommon
         ));
     }
