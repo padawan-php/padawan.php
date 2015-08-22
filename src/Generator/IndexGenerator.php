@@ -164,7 +164,7 @@ class IndexGenerator
     /**
      * Object with Composer-specific functions
      *
-     * @var ComposerUtils
+     * @var Composer
      */
     protected $composer;
 
