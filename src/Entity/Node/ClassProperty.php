@@ -13,15 +13,15 @@ class ClassProperty
     public $defauls     = "";
     public $doc         = "";
 
-    public function __construct($name=""){
+    public function __construct($name = "") {
         $this->name = $name;
     }
 
-    public function getType(){
+    public function getType() {
         return $this->type;
     }
 
-    public function setType(FQCN $fqcn){
+    public function setType(FQCN $fqcn) {
         $this->type = $fqcn;
     }
 
@@ -41,6 +41,9 @@ class ClassProperty
         return (bool) ($this->modifier & ClassData::MODIFIER_STATIC);
     }
 
+    /**
+     * @param integer $modifier
+     */
     public function setModifier($modifier){
         $this->modifier = $modifier;
     }

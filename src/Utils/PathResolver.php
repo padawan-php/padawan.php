@@ -46,7 +46,7 @@ class PathResolver
             throw new \Exception("Unable to create file");
         }
     }
-    public function create($filePath, $isDir=false)
+    public function create($filePath, $isDir = false)
     {
         $dirPath = $filePath;
         if (!$isDir) {
@@ -72,7 +72,7 @@ class PathResolver
         if (!$cwd) {
             $cwd = $this->getWorkingDirectory();
         }
-        return $this->join([$cwd,$path]);
+        return $this->join([$cwd, $path]);
     }
     public function remove($path)
     {
@@ -102,7 +102,7 @@ class PathResolver
     }
     public function getDirFiles($dir)
     {
-        return array_filter(scandir($dir), function ($file) {
+        return array_filter(scandir($dir), function($file) {
             return $file !== '.' && $file !== '..' && $file !== '.git';
         });
     }

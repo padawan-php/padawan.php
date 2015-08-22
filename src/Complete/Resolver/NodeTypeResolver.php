@@ -40,7 +40,7 @@ class NodeTypeResolver
     /**
      * Calculates type of the passed node
      *
-     * @param PhpParser\Node $node
+     * @param \PhpParser\Node\Expr $node
      * @param Index $index
      * @param Scope $scope
      * @return FQCN|null
@@ -66,7 +66,7 @@ class NodeTypeResolver
      * @param PhpParser\Node $node
      * @param Index $index
      * @param Scope $scope
-     * @return FQCN[]
+     * @return FQCN|null
      */
     public function getLastChainNodeType($node, Index $index, Scope $scope)
     {
@@ -168,6 +168,10 @@ class NodeTypeResolver
         }
         return $chain;
     }
+
+    /**
+     * @param string $name
+     */
     protected function getVarType($name, Scope $scope)
     {
         $var = $scope->getVar($name);
@@ -176,6 +180,10 @@ class NodeTypeResolver
         }
         return $var->getType();
     }
+
+    /**
+     * @param string $name
+     */
     protected function getMethodType($name, FQCN $type, Index $index)
     {
         $class = $index->findClassByFQCN($type);
@@ -191,6 +199,10 @@ class NodeTypeResolver
         }
         return $method->getReturn();
     }
+
+    /**
+     * @param string $name
+     */
     protected function getPropertyType($name, FQCN $type, Index $index)
     {
         $class = $index->findClassByFQCN($type);

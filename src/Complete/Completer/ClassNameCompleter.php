@@ -7,11 +7,11 @@ use Entity\Completion\Context;
 use Entity\Completion\Entry;
 
 class ClassNameCompleter implements CompleterInterface {
-    public function getEntries(Project $project, Context $context){
+    public function getEntries(Project $project, Context $context) {
         $entries = [];
         $postfix = trim("");
-        foreach($project->getIndex()->getClasses() as $fqcn => $class){
-            if(!empty($postfix) && strpos($fqcn, $postfix) === false){
+        foreach ($project->getIndex()->getClasses() as $fqcn => $class) {
+            if (!empty($postfix) && strpos($fqcn, $postfix) === false) {
                 continue;
             }
             $fqcn = $context->getScope()->getUses()->findAlias($class->fqcn);

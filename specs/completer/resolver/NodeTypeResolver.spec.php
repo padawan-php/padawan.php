@@ -16,7 +16,7 @@ use Monolog\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
-function createClass($classFQN, $fqcn){
+function createClass($classFQN, $fqcn) {
     $class = new ClassData($classFQN, 'dummy/path/class.php');
     $method = new MethodData('method2');
     $method->setType(ClassData::MODIFIER_PUBLIC);
@@ -28,8 +28,8 @@ function createClass($classFQN, $fqcn){
     return $class;
 }
 
-describe('NodeTypeResolver', function(){
-    beforeEach(function(){
+describe('NodeTypeResolver', function() {
+    beforeEach(function() {
         $logger = new Logger('spec');
         $logger->pushHandler(new NullHandler);
         $this->resolver = new NodeTypeResolver($logger, new UseParser, new EventDispatcher);
@@ -46,49 +46,49 @@ describe('NodeTypeResolver', function(){
         $this->index->addClass($class);
         $this->index->addClass($class2);
     });
-    describe('->getType()', function(){
-        it('returns variable type from scope', function(){
+    describe('->getType()', function() {
+        it('returns variable type from scope', function() {
             $node = new NodeVar;
             $node->name = $this->var->getName();
             expect($this->resolver->getLastChainNodeType($node, $this->index, $this->scope))
                 ->to->equal($this->var->getType());
         });
-        describe('Properties', function(){
-            beforeEach(function(){
+        describe('Properties', function() {
+            beforeEach(function() {
                 $this->node = new PropertyFetch;
                 $this->node->var = new NodeVar;
                 $this->node->var->name = $this->var->getName();
             });
-            it('returns null for unknown property', function(){
+            it('returns null for unknown property', function() {
                 $this->node->name = 'param';
                 expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->be->null;
             });
-            it('returns type for known property', function(){
+            it('returns type for known property', function() {
                 $this->node->name = 'param2';
                 expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->equal($this->anotherFQCN);
             });
         });
-        describe('Method', function(){
-            beforeEach(function(){
+        describe('Method', function() {
+            beforeEach(function() {
                 $this->node = new MethodCall;
                 $this->node->var = new NodeVar;
                 $this->node->var->name = $this->var->getName();
             });
-            it('returns null for unknown method', function(){
+            it('returns null for unknown method', function() {
                 $this->node->name = 'method';
                 expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->be->null;
             });
-            it('returns type for known method', function(){
+            it('returns type for known method', function() {
                 $this->node->name = 'method2';
                 expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->equal($this->anotherFQCN);
             });
         });
-        describe('Complex', function(){
-            beforeEach(function(){
+        describe('Complex', function() {
+            beforeEach(function() {
                 $this->node = new MethodCall;
                 $this->node->name = 'method2';
                 $this->node->var = new PropertyFetch;
@@ -98,7 +98,7 @@ describe('NodeTypeResolver', function(){
                 $this->node->var->var->var = new NodeVar;
                 $this->node->var->var->var->name = $this->var->getName();
             });
-            it('returns type for known property in complex chain', function(){
+            it('returns type for known property in complex chain', function() {
                 $node = new PropertyFetch;
                 $node->var = $this->node;
                 $node->name = 'param2';

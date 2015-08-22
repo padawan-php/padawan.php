@@ -6,7 +6,6 @@ use Entity\Node\ClassData;
 use Entity\Node\InterfaceData;
 use Entity\Index;
 use Entity\Project;
-use Entity\FQCN;
 use Utils\PathResolver;
 use Utils\Composer;
 use Utils\ClassUtils;
@@ -69,10 +68,10 @@ class IndexGenerator
             $end = microtime(1) - $start;
 
             $this->getLogger()->debug("Indexing: [$end]s");
-            $this->getLogger()->debug("Memory: ". memory_get_usage());
+            $this->getLogger()->debug("Memory: " . memory_get_usage());
             $globalTime += $end;
             ++$done;
-            $process = floor($done/$all * 100);
+            $process = floor($done / $all * 100);
             $this->getLogger()->info("Progress: $process%");
         }
         $this->getLogger()->info("[ $globalTime ]");

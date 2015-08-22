@@ -52,7 +52,7 @@ class ContextResolver
         try {
             $symbols = @token_get_all($this->prepareLine($badLine, false));
         } catch (\Exception $e) {
-            $symbols = [0,0];
+            $symbols = [0, 0];
         }
         $token = null;
         array_shift($symbols);
@@ -127,7 +127,7 @@ class ContextResolver
             $badLine = '<?php ' . $badLine;
         }
         $badLine = str_replace(['elseif', 'else', 'catch'], '', $badLine);
-        if ($wrapFunctionCall && $badLine[strlen($badLine)-1] === '(') {
+        if ($wrapFunctionCall && $badLine[strlen($badLine) - 1] === '(') {
             $badLine .= ')';
         }
         return $badLine;

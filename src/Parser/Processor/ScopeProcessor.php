@@ -5,18 +5,14 @@ namespace Parser\Processor;
 use Parser\UseParser;
 use Parser\CommentParser;
 use Parser\ParamParser;
-use Parser\NamespaceParser;
 use Complete\Resolver\NodeTypeResolver;
-
 use Entity\FQCN;
 use Entity\Index;
 use Entity\Node\Uses;
 use Entity\Node\Variable;
 use Entity\Completion\Scope;
-
 use PhpParser\NodeTraverserInterface;
 use PhpParser\NodeVisitorAbstract;
-
 use PhpParser\Node;
 use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\Assign;
@@ -48,14 +44,11 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         }
         if($node instanceof Class_){
             $this->createScopeFromClass($node);
-        }
-        elseif($node instanceof ClassMethod){
+        } elseif($node instanceof ClassMethod){
             $this->createScopeFromMethod($node);
-        }
-        elseif($node instanceof Closure){
+        } elseif($node instanceof Closure){
             $this->createScopeFromClosure($node);
-        }
-        elseif($node instanceof Assign){
+        } elseif($node instanceof Assign){
             $this->addVarToScope($node);
         }
     }
@@ -74,6 +67,10 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         $this->resultNodes = [ $this->scope ];
         return $this->resultNodes;
     }
+
+    /**
+     * @param Node $node
+     */
     public function isIn($node, $line){
         list($startLine, $endLine) = $this->getNodeLines($node);
         if($node instanceof ClassMethod
@@ -106,16 +103,16 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         $var->setType($this->scope->getFQCN());
         $this->scope->addVar($var);
     }
-    public function createScopeFromClosure(Closure $node){
+    public function createScopeFromClosure(Closure $node) {
         $this->createScope();
-        foreach($node->params AS $param){
+        foreach ($node->params AS $param) {
             $this->scope->addVar(
                 $this->paramParser->parse($param)
             );
         }
-        foreach($node->uses as $closureUse){
+        foreach ($node->uses as $closureUse) {
             $var = $this->scope->getParent()->getVar($closureUse->var);
-            if($var instanceof Variable){
+            if ($var instanceof Variable) {
                 $this->scope->addVar(
                     $var
                 );
@@ -123,36 +120,35 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
 
         }
     }
-    public function createScopeFromMethod(ClassMethod $node){
+    public function createScopeFromMethod(ClassMethod $node) {
         $this->createScope();
         $this->scope->addVar($this->scope->getParent()->getVar('this'));
         $index = $this->getIndex();
-        if(empty($index)){
+        if (empty($index)) {
             return;
         }
         $fqcn = $this->scope->getFQCN();
         $classData = $index->findClassByFQCN($fqcn);
-        if(empty($classData)){
+        if (empty($classData)) {
             return;
         }
         $method = $classData->methods->get($node->name);
-        if(empty($method)){
+        if (empty($method)) {
             return;
         }
-        foreach($method->arguments AS $param){
+        foreach ($method->arguments AS $param) {
             $this->scope->addVar($param);
         }
     }
-    public function addVarToScope(Assign $node){
-        if(!$node->var instanceof NodeVar){
+    public function addVarToScope(Assign $node) {
+        if (!$node->var instanceof NodeVar) {
             return;
         }
         $var = new Variable($node->var->name);
         $comment = $this->commentParser->parse($node->getAttribute('comments'));
-        if($comment->getVar($var->getName())){
+        if ($comment->getVar($var->getName())) {
             $type = $comment->getVar($var->getName())->getType();
-        }
-        else {
+        } else {
             $type = $this->typeResolver->getType(
                 $node->expr, $this->getIndex(), $this->scope
             );
@@ -160,28 +156,28 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         $var->setType($type);
         $this->scope->addVar($var);
     }
-    public function parseUse(Use_ $node, $fqcn, $file){
+    public function parseUse(Use_ $node, $fqcn, $file) {
         $this->useParser->parse($node, $fqcn, $file);
     }
 
     /**
      * @return FQCN
      */
-    public function parseFQCN($fqcn){
+    public function parseFQCN($fqcn) {
         return $this->useParser->parseFQCN($fqcn);
     }
 
     /**
      * @return Index
      */
-    public function getIndex(){
+    public function getIndex() {
         return $this->index;
     }
-    public function setIndex(Index $index){
+    public function setIndex(Index $index) {
         $this->index = $index;
     }
 
-    protected function createScope(){
+    protected function createScope() {
         $this->scope = new Scope($this->scope);
         $this->scope->setUses($this->useParser->getUses());
     }

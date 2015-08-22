@@ -13,7 +13,7 @@ class InterfaceParser {
     public function __construct(
         MethodParser $methodParser,
         UseParser $useParser
-    ){
+    ) {
         $this->methodParser = $methodParser;
         $this->useParser    = $useParser;
     }
@@ -27,20 +27,20 @@ class InterfaceParser {
     {
         $fqcn = new FQCN($node->name, $fqn);
         $interface = new InterfaceData($fqcn, $file);
-        foreach($node->extends AS $interfaceName){
+        foreach ($node->extends AS $interfaceName) {
             $interface->addInterface(
                 $this->useParser->getFQCN($interfaceName)
             );
         }
-        foreach($node->stmts AS $child){
-            if($child instanceof ClassMethod){
+        foreach ($node->stmts AS $child) {
+            if ($child instanceof ClassMethod) {
                 $interface->addMethod($this->parseMethod($child));
             }
         }
         return $interface;
     }
 
-    protected function parseMethod(ClassMethod $node){
+    protected function parseMethod(ClassMethod $node) {
         return $this->methodParser->parse($node);
     }
 

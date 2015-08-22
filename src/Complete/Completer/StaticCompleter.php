@@ -9,7 +9,6 @@ use Entity\Node\ClassProperty;
 use Entity\Node\InterfaceData;
 use Entity\Completion\Context;
 use Entity\Completion\Entry;
-use Entity\Completion\Scope;
 use Entity\Collection\Specification;
 use Psr\Log\LoggerInterface;
 

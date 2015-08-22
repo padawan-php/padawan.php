@@ -14,7 +14,7 @@ use PhpParser\Node\Name;
 /**
  * SomeComment
  */
-class ClassParser{
+class ClassParser {
     /**
      * @property ClassParser
      */
@@ -39,15 +39,15 @@ class ClassParser{
         $this->useParser = $useParser;
     }
 
-    public function parse(Class_ $node, Entity\FQN $fqn, $file){
+    public function parse(Class_ $node, Entity\FQN $fqn, $file) {
         $fqcn = new Entity\FQCN($node->name, $fqn);
         $classData = new Node\ClassData($fqcn, $file);
-        if($node->extends instanceof Name){
+        if ($node->extends instanceof Name) {
             $classData->setParent(
                 $this->useParser->getFQCN($node->extends)
             );
         }
-        foreach($node->implements AS $interfaceName){
+        foreach ($node->implements AS $interfaceName) {
             $classData->addInterface(
                 $this->useParser->getFQCN($interfaceName)
             );
@@ -57,19 +57,19 @@ class ClassParser{
             $classData,
             $node->getAttribute("comments")
         );
-        foreach($node->stmts AS $child){
-            if($child instanceof ClassMethod){
+        foreach ($node->stmts AS $child) {
+            if ($child instanceof ClassMethod) {
                 $classData->addMethod($this->parseMethod($child));
             }
-            elseif($child instanceof Property){
-                foreach($child->props AS $prop){
+            elseif ($child instanceof Property) {
+                foreach ($child->props AS $prop) {
                     $classData->addProp(
                         $this->parseProperty($prop, $child->type, $child->getAttribute('comments'))
                     );
                 }
             }
-            elseif($child instanceof ClassConst){
-                foreach($child->consts AS $const){
+            elseif ($child instanceof ClassConst) {
+                foreach ($child->consts AS $const) {
                     $classData->addConst($const->name);
                 }
             }

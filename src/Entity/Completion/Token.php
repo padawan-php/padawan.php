@@ -6,12 +6,12 @@ class Token {
     private $symbol = "";
     private $type   = 0;
 
-    public function __construct($code, $symbol){
+    public function __construct($code, $symbol) {
         $this->add($code, $symbol);
     }
 
-    public function add($code, $symbol){
-        switch($code){
+    public function add($code, $symbol) {
+        switch ($code) {
         case T_WHITESPACE:
             $this->addType(self::T_WHITESPACE);
         case T_NS_SEPARATOR:
@@ -21,7 +21,7 @@ class Token {
         case T_VARIABLE:
         case T_DOUBLE_COLON:
         case T_OBJECT_OPERATOR:
-            if($this->isWhitespace()){
+            if ($this->isWhitespace()) {
                 $this->addType(self::T_UNKNOWN);
             }
         case T_NAMESPACE:
@@ -45,64 +45,64 @@ class Token {
         default:
             $this->addType(self::T_UNKNOWN);
         }
-        if(!$this->isReady()){
+        if (!$this->isReady()) {
             $this->symbol = $symbol . $this->symbol;
         }
     }
 
-    public function getSymbol(){
+    public function getSymbol() {
         return $this->symbol;
     }
 
-    public function getType(){
+    public function getType() {
         return $this->type;
     }
 
-    public function isUnknown(){
+    public function isUnknown() {
         return (bool) ($this->type & self::T_UNKNOWN);
     }
 
-    public function isReady(){
+    public function isReady() {
         return !((bool) ($this->type & self::T_CONTINUE_PROCESS));
     }
 
-    public function isTerminate(){
+    public function isTerminate() {
         return (bool) ($this->type & self::T_TERMINATE);
     }
 
-    public function isObjectOperator(){
+    public function isObjectOperator() {
         return (bool) ($this->type & self::T_OBJECT_OPERATOR);
     }
 
-    public function isStaticOperator(){
+    public function isStaticOperator() {
         return (bool) ($this->type & self::T_STATIC_OPERATOR);
     }
 
-    public function isUseOperator(){
+    public function isUseOperator() {
         return (bool) ($this->type & self::T_USE_OPERATOR);
     }
 
-    public function isNamespaceOperator(){
+    public function isNamespaceOperator() {
         return (bool) ($this->type & self::T_NAMESPACE_OPERATOR);
     }
 
-    public function isExtendsOperator(){
+    public function isExtendsOperator() {
         return (bool) ($this->type & self::T_EXTENDS_OPERATOR);
     }
 
-    public function isImplementsOperator(){
+    public function isImplementsOperator() {
         return (bool) ($this->type & self::T_IMPLEMENTS_OPERATOR);
     }
 
-    public function isNewOperator(){
+    public function isNewOperator() {
         return (bool) ($this->type & self::T_NEW_OPERATOR);
     }
 
-    public function isVar(){
+    public function isVar() {
         return (bool) ($this->type & self::T_VAR);
     }
 
-    public function isWhitespace(){
+    public function isWhitespace() {
         return (bool) ($this->type & self::T_WHITESPACE);
     }
 
@@ -115,6 +115,9 @@ class Token {
         $this->type |= $type;
     }
 
+    /**
+     * @param integer $type
+     */
     protected function removeType($type){
         if((bool) ($this->type & $type)){
             $this->type ^= $type;

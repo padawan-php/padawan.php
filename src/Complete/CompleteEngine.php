@@ -4,18 +4,12 @@ namespace Complete;
 
 use Entity\Project;
 use Entity\Completion\Scope;
-use Entity\FQN;
 use Parser\Parser;
 use Generator\IndexGenerator;
-use Entity\Completion\Entry;
-use Entity\Completion\Context;
 use Complete\Completer\CompleterFactory;
-use Complete\Completer\CompleterInterface;
 use Complete\Resolver\ContextResolver;
-use Complete\Resolver\ScopeResolver;
 use Parser\Processor\IndexProcessor;
 use Parser\Processor\ScopeProcessor;
-use Parser\Processor\ProcessorInterface;
 use Psr\Log\LoggerInterface;
 
 class CompleteEngine {
@@ -43,11 +37,11 @@ class CompleteEngine {
         $line,
         $column,
         $file
-    ){
+    ) {
         $start = microtime(1);
         $entries = [];
         if ($line) {
-            list($lines, , $completionLine) = $this->prepareContent(
+            list($lines,, $completionLine) = $this->prepareContent(
                 $content,
                 $line,
                 $column
@@ -78,6 +72,10 @@ class CompleteEngine {
             "context" => []
         ];
     }
+
+    /**
+     * @param string $badLine
+     */
     protected function findEntries(Project $project, Scope $scope, $badLine, $column)
     {
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
@@ -91,22 +89,22 @@ class CompleteEngine {
      * @TODO
      * Should check for bad lines
      */
-    protected function prepareContent($content, $line, $column){
+    protected function prepareContent($content, $line, $column) {
         $lines = explode(PHP_EOL, $content);
         if ($line > count($lines)) {
             $badLine = "";
         } else {
-            $badLine = $lines[$line-1];
+            $badLine = $lines[$line - 1];
         }
-        $completionLine = substr($badLine, 0, $column-1);
-        $lines[$line-1] = "";
+        $completionLine = substr($badLine, 0, $column - 1);
+        $lines[$line - 1] = "";
         return [$lines, trim($badLine), trim($completionLine)];
     }
 
     /**
      * @return Scope
      */
-    protected function processFileContent(Project $project, $lines, $line, $file){
+    protected function processFileContent(Project $project, $lines, $line, $file) {
         if (is_array($lines)) {
             $content = implode("\n", $lines);
         } else {

@@ -16,6 +16,10 @@ class UseParser {
             $this->uses->add($fqcn, $use->alias);
         }
     }
+
+    /**
+     * @param string $type
+     */
     public function parseType($type){
         $pureFQCN = $this->parseFQCN($type);
         if($pureFQCN->isScalar()){
@@ -31,8 +35,9 @@ class UseParser {
         return $this->createFQCN($pureFQCN);
     }
     public function getFQCN(Name $node = null){
-        if($node === null)
-            return $node;
+        if($node === null) {
+                    return $node;
+        }
         if($node->isFullyQualified()){
             return $this->parseFQCN($node->toString());
         }
@@ -62,13 +67,13 @@ class UseParser {
             $isArray
         );
     }
-    public function getUses(){
+    public function getUses() {
         return $this->uses;
     }
-    public function setUses(Uses $uses = null){
+    public function setUses(Uses $uses = null) {
         $this->uses = $uses;
     }
-    protected function createFQCN($fqcn){
+    protected function createFQCN($fqcn) {
         $fqn = $this->uses->getFQCN()->join($this->parseFQCN($fqcn));
         return new FQCN($fqn->getLast(), $fqn->getTail());
     }
