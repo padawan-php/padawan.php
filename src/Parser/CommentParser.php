@@ -12,7 +12,7 @@ use Entity\Node\ClassProperty;
 
 class CommentParser {
 
-    public function __construct(UseParser $useParser){
+    public function __construct(UseParser $useParser) {
         $this->useParser = $useParser;
     }
 
@@ -22,9 +22,9 @@ class CommentParser {
      * @param string $doc
      * @return Comment
      */
-    public function parse($doc){
+    public function parse($doc) {
         $text = $doc;
-        if(is_array($doc)){
+        if (is_array($doc)) {
             $doc = array_shift($doc);
             $text = $doc->getText();
         }
@@ -41,12 +41,12 @@ class CommentParser {
      *
      * @param string $text
      */
-    protected function parseDoc(Comment $comment, $text){
+    protected function parseDoc(Comment $comment, $text) {
         $context = $this->getContext();
-        try{
+        try {
             $block = new DocBlock($text, $context);
-            foreach($block->getTags() AS $tag){
-                switch($tag->getName()){
+            foreach ($block->getTags() AS $tag) {
+                switch ($tag->getName()) {
                 case "param":
                     $comment->addVar(
                         $this->createMethodParam($tag)
@@ -73,23 +73,23 @@ class CommentParser {
                 }
             }
         }
-        catch(\Exception $e){
+        catch (\Exception $e) {
 
         }
     }
-    protected function createMethodParam(Tag $tag){
+    protected function createMethodParam(Tag $tag) {
         $name = trim($tag->getVariableName(), '$');
         $param = new MethodParam($name);
         $param->setType($this->getFQCN($tag->getType()));
         return $param;
     }
-    protected function createVar(Tag $tag){
+    protected function createVar(Tag $tag) {
         $name = trim($tag->getVariableName(), '$');
         $param = new Variable($name);
         $param->setType($this->getFQCN($tag->getType()));
         return $param;
     }
-    protected function createProperty(Tag $tag){
+    protected function createProperty(Tag $tag) {
         $name = trim($tag->getVariableName(), '$');
         $prop = new ClassProperty;
         $prop->name = $name;
@@ -103,16 +103,16 @@ class CommentParser {
      * @param string $type
      * @return \Entity\FQCN
      */
-    protected function getFQCN($type){
+    protected function getFQCN($type) {
         return $this->useParser->parseType($type);
     }
 
     /**
      * @return string
      */
-    protected function trimComment($comment){
+    protected function trimComment($comment) {
         $lines = explode("\n", $comment);
-        foreach($lines AS $key => $line){
+        foreach ($lines AS $key => $line) {
             $lines[$key] = preg_replace([
                 "/^\/\**/",
                 "/^ *\* */",
@@ -125,10 +125,10 @@ class CommentParser {
     /**
      * @return Context
      */
-    protected function getContext(){
+    protected function getContext() {
         $uses = $this->useParser->getUses();
         $namespace = $uses->getFQCN()->toString();
-        $aliases = array_map(function($fqcn){
+        $aliases = array_map(function($fqcn) {
             return $fqcn->toString();
         }, $uses->all());
         return new Context($namespace, $aliases);

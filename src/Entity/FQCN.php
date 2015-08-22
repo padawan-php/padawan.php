@@ -4,20 +4,20 @@ namespace Entity;
 
 class FQCN extends FQN {
 
-    public function __get($key){
-        if($key === "className"){
+    public function __get($key) {
+        if ($key === "className") {
             return $this->getClassName();
         }
-        elseif($key === "namespace"){
+        elseif ($key === "namespace") {
             return $this->getNamespace();
         }
     }
-    public function __construct($className, $namespace = "", $isArray=false){
+    public function __construct($className, $namespace = "", $isArray = false) {
         parent::__construct($namespace);
         $this->_isArray = $isArray;
         $this->_isScalar = false;
-        if(count($this->parts) === 0){
-            switch($className){
+        if (count($this->parts) === 0) {
+            switch ($className) {
             case "int":
             case "string":
             case "float":
@@ -39,35 +39,35 @@ class FQCN extends FQN {
     /**
      * @inheritdoc
      */
-    public function join(FQN $join){
+    public function join(FQN $join) {
         $result = new self($join->getLast());
         $resultParts = $this->getParts();
         $joiningParts = $join->getParts();
-        if($this->getLast() === $join->getFirst()){
+        if ($this->getLast() === $join->getFirst()) {
             array_shift($joiningParts);
         }
         $result->setParts(array_merge($resultParts, $joiningParts));
         return $result;
     }
-    public function getClassName(){
+    public function getClassName() {
         return $this->getLast();
     }
-    public function getNamespace(){
+    public function getNamespace() {
         $parts = $this->getParts();
         array_pop($parts);
         return implode("\\", $parts);
     }
-    public function toString(){
+    public function toString() {
         $str = parent::toString();
-        if($this->isArray()){
+        if ($this->isArray()) {
             $str .= '[]';
         }
         return $str;
     }
-    public function isArray(){
+    public function isArray() {
         return $this->_isArray;
     }
-    public function isScalar(){
+    public function isScalar() {
         return $this->_isScalar;
     }
 

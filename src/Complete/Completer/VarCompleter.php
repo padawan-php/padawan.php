@@ -19,8 +19,7 @@ class VarCompleter implements CompleterInterface
     protected function createEntry(Variable $var)
     {
         $type = $var->getType() instanceof FQCN ?
-            $var->getType()->toString() :
-            $var->getType();
+            $var->getType()->toString() : $var->getType();
         return new Entry(
             $var->getName(),
             $type

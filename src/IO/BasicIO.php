@@ -78,7 +78,7 @@ class BasicIO
     public function getIndexFileName($rootDir = null)
     {
         $indexPath = $this->indexFileName;
-        if($rootDir){
+        if ($rootDir) {
             $indexPath = $this->getPath()->join([
                 $rootDir,
                 $indexPath

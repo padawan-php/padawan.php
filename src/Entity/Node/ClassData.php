@@ -15,13 +15,13 @@ use Entity\Collection\ConstCollection;
  */
 class ClassData
 {
-    const MODIFIER_PUBLIC    =  1;
-    const MODIFIER_PROTECTED =  2;
-    const MODIFIER_PRIVATE   =  4;
-    const MODIFIER_STATIC    =  8;
+    const MODIFIER_PUBLIC    = 1;
+    const MODIFIER_PROTECTED = 2;
+    const MODIFIER_PRIVATE   = 4;
+    const MODIFIER_STATIC    = 8;
     const MODIFIER_ABSTRACT  = 16;
     const MODIFIER_FINAL     = 32;
-    public $interfaces      = [];
+    public $interfaces = [];
     /** @var Uses */
     public $uses;
 
@@ -64,11 +64,11 @@ class ClassData
     public function setParent($parent)
     {
         $this->parent = $parent;
-        if($parent instanceof ClassData){
-            foreach($this->methods->all() as $method){
-                if($method->doc === Comment::INHERIT_MARK){
+        if ($parent instanceof ClassData) {
+            foreach ($this->methods->all() as $method) {
+                if ($method->doc === Comment::INHERIT_MARK) {
                     $parentMethod = $parent->methods->get($method->name);
-                    if($parentMethod instanceof MethodData){
+                    if ($parentMethod instanceof MethodData) {
                         $method->doc = $parentMethod->doc;
                         $method->setReturn($parentMethod->getReturn());
                     }

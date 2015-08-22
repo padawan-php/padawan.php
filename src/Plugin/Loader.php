@@ -21,9 +21,9 @@ class Loader
     public function loadPlugin($pluginName)
     {
         $parts = explode("/", $pluginName);
-        $className = implode("\\", array_map(function ($part) {
+        $className = implode("\\", array_map(function($part) {
             return implode("", array_map(
-                function ($part) {
+                function($part) {
                     return ucfirst($part);
                 },
                 explode("-", $part)

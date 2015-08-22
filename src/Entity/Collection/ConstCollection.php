@@ -6,6 +6,9 @@ use Entity\Node\ClassData;
 
 class ConstCollection
 {
+    /**
+     * @param ClassData $class
+     */
     public function __construct($class)
     {
         $this->class = $class;
@@ -40,6 +43,6 @@ class ConstCollection
         }
     }
 
-    private $map        = [];
+    private $map = [];
     private $class;
 }

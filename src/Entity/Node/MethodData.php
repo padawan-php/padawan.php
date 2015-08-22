@@ -13,31 +13,31 @@ class MethodData {
     public $endLine     = 0;
     public $return      = null;
 
-    public function __construct($name){
+    public function __construct($name) {
         $this->name = $name;
     }
 
-    public function getSignature(){
+    public function getSignature() {
         return sprintf("(%s) : %s",
             $this->getParamsStr(), $this->getReturnStr()
         );
     }
 
-    public function addParam(MethodParam $param){
-        if(array_key_exists($param->getName(), $this->arguments)){
+    public function addParam(MethodParam $param) {
+        if (array_key_exists($param->getName(), $this->arguments)) {
             $var = $this->arguments[$param->getName()];
-            if(empty($param->getType())){
+            if (empty($param->getType())) {
                 $param->setType($var->getType());
             }
         }
         $this->arguments[$param->getName()] = $param;
     }
-    public function getParamsStr(){
+    public function getParamsStr() {
         $paramsStr = [];
-        foreach($this->arguments as $argument){
+        foreach ($this->arguments as $argument) {
             /** @var MethodParam $argument */
             $curParam = [];
-            if($argument->getType()){
+            if ($argument->getType()) {
                 if ($argument->getType() instanceof FQCN) {
                     $curParam[] = $argument->getType()->getClassName();
                 } else {
@@ -49,16 +49,16 @@ class MethodData {
         }
         return implode(", ", $paramsStr);
     }
-    public function getReturnStr(){
-        if($this->return instanceof FQCN){
+    public function getReturnStr() {
+        if ($this->return instanceof FQCN) {
             return $this->return->getClassName();
         }
         return "mixed";
     }
-    public function getReturn(){
+    public function getReturn() {
         return $this->return;
     }
-    public function setReturn(FQCN $fqcn = null){
+    public function setReturn(FQCN $fqcn = null) {
         $this->return = $fqcn;
     }
     public function isPublic() {
@@ -84,7 +84,7 @@ class MethodData {
     public function isStatic() {
         return (bool) ($this->type & ClassData::MODIFIER_STATIC);
     }
-    public function isMagic(){
+    public function isMagic() {
         return in_array($this->name, [
             '__construct',
             '__destruct',
@@ -97,7 +97,7 @@ class MethodData {
             '__clone'
         ]);
     }
-    public function setType($type){
+    public function setType($type) {
         $this->type = $type;
     }
 }

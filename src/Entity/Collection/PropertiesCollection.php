@@ -7,6 +7,9 @@ use Entity\Node\ClassData;
 
 class PropertiesCollection
 {
+    /**
+     * @param ClassData $class
+     */
     public function __construct($class)
     {
         $this->class = $class;
@@ -66,7 +69,7 @@ class PropertiesCollection
         }
     }
 
-    private $map        = [];
+    private $map = [];
     /** @var ClassData */
     private $class;
 }

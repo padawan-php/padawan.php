@@ -14,20 +14,20 @@ class InterfaceData {
     public $file            = "";
     public $startLine       = 0;
     public $doc             = "";
-    public function __construct(FQCN $fqcn, $file){
+    public function __construct(FQCN $fqcn, $file) {
         $this->fqcn = $fqcn;
         $this->file = $file;
         $this->methods = new MethodsCollection($this);
     }
-    public function addMethod(MethodData $method){
+    public function addMethod(MethodData $method) {
         $this->methods->add($method);
     }
-    public function getInterfaces(){
+    public function getInterfaces() {
         return $this->interfaces;
     }
-    public function addInterface($interface){
+    public function addInterface($interface) {
         $fqcn = $interface;
-        if($interface instanceof InterfaceData){
+        if ($interface instanceof InterfaceData) {
             $fqcn = $interface->fqcn;
         }
         $this->interfaces[$fqcn->toString()] = $interface;

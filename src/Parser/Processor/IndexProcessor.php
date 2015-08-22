@@ -21,56 +21,56 @@ class IndexProcessor extends NodeVisitorAbstract implements ProcessorInterface {
         InterfaceParser $interfaceParser,
         UseParser $useParser,
         NamespaceParser $namespaceParser
-    ){
+    ) {
         $this->classParser = $classParser;
         $this->interfaceParser = $interfaceParser;
         $this->useParser = $useParser;
         $this->namespaceParser = $namespaceParser;
     }
-    public function setFileInfo(Uses $uses, $file){
+    public function setFileInfo(Uses $uses, $file) {
         $this->uses = $uses;
         $this->file = $file;
     }
-    public function parseInterface(Interface_ $node, $fqcn, $file){
+    public function parseInterface(Interface_ $node, $fqcn, $file) {
         $this->addResultNode(
             $this->interfaceParser->parse($node, $fqcn, $file)
         );
     }
-    public function parseClass(Class_ $node, $fqcn, $file){
+    public function parseClass(Class_ $node, $fqcn, $file) {
         $this->addResultNode(
             $this->classParser->parse($node, $fqcn, $file)
         );
     }
-    public function parseUse(Use_ $node){
+    public function parseUse(Use_ $node) {
         $this->useParser->parse($node);
     }
-    public function parseFQCN($fqcn){
+    public function parseFQCN($fqcn) {
         return $this->useParser->parseFQCN($fqcn);
     }
-    public function enterNode(Node $node){
-        if($node instanceof Use_){
+    public function enterNode(Node $node) {
+        if ($node instanceof Use_) {
             $this->parseUse($node);
         }
-        elseif($node instanceof Namespace_){
+        elseif ($node instanceof Namespace_) {
             $this->namespaceParser->parse($node);
         }
     }
-    public function leaveNode(Node $node){
-        if($node instanceof Class_){
+    public function leaveNode(Node $node) {
+        if ($node instanceof Class_) {
             $this->parseClass($node, $this->uses->getFQCN(), $this->file);
         }
-        elseif($node instanceof Interface_){
+        elseif ($node instanceof Interface_) {
             $this->parseInterface($node, $this->uses->getFQCN(), $this->file);
         }
     }
-    public function clearResultNodes(){
+    public function clearResultNodes() {
         $this->resultNodes = [];
     }
-    public function getResultNodes(){
+    public function getResultNodes() {
         return $this->resultNodes;
     }
-    protected function addResultNode($resultNode){
-        if(!$resultNode){
+    protected function addResultNode($resultNode) {
+        if (!$resultNode) {
             return;
         }
         $this->resultNodes[] = $resultNode;

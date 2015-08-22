@@ -9,7 +9,7 @@ class CompleteCommand extends AbstractCommand {
      *
      * @return array
      */
-    public function run(array $arguments = []){
+    public function run(array $arguments = []) {
         $project = $arguments["project"];
         $completeEngine = $this->getContainer()->get("Complete\CompleteEngine");
         $column = $arguments['column'];
@@ -30,9 +30,9 @@ class CompleteCommand extends AbstractCommand {
             "context" => $completion["context"]
         ];
     }
-    protected function prepareEntries(array $entries){
+    protected function prepareEntries(array $entries) {
         $result = [];
-        foreach($entries as $entry){
+        foreach ($entries as $entry) {
             $result[] = [
                 "name" => $entry->getName(),
                 "signature" => $entry->getSignature(),

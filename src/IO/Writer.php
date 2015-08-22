@@ -2,20 +2,20 @@
 
 namespace IO;
 
-class Writer extends BasicIO{
-    public function write($project){
+class Writer extends BasicIO {
+    public function write($project) {
         $this->writeToFile(
             $this->getIndexFileName($project->getRootDir()),
             $this->prepareIndex($project)
         );
     }
-    public function writeReport($invalidClasses){
+    public function writeReport($invalidClasses) {
         $this->writeToFile(
             $this->getReportFileName(),
             implode("\n", $invalidClasses)
         );
     }
-    protected function prepareIndex($index){
+    protected function prepareIndex($index) {
         $str = serialize($index);
         return $str;
     }
