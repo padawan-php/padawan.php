@@ -24,6 +24,8 @@
     "require-dev": {
         "behat/behat": "~3.0",
         "peridot-php/peridot": "~1.15",
-        "peridot-php/leo": "~1.4"
+        "peridot-php/leo": "~1.4",
+        "phpspec/prophecy": "^1.5",
+        "peridot-php/peridot-prophecy-plugin": "~1.0"
     }
 }
