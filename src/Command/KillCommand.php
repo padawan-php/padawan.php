@@ -4,7 +4,7 @@ namespace Command;
 
 class KillCommand implements CommandInterface
 {
-    public function run()
+    public function run(array $arguments = [])
     {
         die();
     }

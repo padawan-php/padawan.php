@@ -46,30 +46,30 @@ class CompleteEngine {
     ){
         $start = microtime(1);
         $entries = [];
-        if($line){
-            list($lines, $badLine, $completionLine) = $this->prepareContent(
+        if ($line) {
+            list($lines, , $completionLine) = $this->prepareContent(
                 $content,
                 $line,
                 $column
             );
             try {
                 $scope = $this->processFileContent($project, $lines, $line, $file);
-                if(empty($scope)){
+                if (empty($scope)) {
                     $scope = new Scope;
                 }
-                $this->logger->addDebug(sprintf(
-                    "%s seconds for ast processing"
-                , (microtime(1) - $start)));
-            }
-            catch(\Exception $e){
+                $this->logger->debug(sprintf(
+                    "%s seconds for ast processing",
+                    (microtime(1) - $start)
+                ));
+            } catch (\Exception $e) {
                 $scope = new Scope;
             }
-            $entries = $this->findEntries($project, $scope, $completionLine, $column, $lines);
-            $this->logger->addDebug(sprintf(
-                "%s seconds for entries generation"
-            , (microtime(1) - $start)));
-        }
-        elseif(!empty($content)) {
+            $entries = $this->findEntries($project, $scope, $completionLine, $column);
+            $this->logger->debug(sprintf(
+                "%s seconds for entries generation",
+                (microtime(1) - $start)
+            ));
+        } elseif (!empty($content)) {
             $this->processFileContent($project, $content, $line, $file);
         }
 
@@ -78,7 +78,8 @@ class CompleteEngine {
             "context" => []
         ];
     }
-    protected function findEntries(Project $project, Scope $scope, $badLine, $column, $lines){
+    protected function findEntries(Project $project, Scope $scope, $badLine, $column)
+    {
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
         $completer = $this->completerFactory->getCompleter($context, $project);
         if ($completer) {
@@ -92,10 +93,9 @@ class CompleteEngine {
      */
     protected function prepareContent($content, $line, $column){
         $lines = explode(PHP_EOL, $content);
-        if($line > count($lines)){
+        if ($line > count($lines)) {
             $badLine = "";
-        }
-        else{
+        } else {
             $badLine = $lines[$line-1];
         }
         $completionLine = substr($badLine, 0, $column-1);
@@ -107,26 +107,21 @@ class CompleteEngine {
      * @return Scope
      */
     protected function processFileContent(Project $project, $lines, $line, $file){
-        if(is_array($lines)){
+        if (is_array($lines)) {
             $content = implode("\n", $lines);
-        }
-        else {
+        } else {
             $content = $lines;
         }
-        if(empty($content)){
+        if (empty($content)) {
             return;
-        }
-        $fqcn = $project->getIndex()->findFQCNByFile($file);
-        if (!$fqcn instanceof FQN) {
-            $fqcn = new FQN();
         }
         if (!array_key_exists($file, $this->cachePool)) {
             $this->cachePool[$file] = [0, [], []];
         }
-        if($this->isValidCache($file, $content)){
-            list($hash, $indexNodes, $scopeNodes) = $this->cachePool[$file];
+        if ($this->isValidCache($file, $content)) {
+            list(,, $scopeNodes) = $this->cachePool[$file];
         }
-        if(empty($scopeNodes)) {
+        if (empty($scopeNodes)) {
             $this->indexProcessor->clearResultNodes();
             $parser = $this->parser;
             $parser->addProcessor($this->indexProcessor);
@@ -145,13 +140,14 @@ class CompleteEngine {
             $contentHash = hash('sha1', $content);
             $this->cachePool[$file] = [$contentHash, $nodes, $scopeNodes];
         }
-        if(count($scopeNodes)){
+        if (count($scopeNodes)) {
             return $scopeNodes[0];
         }
         return null;
     }
 
-    private function isValidCache($file, $content){
+    private function isValidCache($file, $content)
+    {
         $contentHash = hash('sha1', $content);
         list($hash) = $this->cachePool[$file];
         return $hash === $contentHash;

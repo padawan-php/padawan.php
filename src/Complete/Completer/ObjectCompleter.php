@@ -13,39 +13,42 @@ use Entity\Completion\Scope;
 use Entity\Collection\Specification;
 use Psr\Log\LoggerInterface;
 
-class ObjectCompleter {
-    public function __construct(LoggerInterface $logger){
+class ObjectCompleter
+{
+    public function __construct(LoggerInterface $logger)
+    {
         $this->logger = $logger;
     }
-    public function getEntries(Project $project, Context $context){
+    public function getEntries(Project $project, Context $context)
+    {
         /** @var FQCN $fqcn */
         list($fqcn, $isThis) = $context->getData();
-        $this->logger->addDebug('creating entries');
-        if(!$fqcn instanceof FQCN){
+        $this->logger->debug('creating entries');
+        if (!$fqcn instanceof FQCN) {
             return [];
         }
         $index = $project->getIndex();
-        $this->logger->addDebug('Creating completion for ' . $fqcn->toString());
+        $this->logger->debug('Creating completion for ' . $fqcn->toString());
         $class = $index->findClassByFQCN($fqcn);
-        if(empty($class)){
+        if (empty($class)) {
             $class = $index->findInterfaceByFQCN($fqcn);
         }
-        if(empty($class)){
+        if (empty($class)) {
             return [];
         }
         $entries = [];
         $spec = new Specification($isThis ? 'private' : 'public');
-        if($class->methods !== null){
-            foreach($class->methods->all($spec) AS $method){
+        if ($class->methods !== null) {
+            foreach ($class->methods->all($spec) as $method) {
                 $entry = $this->createEntryForMethod($method);
                 $entries[$method->name] = $entry;
             }
         }
-        if($class instanceof InterfaceData){
+        if ($class instanceof InterfaceData) {
             return $entries;
         }
-        if($class->properties !== null){
-            foreach($class->properties->all($spec) AS $property){
+        if ($class->properties !== null) {
+            foreach ($class->properties->all($spec) as $property) {
                 $entries[$property->name] = $this->createEntryForProperty($property);
             }
         }
@@ -59,7 +62,8 @@ class ObjectCompleter {
      * @param MethodData $method a method
      * @return Entry
      */
-    protected function createEntryForMethod(MethodData $method){
+    protected function createEntryForMethod(MethodData $method)
+    {
         return new Entry(
             $method->name,
             $method->getSignature(),
@@ -67,7 +71,8 @@ class ObjectCompleter {
         );
     }
 
-    protected function createEntryForProperty(ClassProperty $prop){
+    protected function createEntryForProperty(ClassProperty $prop)
+    {
         $type = $prop->type instanceof FQCN ? $prop->type->getClassName() : 'mixed';
         return new Entry(
             $prop->name,

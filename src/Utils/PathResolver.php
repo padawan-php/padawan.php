@@ -20,7 +20,7 @@ class PathResolver
         $toParts = array_values(array_filter($this->path->split($to)));
         $i = 0;
         $count = min(count($fromParts), count($toParts));
-        while ($fromParts[$i] === $toParts[$i] && $i < $count) {
+        while ($i < $count && $fromParts[$i] === $toParts[$i]) {
             ++$i;
         }
         $pathToCommon = array_slice($toParts, $i);

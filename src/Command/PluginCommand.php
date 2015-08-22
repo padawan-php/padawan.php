@@ -8,32 +8,20 @@ class PluginCommand extends AbstractCommand
     {
         $commandName = array_shift($arguments);
         $pluginName = array_shift($arguments);
+        /** @var \Plugin\Package */
+        $package = $this->getContainer()->get("Plugin\\Package");
+        $plugins = $package->getPluginsList();
         if ($commandName === 'add') {
-            return $this->addAction($pluginName);
+            if (array_key_exists($pluginName, $plugins)) {
+                return;
+            }
+            $plugins[] = $pluginName;
         } elseif ($commandName === 'remove') {
-            return $this->removeAction($pluginName);
+            if (!array_key_exists($pluginName, $plugins)) {
+                return;
+            }
+            unset($plugins[$pluginName]);
         }
-    }
-    public function addAction($pluginName)
-    {
-        /** @var \Plugin\Package */
-        $package = $this->getContainer()->get("Plugin\\Package");
-        $plugins = $package->getPluginsList();
-        if (array_key_exists($pluginName, $plugins)) {
-            return;
-        }
-        $plugins[] = $pluginName;
-        $package->writePluginsList($plugins);
-    }
-    public function removeAction($pluginName)
-    {
-        /** @var \Plugin\Package */
-        $package = $this->getContainer()->get("Plugin\\Package");
-        $plugins = $package->getPluginsList();
-        if (!array_key_exists($pluginName, $plugins)) {
-            return;
-        }
-        unset($plugins[$pluginName]);
         $package->writePluginsList($plugins);
     }
 }

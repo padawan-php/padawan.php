@@ -7,6 +7,7 @@ use Entity\Index;
 use Command\ErrorCommand;
 use DI\Container;
 use Application\BaseApplication;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class App extends BaseApplication
@@ -43,6 +44,8 @@ class App extends BaseApplication
                 'Origin' => 'http://localhost:15155'
             ]);
         } catch (\Exception $e) {
+            $this->container->get(LoggerInterface::class)
+                ->addDebug("Response writing failed");
         }
     }
     protected function parseQuery(array $query, $data)

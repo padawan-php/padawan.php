@@ -8,7 +8,13 @@ use Entity\Collection\MethodsCollection;
 use Entity\Collection\PropertiesCollection;
 use Entity\Collection\ConstCollection;
 
-class ClassData{
+/**
+ * @property $properties
+ * @property $methods
+ * @property $constants
+ */
+class ClassData
+{
     const MODIFIER_PUBLIC    =  1;
     const MODIFIER_PROTECTED =  2;
     const MODIFIER_PRIVATE   =  4;
@@ -26,7 +32,8 @@ class ClassData{
     public $doc             = "";
     public $startLine       = 0;
     public $file            = "";
-    public function __construct(FQCN $fqcn, $file){
+    public function __construct(FQCN $fqcn, $file)
+    {
         $this->fqcn = $fqcn;
         $this->file = $file;
         $this->constants = new ConstCollection($this);
@@ -37,21 +44,25 @@ class ClassData{
     /**
      * @return ClassData
      */
-    public function getParent(){
+    public function getParent()
+    {
         return $this->parent;
     }
 
     /**
      * @return InterfaceData[]
      */
-    public function getInterfaces(){
+    public function getInterfaces()
+    {
         return $this->interfaces;
     }
 
-    public function getName(){
+    public function getName()
+    {
         return $this->fqcn->getClassName();
     }
-    public function setParent($parent){
+    public function setParent($parent)
+    {
         $this->parent = $parent;
         if($parent instanceof ClassData){
             foreach($this->methods->all() as $method){
@@ -65,27 +76,30 @@ class ClassData{
             }
         }
     }
-    public function addInterface($interface){
+    public function addInterface($interface)
+    {
         $fqcn = $interface instanceof InterfaceData ? $interface->fqcn : $interface;
         $this->interfaces[$fqcn->toString()] = $interface;
     }
-    public function addMethod(MethodData $method){
+    public function addMethod(MethodData $method)
+    {
         $this->methods->add($method);
     }
-    public function addProp(ClassProperty $prop){
+    public function addProp(ClassProperty $prop)
+    {
         $this->properties->add($prop);
     }
-    public function addConst($constName){
+    public function addConst($constName)
+    {
         $this->constants->add($constName);
     }
-    public function __get($name){
-        if($name === 'methods'){
+    public function __get($name)
+    {
+        if ($name === 'methods') {
             return $this->methods;
-        }
-        elseif($name === 'properties'){
+        } elseif ($name === 'properties') {
             return $this->properties;
-        }
-        elseif($name === 'constants'){
+        } elseif ($name === 'constants') {
             return $this->constants;
         }
     }

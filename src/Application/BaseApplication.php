@@ -49,10 +49,7 @@ abstract class BaseApplication
         return;
     }
 
-    protected function getArguments($request, $response, $data)
-    {
-        return [];
-    }
+    abstract protected function getArguments($request, $response, $data);
     /**
      * @return RouterInterface
      */
