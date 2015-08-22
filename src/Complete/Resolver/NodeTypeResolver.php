@@ -90,7 +90,7 @@ class NodeTypeResolver
         $chain = $this->createChain($node);
         $block = $chain;
         while ($block instanceof Chain) {
-            $this->logger->addDebug('looking for type of ' . $block->getName());
+            $this->logger->debug('looking for type of ' . $block->getName());
             $event = new TypeResolveEvent($block, $type);
             $this->dispatcher->dispatch(self::BLOCK_START, $event);
             if ($block->getType() === 'var') {
@@ -109,12 +109,18 @@ class NodeTypeResolver
                 $type = $this->getPropertyType($block->getName(), $type, $index);
             } elseif ($block->getType() === 'class') {
                 $type = $block->getName();
-                if ($type->getClassName() === 'self'
-                    || $type->getClassName() === 'static'
-                ) {
-                    $type = $scope->getFQCN();
-                } elseif ($type->getClassName() === 'parent') {
-                    $type = $this->getParentType($scope->getFQCN(), $index);
+                if ($type instanceof FQCN) {
+                    if ($type instanceof FQCN && (
+                        $type->getClassName() === 'self'
+                        || $type->getClassName() === 'static'
+                    )
+                    ) {
+                        $type = $scope->getFQCN();
+                    } elseif ($type->getClassName() === 'parent'
+                        && $scope->getFQCN() instanceof FQCN
+                    ) {
+                        $type = $this->getParentType($scope->getFQCN(), $index);
+                    }
                 }
             }
             $event = new TypeResolveEvent($block, $type);
@@ -170,38 +176,41 @@ class NodeTypeResolver
         }
         return $var->getType();
     }
-    protected function getMethodType($name, FQCN $type, Index $index){
+    protected function getMethodType($name, FQCN $type, Index $index)
+    {
         $class = $index->findClassByFQCN($type);
-        if(empty($class)){
+        if (empty($class)) {
             $class = $index->findInterfaceByFQCN($type);
         }
-        if(empty($class)){
+        if (empty($class)) {
             return null;
         }
         $method = $class->methods->get($name);
-        if(empty($method)){
+        if (empty($method)) {
             return null;
         }
         return $method->getReturn();
     }
-    protected function getPropertyType($name, FQCN $type, Index $index){
+    protected function getPropertyType($name, FQCN $type, Index $index)
+    {
         $class = $index->findClassByFQCN($type);
-        if(empty($class)){
+        if (empty($class)) {
             return null;
         }
         $prop = $class->properties->get($name);
-        if(empty($prop)){
+        if (empty($prop)) {
             return null;
         }
         return $prop->getType();
     }
-    protected function getParentType(FQCN $type, Index $index){
+    protected function getParentType(FQCN $type, Index $index)
+    {
         $class = $index->findClassByFQCN($type);
-        if(empty($class)){
+        if (empty($class)) {
             return null;
         }
         $parent = $class->getParent();
-        if(empty($parent)){
+        if (empty($parent)) {
             return null;
         }
         return $parent->fqcn;

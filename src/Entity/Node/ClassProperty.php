@@ -4,9 +4,11 @@ namespace Entity\Node;
 
 use Entity\FQCN;
 
-class ClassProperty {
+class ClassProperty
+{
     public $name;
     public $modifier    = 0;
+    /** @property FQCN|string $type */
     public $type        = "";
     public $defauls     = "";
     public $doc         = "";

@@ -2,20 +2,25 @@
 
 namespace Entity\Collection;
 
-class ConstCollection {
+use Entity\Node\ClassData;
 
-    public function __construct($class){
+class ConstCollection
+{
+    public function __construct($class)
+    {
         $this->class = $class;
         $this->map['class'] = 'class';
     }
-    public function add($constant){
+    public function add($constant)
+    {
         $this->map[$constant] = $constant;
     }
-    public function all(Specification $spec = null){
+    public function all()
+    {
         $consts = $this->map;
         $parent = $this->class->getParent();
-        if($parent instanceof ClassData){
-            $props = array_merge(
+        if ($parent instanceof ClassData) {
+            $consts = array_merge(
                 $parent->properties->all(),
                 $consts
             );
@@ -23,14 +28,15 @@ class ConstCollection {
         sort($consts);
         return $consts;
     }
-    public function get($propName, $spec = null){
-        if(array_key_exists($propName, $this->map)){
+    public function get($propName)
+    {
+        if (array_key_exists($propName, $this->map)) {
             $const = $this->map[$propName];
             return $const;
         }
         $parent = $this->class->getParent();
-        if($parent instanceof ClassData){
-            return $parent->properties->get($name);
+        if ($parent instanceof ClassData) {
+            return $parent->properties->get($propName);
         }
     }
 

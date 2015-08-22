@@ -4,7 +4,8 @@ namespace IO;
 
 use Utils\PathResolver;
 
-class BasicIO{
+class BasicIO
+{
     /**
      * index file name
      *
@@ -24,12 +25,6 @@ class BasicIO{
      * @var string
      */
     private $coreIndexFile;
-    /**
-     *
-     *
-     * @var string
-     */
-    private $pluginIndexFile;
 
     /**
      *
@@ -37,7 +32,8 @@ class BasicIO{
      */
     private $path;
 
-    public function __construct(PathResolver $path){
+    public function __construct(PathResolver $path)
+    {
         $this->path             = $path;
         $this->indexFileName    = './.padawan/project';
         $this->reportFileName   = './.padawan/report.txt';
@@ -48,7 +44,8 @@ class BasicIO{
      *
      * @return PathResolver
      */
-    public function getPath(){
+    public function getPath()
+    {
         return $this->path;
     }
     /**
