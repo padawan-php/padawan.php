@@ -1,6 +1,8 @@
 Padawan.php for composer projects
 =================================
 
+[![Join the chat at https://gitter.im/mkusher/padawan.php](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mkusher/padawan.php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/mkusher/padawan.php.svg?branch=master)](https://travis-ci.org/mkusher/padawan.php)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
 
