@@ -3,7 +3,6 @@
 namespace Entity\Completion;
 
 class Context {
-    const T_VAR              = 1;
     const T_USE              = 2;
     const T_NAMESPACE        = 4;
     const T_OBJECT           = 8;
@@ -13,6 +12,7 @@ class Context {
     const T_CLASS_STATIC     = 128;
     const T_CLASS_METHODS    = 256;
     const T_METHOD_CALL      = 512;
+    const T_VAR              = 1024;
 
     private $type            = 0;
     private $token;

@@ -71,6 +71,10 @@ describe('ContextResolver', function() {
                 $context = $this->resolver->getContext('$var->');
                 expect($context->isObject())->to->be->true;
             });
+            it('has type object after object operator and space', function() {
+                $context = $this->resolver->getContext('$var-> ');
+                expect($context->isObject())->to->be->true;
+            });
             it('has type object after object operator and $this', function() {
                 $context = $this->resolver->getContext('$this->');
                 expect($context->isObject())->to->be->true;
@@ -101,6 +105,24 @@ describe('ContextResolver', function() {
             it('has type method call after (', function() {
                 $context = $this->resolver->getContext('$var->method(');
                 expect($context->isMethodCall())->to->be->true;
+            });
+        });
+        describe("Variable", function() {
+            it('has type variable after $', function() {
+                $context = $this->resolver->getContext('$');
+                expect($context->isVar())->to->be->true;
+            });
+            it('has type variable after $ with TString', function() {
+                $context = $this->resolver->getContext('$var');
+                expect($context->isVar())->to->be->true;
+            });
+            it('hasn\'t type variable after space symbol', function() {
+                $context = $this->resolver->getContext('$var ');
+                expect($context->isVar())->to->be->false;
+            });
+            it('hasn\'t type variable after - symbol', function() {
+                $context = $this->resolver->getContext('$var-');
+                expect($context->isVar())->to->be->false;
             });
         });
     });
