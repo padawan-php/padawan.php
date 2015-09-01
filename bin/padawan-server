@@ -5,10 +5,15 @@ use React\Http\Response;
 use React\Http\Request;
 use Application\HTTP\App;
 
-define("ROOT", dirname(__DIR__));
+$autoloadPath = dirname(__DIR__) . "/autoload.php";
+$configPath = dirname(__DIR__) . "/mkusher/padawan/app/config/bin.php";
+if (!file_exists($autoloadPath)) {
+    $autoloadPath = dirname(__DIR__) . "/vendor/autoload.php";
+    $configPath = dirname(__DIR__) . "/app/config/bin.php";
+}
 
-require ROOT . "/app/config/bin.php";
-require ROOT . "/vendor/autoload.php";
+require($configPath);
+require($autoloadPath);
 
 $noFsIO = false;
 $port = 15155;

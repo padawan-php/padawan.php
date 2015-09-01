@@ -1,7 +1,11 @@
 #!/usr/bin/env php
 <?php
 
-require(dirname(__DIR__) . "/vendor/autoload.php");
+$autoloadPath = dirname(__DIR__) . "/autoload.php";
+if (!file_exists($autoloadPath)) {
+    $autoloadPath =dirname(__DIR__) . "/vendor/autoload.php";
+}
+require($autoloadPath);
 
 set_time_limit(0);
 ini_set('memory_limit', '2048M');
