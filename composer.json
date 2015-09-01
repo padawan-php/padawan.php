@@ -1,5 +1,5 @@
 {
-    "name": "mkusher/padawan.php",
+    "name": "mkusher/padawan",
     "description": "Smart php completion server",
     "authors": [
         {
@@ -10,6 +10,7 @@
     "autoload":{
         "psr-4":{"":"src/"}
     },
+    "bin": ["bin/padawan", "bin/padawan-server"],
     "license": "MIT",
     "require": {
         "phine/path": "~1.0",
