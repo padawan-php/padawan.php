@@ -5,15 +5,21 @@ use React\Http\Response;
 use React\Http\Request;
 use Application\HTTP\App;
 
-$autoloadPath = dirname(__DIR__) . "/autoload.php";
-$configPath = dirname(__DIR__) . "/mkusher/padawan/app/config/bin.php";
-if (!file_exists($autoloadPath)) {
-    $autoloadPath = dirname(__DIR__) . "/vendor/autoload.php";
-    $configPath = dirname(__DIR__) . "/app/config/bin.php";
+$autoloaders = [
+    __DIR__ . '/../../../autoload.php',
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/vendor/autoload.php',
+    __DIR__ . '/../autoload.php'
+];
+
+foreach ($autoloaders as $autoloader) {
+    if (file_exists($autoloader)) {
+        define("AUTOLOAD_PATH", $autoloader);
+        break;
+    }
 }
 
-require($configPath);
-require($autoloadPath);
+require(AUTOLOAD_PATH);
 
 $noFsIO = false;
 $port = 15155;

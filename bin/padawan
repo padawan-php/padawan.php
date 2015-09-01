@@ -1,11 +1,21 @@
 #!/usr/bin/env php
 <?php
 
-$autoloadPath = dirname(__DIR__) . "/autoload.php";
-if (!file_exists($autoloadPath)) {
-    $autoloadPath =dirname(__DIR__) . "/vendor/autoload.php";
+$autoloaders = [
+    __DIR__ . '/../../../autoload.php',
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/vendor/autoload.php',
+    __DIR__ . '/../autoload.php'
+];
+
+foreach ($autoloaders as $autoloader) {
+    if (file_exists($autoloader)) {
+        define("AUTOLOAD_PATH", $autoloader);
+        break;
+    }
 }
-require($autoloadPath);
+
+require(AUTOLOAD_PATH);
 
 set_time_limit(0);
 ini_set('memory_limit', '2048M');
