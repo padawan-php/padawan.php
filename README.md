@@ -5,6 +5,10 @@ Padawan.php for composer projects
 
 [![Build Status](https://travis-ci.org/mkusher/padawan.php.svg?branch=master)](https://travis-ci.org/mkusher/padawan.php)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
+[![Latest Stable Version](https://poser.pugx.org/mkusher/padawan/v/stable)](https://packagist.org/packages/mkusher/padawan)
+[![Total Downloads](https://poser.pugx.org/mkusher/padawan/downloads)](https://packagist.org/packages/mkusher/padawan)
+[![Latest Unstable Version](https://poser.pugx.org/mkusher/padawan/v/unstable)](https://packagist.org/packages/mkusher/padawan)
+[![License](https://poser.pugx.org/mkusher/padawan/license)](https://packagist.org/packages/mkusher/padawan)
 
 Smart php intelligent code completion server for composer projects.
 It tries to be a [Jedi](https://github.com/davidhalter/jedi-vim),
@@ -36,6 +40,14 @@ as you type.
 How to use
 ==========
 
+- Install padawan.php through `composer`:
+```bash
+$ composer global require mkusher/padawan
+```
+- Add [composer global bin to your $PATH](https://getcomposer.org/doc/03-cli.md#global):
+```bash
+PATH=$PATH:$HOME/.composer/vendor/bin
+```
 - Install plugin for your editor.
 - Run index generation command in your php composer
 project folder.
