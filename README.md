@@ -19,9 +19,9 @@ as you type.
 
 Padawan.php can be extended by various plugins, which will bring some
 extra completion, framework integrations or so.
-[See this paragraph to learn more](https://github.com/mkusher/padawan.php#plugins-for-editors)
+[See this paragraph to learn more](https://github.com/mkusher/padawan.php#pluginsextensions-for-padawanphp)
 
-It tries to be a [Jedi](https://github.com/davidhalter/jedi-vim),
+It tries to be a [Jedi](https://github.com/davidhalter/jedi),
 but currently it's only a padawan :)
 
 Plugins for editors
@@ -59,7 +59,7 @@ project folder.
 - Start padawan's server
 - Enjoy smart completion
 
-Check out how to do this in the plugin documentation for specific editor below.
+Check out how to do this in the plugin documentation for specific editor above.
 
 Plugins(extensions) for padawan.php
 -----------------------------------
