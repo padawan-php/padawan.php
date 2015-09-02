@@ -21,9 +21,6 @@ But as of now it is a completely new project with different design principles
 
 ### Demo video
 
-Currently it has basic completion for classes and methods based on doc comments
-and methods signature.
-
 Watch this short video to see what it can already do(image is clickable)
 [![ScreenShot](http://i1.ytimg.com/vi/Y54P2N1T6-I/maxresdefault.jpg)](https://www.youtube.com/watch?v=Y54P2N1T6-I)
 
@@ -32,7 +29,7 @@ Project
 
 Padawan.php is an http server that parses your project and gives you
 completions.
-Padawan.php reads autoload classmap of a composer project, parses
+Padawan.php looks recursively for all php files of a composer project, parses
 doc-comments and function declarations of each class and creates an index
 from them. After that it autoupdates the index and gives you completion
 as you type.
@@ -64,7 +61,7 @@ Plugins for editors
 
 If you wish to write your own plugin, vim plugin example may serve
 as a source of inspiration. Look at
-[wiki page](https://github.com/mkusher/padawan.php/wiki/Editor-plugins) for
+[wiki page](https://github.com/mkusher/padawan.php/wiki/Editors'-plugins) for
 some documentation.
 You are welcome to open an issue if you have any questions.
 
