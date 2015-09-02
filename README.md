@@ -19,9 +19,10 @@ This project was inspired by
 and started as a fork with a completely rewritten index generation part.
 But as of now it is a completely new project with different design principles
 
-### Demo video
+### Demo videos
 
-Watch this short video to see what it can already do(image is clickable)
+Watch this short videos to see what it can already do(image is clickable)
+[![ScreenShot](http://i1.ytimg.com/vi/qpLJD24DYcU/maxresdefault.jpg)](https://www.youtube.com/watch?v=qpLJD24DYcU)
 [![ScreenShot](http://i1.ytimg.com/vi/Y54P2N1T6-I/maxresdefault.jpg)](https://www.youtube.com/watch?v=Y54P2N1T6-I)
 
 Project
