@@ -1,32 +1,14 @@
-Padawan.php for composer projects
-=================================
+Padawan.php smart php intelligent code completion for php projects
+==================================================================
 
 [![Join the chat at https://gitter.im/mkusher/padawan.php](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mkusher/padawan.php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/mkusher/padawan.php.svg?branch=master)](https://travis-ci.org/mkusher/padawan.php)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/mkusher/padawan/v/stable)](https://packagist.org/packages/mkusher/padawan)
 [![Total Downloads](https://poser.pugx.org/mkusher/padawan/downloads)](https://packagist.org/packages/mkusher/padawan)
+[![Latest Stable Version](https://poser.pugx.org/mkusher/padawan/v/stable)](https://packagist.org/packages/mkusher/padawan)
 [![Latest Unstable Version](https://poser.pugx.org/mkusher/padawan/v/unstable)](https://packagist.org/packages/mkusher/padawan)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
 [![License](https://poser.pugx.org/mkusher/padawan/license)](https://packagist.org/packages/mkusher/padawan)
-
-Smart php intelligent code completion server for composer projects.
-It tries to be a [Jedi](https://github.com/davidhalter/jedi-vim),
-but currently it's only a padawan.
-
-This project was inspired by
-[phpcomplete-extended by M2mdas](https://github.com/m2mdas/phpcomplete-extended)
-and started as a fork with a completely rewritten index generation part.
-But as of now it is a completely new project with different design principles
-
-### Demo videos
-
-Watch this short videos to see what it can already do(image is clickable)
-[![ScreenShot](http://i1.ytimg.com/vi/qpLJD24DYcU/maxresdefault.jpg)](https://www.youtube.com/watch?v=qpLJD24DYcU)
-[![ScreenShot](http://i1.ytimg.com/vi/Y54P2N1T6-I/maxresdefault.jpg)](https://www.youtube.com/watch?v=Y54P2N1T6-I)
-
-Project
-=======
 
 Padawan.php is an http server that parses your project and gives you
 completions.
@@ -34,6 +16,31 @@ Padawan.php looks recursively for all php files of a composer project, parses
 doc-comments and function declarations of each class and creates an index
 from them. After that it autoupdates the index and gives you completion
 as you type.
+
+Padawan.php can be extended by various plugins, which will bring some
+extra completion, framework integrations or so.
+[See this paragraph to learn more](https://github.com/mkusher/padawan.php#plugins-for-editors)
+
+It tries to be a [Jedi](https://github.com/davidhalter/jedi-vim),
+but currently it's only a padawan :)
+
+Plugins for editors
+-------------------
+
+1. [Vim](https://github.com/mkusher/padawan.vim)
+2. [Sublime Text 3](https://github.com/mkusher/padawan.sublime)
+
+If you wish to write your own plugin, vim plugin example may serve
+as a source of inspiration. Look at
+[wiki page](https://github.com/mkusher/padawan.php/wiki/Editors'-plugins) for
+some documentation.
+You are welcome to open an issue if you have any questions.
+
+### Demo videos
+
+Watch this short videos to see what it can already do(image is clickable)
+[![ScreenShot](http://i1.ytimg.com/vi/qpLJD24DYcU/maxresdefault.jpg)](https://www.youtube.com/watch?v=qpLJD24DYcU)
+[![ScreenShot](http://i1.ytimg.com/vi/Y54P2N1T6-I/maxresdefault.jpg)](https://www.youtube.com/watch?v=Y54P2N1T6-I)
 
 How to use
 ==========
@@ -54,18 +61,6 @@ project folder.
 
 Check out how to do this in the plugin documentation for specific editor below.
 
-Plugins for editors
--------------------
-
-1. [Vim](https://github.com/mkusher/padawan.vim)
-2. [Sublime Text 3](https://github.com/mkusher/padawan.sublime)
-
-If you wish to write your own plugin, vim plugin example may serve
-as a source of inspiration. Look at
-[wiki page](https://github.com/mkusher/padawan.php/wiki/Editors'-plugins) for
-some documentation.
-You are welcome to open an issue if you have any questions.
-
 Plugins(extensions) for padawan.php
 -----------------------------------
 
@@ -76,7 +71,12 @@ Padawan.php can be extended by plugins, there are:
 Look at [full plugins list](https://github.com/mkusher/padawan.php/wiki/Plugins-list)
 
 Why not the original plugin
-===========================
+---------------------------
+
+This project was inspired by
+[phpcomplete-extended by M2mdas](https://github.com/m2mdas/phpcomplete-extended)
+and started as a fork with a completely rewritten index generation part.
+But as of now it is a completely new project with different design principles
 
 M2mdas's plugin is pretty good, but has some core bugs due to
 self-written parser:
@@ -94,11 +94,11 @@ Roadmap
 
 Now in progress:
 
+* Add completion for built-in php classes and functions
 * Implement `go to definition`, `go to assingment`, `show documentation`
 * Add plugins for editors(emacs, sublime text, atom and etc.)
 * Extend type guessing(process classes' contructors, class doc-comment, foreach loops)
 * Implement index updating
-* Add support for non-composer projects
 
 License
 -------
