@@ -1,6 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+set_time_limit(0);
+ini_set('memory_limit', '2048M');
+ini_set('xdebug.max_nesting_level', '9000');
+ini_set('display_errors', 'stderr');
+
 use React\Http\Response;
 use React\Http\Request;
 use Application\HTTP\App;

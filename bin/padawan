@@ -1,6 +1,11 @@
 #!/usr/bin/env php
 <?php
 
+set_time_limit(0);
+ini_set('memory_limit', '2048M');
+ini_set('xdebug.max_nesting_level', '9000');
+ini_set('display_errors', 'stderr');
+
 $autoloaders = [
     __DIR__ . '/../../../autoload.php',
     __DIR__ . '/../vendor/autoload.php',
@@ -16,10 +21,6 @@ foreach ($autoloaders as $autoloader) {
 }
 
 require(AUTOLOAD_PATH);
-
-set_time_limit(0);
-ini_set('memory_limit', '2048M');
-ini_set('display_errors', 'stderr');
 
 $arguments = [];
 $app = new \Application\CLI\App(false);
