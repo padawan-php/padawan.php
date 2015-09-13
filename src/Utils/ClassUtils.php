@@ -12,6 +12,7 @@ class ClassUtils {
         $this->path = $path;
         $this->parser = $parser;
     }
+    /** @return Parser */
     public function getParser() {
         return $this->parser;
     }

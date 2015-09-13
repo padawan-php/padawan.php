@@ -28,7 +28,6 @@ abstract class BaseApplication
         if ($command instanceof ErrorCommand) {
             return $command->run([]);
         }
-        $this->container = $command->getContainer();
         $arguments = $this->getArguments($request, $response, $data);
         try {
             $result = $command->run(
@@ -38,7 +37,6 @@ abstract class BaseApplication
             $result = [
                 "error" => $e->getMessage()
             ];
-            echo $e->getMessage();
         }
 
         return $result;
@@ -47,6 +45,12 @@ abstract class BaseApplication
     public function after()
     {
         return;
+    }
+
+    /** @return Container */
+    public function getContainer()
+    {
+        return $this->container;
     }
 
     abstract protected function getArguments($request, $response, $data);

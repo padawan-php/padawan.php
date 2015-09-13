@@ -22,7 +22,8 @@ class App extends BaseApplication
     {
         $result = parent::handle($request, $response, $data);
         $this->setResponseHeaders($response);
-        return json_encode($result);
+        $responseContent = json_encode($result);
+        return $responseContent;
     }
     protected function getArguments($request, $response, $data)
     {

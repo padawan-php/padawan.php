@@ -1,38 +1,121 @@
 <?php
 
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
+use Behat\Behat\Context\SnippetAcceptingContext;
+use Behat\Gherkin\Node\PyStringNode;
+use Behat\Gherkin\Node\TableNode;
+use Application\HTTP\App;
+use Entity\Project;
+use Entity\Index;
+use Fake\Request;
+use Fake\Response;
+use DI\Container;
+use Psr\Log\LoggerInterface;
+use Monolog\Handler\NullHandler;
 
-class FeatureContext implements Context {
-
-    public function __construct(){
-        $this->rootPath = dirname(dirname(__DIR__)) . "/app/tmp";
-        echo $this->rootPath;
-    }
+/**
+ * Defines application features from the specific context.
+ */
+class FeatureContext implements Context, SnippetAcceptingContext
+{
     /**
-     * @BeforeScenario
+     * Initializes context.
+     *
+     * Every scenario gets its own context instance.
+     * You can also pass arbitrary arguments to the
+     * context constructor through behat.yml.
      */
-    public function prepare(){
-        exec(sprintf("cd %s && mkdir project", $this->rootPath));
+    public function __construct()
+    {
+        $this->createApplication();
+        $this->createProject();
+    }
+
+    public function createApplication()
+    {
+        $this->app = new App(true);
+        $container = $this->app->getContainer();
+        $container->get("Psr\\Log\\LoggerInterface")->popHandler();
+        $container->get("Psr\\Log\\LoggerInterface")->pushHandler(new NullHandler());
+    }
+
+    public function createProject()
+    {
+        $this->project = new Project(new Index);
     }
 
     /**
-     * @AfterScenario
+     * @Given there is a file with:
      */
-    public function cleanProject(){
-        exec(sprintf("cd %s && rm -rf project", $this->rootPath));
-    }
-
-    public function getProjectPath(){
-        return $this->rootPath . "/project";
+    public function thereIsAFileWith(PyStringNode $string)
+    {
+        $file = uniqid() . ".php";
+        $container = $this->app->getContainer();
+        $generator = $container->get("Generator\IndexGenerator");
+        $processor = $generator->getProcessor();
+        $processor->clearResultNodes();
+        $parser = $generator->getClassUtils()->getParser();
+        $parser->addProcessor($processor);
+        $this->content = $string->getRaw();
+        $scope = $parser->parseContent($file, $this->content, null, false);
+        $generator->processFileScope($this->project->getIndex(), $scope);
     }
 
     /**
-     * @Given I have composer project
+     * @When I type :code on the :linenum line
      */
-    public function createComposerProject(){
-        $path = $this->getProjectPath();
-        exec(sprintf("cd %s && echo '{}' > composer.json", $path));
+    public function iTypeOnTheLine($code, $linenum)
+    {
+        $content = explode("\n", $this->content);
+        if (!isset($content[$linenum-1])) {
+            $content[$linenum-1] = "";
+        }
+        $content[$linenum-1] .= $code;
+        $this->content = implode("\n", $content);
+        $this->line = $linenum - 1;
+        $this->column = strlen($content[$linenum-1]);
     }
 
-    private $rootPath;
+    /**
+     * @When ask for completion
+     */
+    public function askForCompletion()
+    {
+        $request = new Request("complete", [
+            'line' => $this->line + 1,
+            'column' => $this->column + 1,
+            'file' => $this->filename
+        ], $this->content);
+        $this->response = json_decode(
+            $this->app->handle($request, new Response, $request->body),
+            true
+        );
+    }
+
+    /**
+     * @Then I should get:
+     */
+    public function iShouldGet(TableNode $table)
+    {
+        if (isset($this->response["error"])) {
+            throw new \Exception($this->response["error"]);
+        }
+        $result = array_map(function ($item) {
+            return [
+                'Name' => $item["name"]
+            ];
+        }, $this->response["completion"]);
+        expect($table->getColumnsHash())->to->be->equal($result);
+    }
+
+    /** @var App */
+    private $app;
+    /** @var Project */
+    private $project;
+    private $filename;
+    private $line;
+    private $column;
+    private $content;
+    private $response;
 }

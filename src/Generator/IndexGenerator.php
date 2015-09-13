@@ -89,20 +89,26 @@ class IndexGenerator
         if ($index->isParsed($file) && !$rewrite) {
             return;
         }
+        $this->processFileScope(
+            $index,
+            $this->createScopeForFile($file, $createCache)
+        );
+        $index->addParsedFile($file);
+    }
+    public function createScopeForFile($file, $createCache = true)
+    {
         $startParser = microtime(1);
         $processor = $this->processor;
         $processor->clearResultNodes();
         $parser = $this->getClassUtils()->getParser();
         $parser->addProcessor($processor);
-        $nodes = $this->getClassUtils()->getParser()
-            ->parseFile($file, null, $createCache);
+        $nodes = $parser->parseFile($file, null, $createCache);
         $end = microtime(1) - $startParser;
         $this->getLogger()
             ->info("Parsing: [$end]s");
-        $this->processFileNodes($index, $nodes);
-        $index->addParsedFile($file);
+        return $nodes;
     }
-    public function processFileNodes(Index $index, $nodes)
+    public function processFileScope(Index $index, $nodes)
     {
         $this->getLogger()->debug('Processing nodes ' . count($nodes));
         foreach ($nodes as $node) {
@@ -124,6 +130,11 @@ class IndexGenerator
         return $this->logger;
     }
 
+    public function getProcessor()
+    {
+        return $this->processor;
+    }
+
     protected function populateClassMapIndex(Project $project)
     {
         $classMap = $this->getComposerUtils()->getCanonicalClassMap($project->getRootDir());
@@ -136,6 +147,7 @@ class IndexGenerator
         return $this->composer;
     }
 
+    /** @return ClassUtils */
     public function getClassUtils()
     {
         return $this->classUtils;

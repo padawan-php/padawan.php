@@ -124,7 +124,7 @@ class CompleteEngine {
             $parser = $this->parser;
             $parser->addProcessor($this->indexProcessor);
             $nodes = $parser->parseContent($file, $content);
-            $this->generator->processFileNodes(
+            $this->generator->processFileScope(
                 $project->getIndex(),
                 $nodes
             );
