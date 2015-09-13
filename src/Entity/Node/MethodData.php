@@ -4,7 +4,8 @@ namespace Entity\Node;
 
 use Entity\FQCN;
 
-class MethodData {
+class MethodData extends FunctionData
+{
     public $name        = "";
     public $arguments   = [];
     public $doc         = "";
@@ -13,78 +14,37 @@ class MethodData {
     public $endLine     = 0;
     public $return      = null;
 
-    public function __construct($name) {
-        $this->name = $name;
-    }
-
-    public function getSignature() {
-        return sprintf("(%s) : %s",
-            $this->getParamsStr(), $this->getReturnStr()
-        );
-    }
-
-    public function addParam(MethodParam $param) {
-        if (array_key_exists($param->getName(), $this->arguments)) {
-            $var = $this->arguments[$param->getName()];
-            if (empty($param->getType())) {
-                $param->setType($var->getType());
-            }
-        }
-        $this->arguments[$param->getName()] = $param;
-    }
-    public function getParamsStr() {
-        $paramsStr = [];
-        foreach ($this->arguments as $argument) {
-            /** @var MethodParam $argument */
-            $curParam = [];
-            if ($argument->getType()) {
-                if ($argument->getType() instanceof FQCN) {
-                    $curParam[] = $argument->getType()->getClassName();
-                } else {
-                    $curParam[] = $argument->getType();
-                }
-            }
-            $curParam[] = sprintf("$%s", $argument->getName());
-            $paramsStr[] = implode(" ", $curParam);
-        }
-        return implode(", ", $paramsStr);
-    }
-    public function getReturnStr() {
-        if ($this->return instanceof FQCN) {
-            return $this->return->getClassName();
-        }
-        return "mixed";
-    }
-    public function getReturn() {
-        return $this->return;
-    }
-    public function setReturn(FQCN $fqcn = null) {
-        $this->return = $fqcn;
-    }
-    public function isPublic() {
+    public function isPublic()
+    {
         return (bool) ($this->type & ClassData::MODIFIER_PUBLIC);
     }
 
-    public function isProtected() {
+    public function isProtected()
+    {
         return (bool) ($this->type & ClassData::MODIFIER_PROTECTED);
     }
 
-    public function isPrivate() {
+    public function isPrivate()
+    {
         return (bool) ($this->type & ClassData::MODIFIER_PRIVATE);
     }
 
-    public function isAbstract() {
+    public function isAbstract()
+    {
         return (bool) ($this->type & ClassData::MODIFIER_ABSTRACT);
     }
 
-    public function isFinal() {
+    public function isFinal()
+    {
         return (bool) ($this->type & ClassData::MODIFIER_FINAL);
     }
 
-    public function isStatic() {
+    public function isStatic()
+    {
         return (bool) ($this->type & ClassData::MODIFIER_STATIC);
     }
-    public function isMagic() {
+    public function isMagic()
+    {
         return in_array($this->name, [
             '__construct',
             '__destruct',
@@ -97,7 +57,8 @@ class MethodData {
             '__clone'
         ]);
     }
-    public function setType($type) {
+    public function setType($type)
+    {
         $this->type = $type;
     }
 }

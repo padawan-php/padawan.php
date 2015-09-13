@@ -19,6 +19,15 @@ class InterfaceData {
         $this->file = $file;
         $this->methods = new MethodsCollection($this);
     }
+    /** @return FQCN */
+    public function getFQCN()
+    {
+        return $this->fqcn;
+    }
+    public function getName()
+    {
+        return $this->getFQCN()->getClassName();
+    }
     public function addMethod(MethodData $method) {
         $this->methods->add($method);
     }
