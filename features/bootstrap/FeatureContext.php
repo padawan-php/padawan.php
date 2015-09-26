@@ -63,7 +63,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When I type :code on the :linenum line
+     * @When I type :code on the :line line
      */
     public function iTypeOnTheLine($code, $linenum)
     {
@@ -101,10 +101,17 @@ class FeatureContext implements Context, SnippetAcceptingContext
         if (isset($this->response["error"])) {
             throw new \Exception($this->response["error"]);
         }
-        $result = array_map(function ($item) {
-            return [
-                'Name' => $item["name"]
-            ];
+        $columns = $table->getRow(0);
+        $result = array_map(function ($item) use($columns) {
+            $hash = [];
+            switch(count($columns)) {
+                case 2:
+                    $hash["Signature"] = $item["Signature"];
+                case 1:
+                    $hash["Name"] = $item["name"];
+                    break;
+            }
+            return $hash;
         }, $this->response["completion"]);
         expect($table->getColumnsHash())->to->be->equal($result);
     }
