@@ -15,6 +15,7 @@ use Entity\Completion\Scope\FileScope;
 use Entity\Completion\Scope\FunctionScope;
 use Entity\Completion\Scope\MethodScope;
 use Entity\Completion\Scope\ClassScope;
+use Entity\Completion\Scope\ClosureScope;
 use PhpParser\NodeTraverserInterface;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
@@ -117,7 +118,8 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
     }
     public function createScopeFromClosure(Closure $node)
     {
-        $this->createScope();
+        $scope = $this->scope;
+        $this->scope = new ClosureScope($scope);
         foreach ($node->params as $param) {
             $this->scope->addVar(
                 $this->paramParser->parse($param)

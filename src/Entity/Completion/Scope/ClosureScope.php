@@ -5,6 +5,6 @@ namespace Entity\Completion\Scope;
 use Entity\Node\FunctionData;
 use Entity\Completion\Scope;
 
-class ClojureScope extends AbstractChildScope
+class ClosureScope extends AbstractChildScope
 {
 }

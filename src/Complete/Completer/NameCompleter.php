@@ -19,7 +19,7 @@ class NameCompleter implements CompleterInterface
             if (!empty($postfix) && strpos($name, $postfix) === false) {
                 continue;
             }
-            $entries[$name] = new Entry($function->name, "", $function->doc);
+            $entries[$name] = new Entry($function->name, $function->getSignature(), $function->doc);
         }
         $entries = array_values($entries);
         return $entries;
