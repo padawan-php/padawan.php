@@ -22,13 +22,19 @@ describe('ContextResolver', function() {
         $this->dummyLine = '$obj->getMethod()->';
     });
     describe('->getContext()', function() {
-        it('throws exception on empty line', function() {
-            expect([$this->resolver, 'getContext'])
-                ->with('', $this->index)->to->throw('Exception');
-        });
         it('returns Context instance', function() {
             $result = $this->resolver->getContext($this->dummyLine);
             expect($result)->to->be->an->instanceof(Context::class);
+        });
+        it('returns empty Context for empty line', function() {
+            $context = $this->resolver->getContext("");
+            expect($context->isEmpty())->to->be->true;
+        });
+        describe("Name", function () {
+            it('has type name after T_STRING', function () {
+                $context = $this->resolver->getContext("str_r");
+                expect($context->isString())->to->be->true;
+            });
         });
         describe('Namespace', function() {
             it('has type namespace after namespace symbol', function() {

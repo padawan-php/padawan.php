@@ -4,11 +4,13 @@ namespace Complete;
 
 use Entity\Project;
 use Entity\Completion\Scope;
+use Entity\Completion\Scope\FileScope;
+use Entity\FQN;
 use Parser\Parser;
 use Generator\IndexGenerator;
 use Complete\Completer\CompleterFactory;
 use Complete\Resolver\ContextResolver;
-use Parser\Processor\IndexProcessor;
+use Parser\Processor\FileNodesProcessor;
 use Parser\Processor\ScopeProcessor;
 use Psr\Log\LoggerInterface;
 
@@ -18,7 +20,7 @@ class CompleteEngine {
         IndexGenerator $generator,
         ContextResolver $contextResolver,
         CompleterFactory $completer,
-        IndexProcessor $indexProcessor,
+        FileNodesProcessor $fileProcessor,
         ScopeProcessor $scopeProcessor,
         LoggerInterface $logger
     ) {
@@ -26,7 +28,7 @@ class CompleteEngine {
         $this->generator        = $generator;
         $this->contextResolver  = $contextResolver;
         $this->completerFactory = $completer;
-        $this->indexProcessor   = $indexProcessor;
+        $this->fileProcessor    = $fileProcessor;
         $this->scopeProcessor   = $scopeProcessor;
         $this->logger           = $logger;
         $this->cachePool        = [];
@@ -49,14 +51,14 @@ class CompleteEngine {
             try {
                 $scope = $this->processFileContent($project, $lines, $line, $file);
                 if (empty($scope)) {
-                    $scope = new Scope;
+                    $scope = new FileScope(new FQN);
                 }
                 $this->logger->debug(sprintf(
                     "%s seconds for ast processing",
                     (microtime(1) - $start)
                 ));
             } catch (\Exception $e) {
-                $scope = new Scope;
+                $scope = new FileScope(new FQN);
             }
             $entries = $this->findEntries($project, $scope, $completionLine, $column);
             $this->logger->debug(sprintf(
@@ -117,12 +119,11 @@ class CompleteEngine {
             $this->cachePool[$file] = [0, [], []];
         }
         if ($this->isValidCache($file, $content)) {
-            list(,, $scopeNodes) = $this->cachePool[$file];
+            list(,, $scope) = $this->cachePool[$file];
         }
-        if (empty($scopeNodes)) {
-            $this->indexProcessor->clearResultNodes();
+        if (empty($scope)) {
             $parser = $this->parser;
-            $parser->addProcessor($this->indexProcessor);
+            $parser->addProcessor($this->fileProcessor);
             $nodes = $parser->parseContent($file, $content);
             $this->generator->processFileScope(
                 $project->getIndex(),
@@ -132,14 +133,13 @@ class CompleteEngine {
             $uses = $parser->getUses();
             $this->scopeProcessor->setIndex($project->getIndex());
             $this->scopeProcessor->setLine($line);
-            $this->scopeProcessor->clearResultNodes();
             $parser->addProcessor($this->scopeProcessor);
-            $scopeNodes = $parser->parseContent($file, $content, $uses);
+            $scope = $parser->parseContent($file, $content, $uses);
             $contentHash = hash('sha1', $content);
-            $this->cachePool[$file] = [$contentHash, $nodes, $scopeNodes];
+            $this->cachePool[$file] = [$contentHash, $nodes, $scope];
         }
-        if (count($scopeNodes)) {
-            return $scopeNodes[0];
+        if ($scope) {
+            return $scope;
         }
         return null;
     }
@@ -157,8 +157,8 @@ class CompleteEngine {
     private $generator;
     private $contextResolver;
     private $completerFactory;
-    /** @property IndexProcessor */
-    private $indexProcessor;
+    /** @property FileNodesProcessor */
+    private $fileProcessor;
     /** @property ScopeProcessor */
     private $scopeProcessor;
     private $cachePool;

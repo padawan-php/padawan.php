@@ -63,7 +63,7 @@ class NodeTypeResolver
     /**
      * Calculates type of the passed last node in chain
      *
-     * @param PhpParser\Node $node
+     * @param \PhpParser\Node $node
      * @param Index $index
      * @param Scope $scope
      * @return FQCN|null
@@ -77,7 +77,7 @@ class NodeTypeResolver
     /**
      * Calculates type of the passed chained node
      *
-     * @param PhpParser\Node $node
+     * @param \PhpParser\Node $node
      * @param Index $index
      * @param Scope $scope
      * @return FQCN[]

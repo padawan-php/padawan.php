@@ -6,11 +6,12 @@ use Entity\Node\ClassData;
 use Entity\Node\InterfaceData;
 use Entity\Index;
 use Entity\Project;
+use Entity\Completion\Scope\FileScope;
 use Utils\PathResolver;
 use Utils\Composer;
 use Utils\ClassUtils;
 use Psr\Log\LoggerInterface;
-use Parser\Processor\IndexProcessor;
+use Parser\Processor\FileNodesProcessor;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class IndexGenerator
@@ -23,7 +24,7 @@ class IndexGenerator
         Composer $composer,
         ClassUtils $class,
         LoggerInterface $logger,
-        IndexProcessor $processor,
+        FileNodesProcessor $processor,
         EventDispatcher $dispatcher,
         FilesFinder $filesFinder,
         $verbose = false
@@ -99,28 +100,35 @@ class IndexGenerator
     {
         $startParser = microtime(1);
         $processor = $this->processor;
-        $processor->clearResultNodes();
         $parser = $this->getClassUtils()->getParser();
         $parser->addProcessor($processor);
         $nodes = $parser->parseFile($file, null, $createCache);
         $end = microtime(1) - $startParser;
         $this->getLogger()
             ->info("Parsing: [$end]s");
+        if (is_array($nodes)) {
+            print_r($nodes);
+            die();
+        }
         return $nodes;
     }
-    public function processFileScope(Index $index, $nodes)
+    public function processFileScope(Index $index, FileScope $scope)
     {
-        $this->getLogger()->debug('Processing nodes ' . count($nodes));
-        foreach ($nodes as $node) {
-            if ($node instanceof ClassData) {
-                $this->getLogger()->debug('Processing node ' . $node->fqcn->toString());
-                $index->addFQCN($node->fqcn);
-                $index->addClass($node);
-            } elseif ($node instanceof InterfaceData) {
-                $this->getLogger()->debug('Processing node ' . $node->fqcn->toString());
-                $index->addFQCN($node->fqcn);
-                $index->addInterface($node);
-            }
+        $nodesNum = count($scope->getClasses()) + count($scope->getInterfaces());
+        $this->getLogger()->debug('Processing nodes ' . $nodesNum);
+        foreach ($scope->getClasses() as $classData) {
+            $this->getLogger()->debug('Processing node ' . $classData->fqcn->toString());
+            $index->addFQCN($classData->fqcn);
+            $index->addClass($classData);
+        }
+        foreach ($scope->getInterfaces() as $interfaceData) {
+            $this->getLogger()->debug('Processing node ' . $interfaceData->fqcn->toString());
+            $index->addFQCN($interfaceData->fqcn);
+            $index->addInterface($interfaceData);
+        }
+        foreach ($scope->getFunctions() as $functionData) {
+            $this->getLogger()->debug('Processing node ' . $functionData->name);
+            $index->addFunction($functionData);
         }
     }
 

@@ -10,8 +10,8 @@ use Entity\Node\MethodParam;
 use Entity\Node\Variable;
 use Entity\Node\ClassProperty;
 
-class CommentParser {
-
+class CommentParser
+{
     public function __construct(UseParser $useParser) {
         $this->useParser = $useParser;
     }
@@ -119,7 +119,8 @@ class CommentParser {
                 "/\**\/$/"
             ], "", $line);
         }
-        return implode("\n", $lines);
+        $text = implode("\n", $lines);
+        return utf8_encode($text);
     }
 
     /**

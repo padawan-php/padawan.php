@@ -20,6 +20,7 @@ class CompleterFactory
         StaticCompleter $staticCompleter,
         UseCompleter $useCompleter,
         VarCompleter $varCompleter,
+        NameCompleter $nameCompleter,
         EventDispatcher $dispatcher
     ) {
         $this->classNameCompleter = $classNameCompleter;
@@ -29,6 +30,7 @@ class CompleterFactory
         $this->staticCompleter = $staticCompleter;
         $this->useCompleter = $useCompleter;
         $this->varCompleter = $varCompleter;
+        $this->nameCompleter = $nameCompleter;
         $this->dispatcher = $dispatcher;
     }
     public function getCompleter(Context $context, Project $project)
@@ -47,6 +49,8 @@ class CompleterFactory
             return $this->staticCompleter;
         } elseif ($context->isVar()) {
             return $this->varCompleter;
+        } elseif ($context->isString() || $context->isEmpty()) {
+            return $this->nameCompleter;
         }
         $event = new CustomCompleterEvent($project, $context);
         $this->dispatcher->dispatch(self::CUSTOM_COMPLETER, $event);
@@ -64,5 +68,6 @@ class CompleterFactory
     private $staticCompleter;
     private $useCompleter;
     private $varCompleter;
+    private $nameCompleter;
     private $dispatcher;
 }

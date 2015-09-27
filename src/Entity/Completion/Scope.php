@@ -5,6 +5,7 @@ namespace Entity\Completion;
 use Entity\FQCN;
 use Entity\Node\Variable;
 use Entity\Node\Uses;
+use Entity\Node\FunctionData;
 
 interface Scope
 {
@@ -18,8 +19,8 @@ interface Scope
     /** @return Uses */
     public function getUses();
     public function getFunctions();
-    public function getFunction();
-    public function addFunction($function);
+    public function getFunction($functionName);
+    public function addFunction(FunctionData $function);
     /** @return string[] */
     public function getConstants();
     public function getConstant($constName);

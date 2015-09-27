@@ -6,6 +6,7 @@ use Entity\Completion\Scope;
 use Entity\FQCN;
 use Entity\Node\Uses;
 use Entity\Node\Variable;
+use Entity\Node\FunctionData;
 
 abstract class AbstractScope implements Scope
 {
@@ -46,9 +47,9 @@ abstract class AbstractScope implements Scope
         }
     }
 
-    public function addFunction($function)
+    public function addFunction(FunctionData $function)
     {
-        throw \Exception("OOOOOPS");
+        $this->functions[$function->name] = $function;
     }
 
     /** @return string[] */

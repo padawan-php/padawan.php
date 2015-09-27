@@ -12,6 +12,7 @@ abstract class AbstractChildScope extends AbstractScope
     {
         $this->parent = $scope;
     }
+    /** @return Scope */
     public function getParent()
     {
         return $this->parent;

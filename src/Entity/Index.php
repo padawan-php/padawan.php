@@ -4,6 +4,7 @@ namespace Entity;
 
 use Entity\Node\InterfaceData;
 use Entity\Node\ClassData;
+use Entity\Node\FunctionData;
 
 class Index
 {
@@ -15,6 +16,7 @@ class Index
     private $extends            = [];
     private $implements         = [];
     private $parsedFiles        = [];
+    private $functions          = [];
 
     public function getFQCNs()
     {
@@ -60,6 +62,16 @@ class Index
     }
 
     /**
+     * @return FunctionData
+     */
+    public function findFunctionByName($functionName)
+    {
+        if (!array_key_exists($functionName, $this->functions)) {
+            return $this->functions[$functionName];
+        }
+    }
+
+    /**
      * @return ClassData[]
      */
     public function findClassChildren(FQCN $class) {
@@ -97,6 +109,14 @@ class Index
         return $this->interfaces;
     }
 
+    /**
+     * @return FunctionData[]
+     */
+    public function getFunctions()
+    {
+        return $this->functions;
+    }
+
     public function addClass(ClassData $class) {
         $this->classes[$class->fqcn->toString()] = $class;
         if ($class->getParent() instanceof FQCN) {
@@ -122,6 +142,11 @@ class Index
                 $this->addImplement($interface, $parent);
             }
         }
+    }
+
+    public function addFunction(FunctionData $function)
+    {
+        $this->functions[$function->name] = $function;
     }
 
     public function addFQCN(FQCN $fqcn) {

@@ -29,12 +29,14 @@ class Parser {
         $this->astPool          = [];
         $this->logger           = $logger;
     }
-    public function parseFile($file, Uses $uses = null, $createCache = true) {
+    public function parseFile($file, Uses $uses = null, $createCache = true)
+    {
         $file = $this->path->getAbsolutePath($file);
         $content = $this->path->read($file);
         return $this->parseContent($file, $content, $uses, $createCache);
     }
-    public function parseContent($file, $content, Uses $uses = null, $createCache = true) {
+    public function parseContent($file, $content, Uses $uses = null, $createCache = true)
+    {
         if ($createCache) {
             $hash = hash('md5', $content);
             if (!array_key_exists($file, $this->astPool)) {
@@ -56,7 +58,8 @@ class Parser {
             }
             catch (\Exception $e) {
                 $this->logger->addError(sprintf("Parsing failed in file %s\n", $file));
-                return [];
+                $this->logger->error($e);
+                return null;
             }
             if ($createCache) {
                 $this->astPool[$file] = [$hash, $ast];
@@ -66,23 +69,27 @@ class Parser {
             count($this->processors)
         ));
         $this->traverser->traverse($ast);
-        $nodes = $this->getResultNode();
+        $nodes = $this->getResultScopes();
         $this->clearProcessors();
-        $this->logger->addInfo('Found ' . count($nodes) . ' nodes');
+        $this->logger->addInfo('Found ' . count($nodes) . ' scopes');
         return $nodes;
     }
-    public function setUses(Uses $uses) {
+    public function setUses(Uses $uses)
+    {
         $this->uses = $uses;
         $this->useParser->setUses($uses);
         $this->namespaceParser->setUses($uses);
     }
-    public function getUses() {
+    public function getUses()
+    {
         return $this->uses;
     }
-    public function parseFQCN($fqcn) {
+    public function parseFQCN($fqcn)
+    {
         return $this->useParser->parseFQCN($fqcn);
     }
-    public function addProcessor(Processor\ProcessorInterface $processor) {
+    public function addProcessor(Processor\ProcessorInterface $processor)
+    {
         $this->processors[] = $processor;
         $this->traverser->addVisitor($processor);
     }
@@ -92,15 +99,20 @@ class Parser {
         }
         $this->processors = [];
     }
-    public function getResultNode() {
+    public function getResultScopes()
+    {
         $nodes = [];
         foreach ($this->processors as $processor) {
-            $nodes = array_merge($processor->getResultNodes(), $nodes);
+            $nodes[] = $processor->getResultScope();
+        }
+        if (count($nodes) === 1) {
+            return array_pop($nodes);
         }
         return $nodes;
     }
 
-    protected function setFileInfo(Uses $uses, $file) {
+    protected function setFileInfo(Uses $uses, $file)
+    {
         foreach ($this->processors AS $processor) {
             $processor->setFileInfo($uses, $file);
         }

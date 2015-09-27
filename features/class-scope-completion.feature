@@ -1,7 +1,7 @@
-Feature: Object Completion
+Feature: Class Scope
     As a user
-    I want to have class properties and methods completion after -> or ::
-    So that I can quickly choose name I need
+    I want to have different visibility scopes in class and out of class
+    So that I can see private methods when getting completions for $this
 
     Scenario: Gettings all methods and properties for $this
         Given there is a file with:

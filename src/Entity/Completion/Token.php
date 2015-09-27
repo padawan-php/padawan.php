@@ -6,6 +6,10 @@ class Token
 {
     public function __construct($code, $symbol)
     {
+        if (empty($code) && empty($symbol)) {
+            $this->type = self::T_EMPTY;
+            return;
+        }
         $this->add($code, $symbol);
     }
 
@@ -138,9 +142,20 @@ class Token
         return (bool) ($this->type & self::T_STRING);
     }
 
+    public function isString()
+    {
+        return $this->type === self::T_STRING
+            || $this->type === (self::T_STRING | self::T_CONTINUE_PROCESS);
+    }
+
     public function isMethodCall()
     {
         return (bool) ($this->type & self::T_METHOD_CALL);
+    }
+
+    public function isEmpty()
+    {
+        return (bool) ($this->type & self::T_EMPTY);
     }
 
     protected function resetType($type = 0)
@@ -176,6 +191,7 @@ class Token
     const T_WHITESPACE          = 1024;
     const T_METHOD_CALL         = 2048;
     const T_STRING              = 4096;
+    const T_EMPTY               = 8192;
 
     protected static $MAP = [
         T_VARIABLE              => Token::T_VAR,

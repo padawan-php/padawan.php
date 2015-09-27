@@ -18,4 +18,12 @@ class ClassScope extends AbstractChildScope
         $var->setType($class->fqcn);
         $this->addVar($var);
     }
+
+    /**
+     * @return FQCN
+     */
+    public function getFQCN()
+    {
+        return $this->class->fqcn;
+    }
 }

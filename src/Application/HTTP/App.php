@@ -10,6 +10,7 @@ use Application\BaseApplication;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
+
 class App extends BaseApplication
 {
     public function __construct($noFsIO)
@@ -23,6 +24,9 @@ class App extends BaseApplication
         $result = parent::handle($request, $response, $data);
         $this->setResponseHeaders($response);
         $responseContent = json_encode($result);
+        if ($responseContent === false) {
+            var_dump(json_last_error());
+        }
         return $responseContent;
     }
     protected function getArguments($request, $response, $data)

@@ -2,7 +2,7 @@
 
 namespace Entity\Completion\Scope;
 
-use Entity\FQCN;
+use Entity\FQN;
 use Entity\Node\Uses;
 use Entity\Node\ClassData;
 use Entity\Node\InterfaceData;
@@ -16,7 +16,7 @@ class FileScope extends AbstractScope
     /** @var Uses */
     private $uses;
 
-    public function __construct(FQCN $namespace, Uses $uses)
+    public function __construct(FQN $namespace, Uses $uses = null)
     {
         $this->uses = $uses;
         $this->namespace = $namespace;

@@ -1,6 +1,5 @@
 <?php
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
@@ -54,7 +53,6 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $container = $this->app->getContainer();
         $generator = $container->get("Generator\IndexGenerator");
         $processor = $generator->getProcessor();
-        $processor->clearResultNodes();
         $parser = $generator->getClassUtils()->getParser();
         $parser->addProcessor($processor);
         $this->content = $string->getRaw();

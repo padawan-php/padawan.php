@@ -2,7 +2,9 @@
 
 use Complete\Resolver\NodeTypeResolver;
 use Entity\Completion\Scope;
+use Entity\Completion\Scope\FileScope;
 use Entity\FQCN;
+use Entity\FQN;
 use Entity\Index;
 use Entity\Node\ClassData;
 use Entity\Node\ClassProperty;
@@ -33,7 +35,7 @@ describe('NodeTypeResolver', function() {
         $logger = new Logger('spec');
         $logger->pushHandler(new NullHandler);
         $this->resolver = new NodeTypeResolver($logger, new UseParser, new EventDispatcher);
-        $this->scope = new Scope;
+        $this->scope = new FileScope(new FQN);
         $this->index = new Index;
         $this->var = new Variable('test');
         $fqcn = new FQCN('ClassName', 'Some\\Path');

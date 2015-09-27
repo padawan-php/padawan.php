@@ -2,7 +2,8 @@
 
 namespace Entity\Completion;
 
-class Context {
+class Context
+{
     const T_USE              = 2;
     const T_NAMESPACE        = 4;
     const T_OBJECT           = 8;
@@ -13,6 +14,7 @@ class Context {
     const T_CLASS_METHODS    = 256;
     const T_METHOD_CALL      = 512;
     const T_VAR              = 1024;
+    const T_ANY_NAME         = 2048;
 
     private $type            = 0;
     private $token;
@@ -44,6 +46,9 @@ class Context {
             $this->addType(Context::T_INTERFACENAME);
         } elseif ($token->isMethodCall()) {
             $this->addType(Context::T_METHOD_CALL);
+        } elseif ($token->isString()) {
+            $this->addType(self::T_ANY_NAME);
+            $this->setData($token->getSymbol());
         }
     }
 
@@ -104,5 +109,9 @@ class Context {
     public function isMethodCall()
     {
         return (bool) ($this->type & self::T_METHOD_CALL);
+    }
+    public function isString()
+    {
+        return (bool) ($this->type & self::T_ANY_NAME);
     }
 }

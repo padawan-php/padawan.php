@@ -12,4 +12,8 @@ class MethodScope extends FunctionScope
         parent::__construct($scope, $function);
         $this->addVar($this->getParent()->getVar('this'));
     }
+    public function getFQCN()
+    {
+        return $this->getParent()->getFQCN();
+    }
 }

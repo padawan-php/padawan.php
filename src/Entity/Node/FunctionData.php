@@ -2,9 +2,11 @@
 
 namespace Entity\Node;
 
+use Entity\FQCN;
+
 class FunctionData
 {
-    private $name = "";
+    public $name = "";
     public $arguments = [];
     public $return;
     public $doc = "";

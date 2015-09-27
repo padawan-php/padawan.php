@@ -11,8 +11,10 @@ use Entity\Index;
 use Entity\Node\Uses;
 use Entity\Node\Variable;
 use Entity\Completion\Scope;
+use Entity\Completion\Scope\FileScope;
 use Entity\Completion\Scope\FunctionScope;
 use Entity\Completion\Scope\MethodScope;
+use Entity\Completion\Scope\ClassScope;
 use PhpParser\NodeTraverserInterface;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
@@ -31,7 +33,6 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
         CommentParser $commentParser,
         ParamParser $paramParser
     ) {
-        $this->resultNodes      = [];
         $this->useParser        = $useParser;
         $this->typeResolver     = $typeResolver;
         $this->commentParser    = $commentParser;
@@ -64,17 +65,12 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
     }
     public function setFileInfo(Uses $uses, $file)
     {
-        $this->scope = new Scope($this->scope);
-        $this->scope->setUses($uses);
+        $this->scope = new FileScope($uses->getFQCN(), $uses);
+        $this->fileScope = $this->scope;
     }
-    public function clearResultNodes()
+    public function getResultScope()
     {
-        $this->resultNodes = [];
-    }
-    public function getResultNodes()
-    {
-        $this->resultNodes = [ $this->scope ];
-        return $this->resultNodes;
+        return $this->scope;
     }
 
     /**
@@ -117,7 +113,7 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
         if (empty($classData)) {
             return;
         }
-        $this->scope = new ClassScope($classScope, $classData);
+        $this->scope = new ClassScope($scope, $classData);
     }
     public function createScopeFromClosure(Closure $node)
     {
@@ -198,8 +194,8 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
         $this->index = $index;
     }
 
-    /** @var ClassData[]|InterfaceData[] */
-    private $resultNodes;
+    /** @var FileScope */
+    private $fileScope;
     private $line;
     /** @var UseParser */
     private $useParser;

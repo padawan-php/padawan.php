@@ -5,6 +5,8 @@ namespace Complete\Resolver;
 use Entity\Completion\Token;
 use Entity\Completion\Context;
 use Entity\Completion\Scope;
+use Entity\Completion\Scope\FileScope;
+use Entity\FQN;
 use Entity\Index;
 use Entity\FQCN;
 use Parser\ErrorFreePhpParser;
@@ -28,11 +30,8 @@ class ContextResolver
     }
     public function getContext($badLine, Index $index, Scope $scope = null)
     {
-        if (empty($badLine)) {
-            throw new \Exception("Could not define empty line context");
-        }
         if (empty($scope)) {
-            $scope = new Scope;
+            $scope = new FileScope(new FQN);
         }
 
         $token = $this->getLastToken($badLine);
