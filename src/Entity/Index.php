@@ -132,7 +132,7 @@ class Index
         return $this->classMap;
     }
     public function getFlippedClassMap() {
-        return $this->classMap;
+			return $this->flippedClassMap;
     }
     public function getImplements() {
         return $this->implements;
