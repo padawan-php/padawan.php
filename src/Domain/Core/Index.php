@@ -51,6 +51,9 @@ class Index
         if (array_key_exists($str, $this->classes)) {
             return $this->classes[$str];
         }
+        if (!$this->isCoreIndex()) {
+            return self::$coreIndex->findClassByFQCN($fqcn);
+        }
     }
 
     /**
@@ -61,6 +64,9 @@ class Index
         if (array_key_exists($str, $this->interfaces)) {
             return $this->interfaces[$str];
         }
+        if (!$this->isCoreIndex()) {
+            return self::$coreIndex->findInterfaceByFQCN($fqcn);
+        }
     }
 
     /**
@@ -70,6 +76,9 @@ class Index
     {
         if (array_key_exists($functionName, $this->functions)) {
             return $this->functions[$functionName];
+        }
+        if (!$this->isCoreIndex()) {
+            return self::$coreIndex->findFunctionByName($functionName);
         }
     }
 
@@ -100,15 +109,25 @@ class Index
     /**
      * @return ClassData[]
      */
-    public function getClasses() {
-        return $this->classes;
+    public function getClasses()
+    {
+        $classes = $this->classes;
+        if (!$this->isCoreIndex()) {
+            $classes = array_merge($classes, self::$coreIndex->getClasses());
+        }
+        return $classes;
     }
 
     /**
      * @return InterfaceData[]
      */
-    public function getInterfaces() {
-        return $this->interfaces;
+    public function getInterfaces()
+    {
+        $interfaces = $this->interfaces;
+        if (!$this->isCoreIndex()) {
+            $interfaces = array_merge($interfaces, self::$coreIndex->getInterfaces());
+        }
+        return $interfaces;
     }
 
     /**
@@ -116,7 +135,11 @@ class Index
      */
     public function getFunctions()
     {
-        return $this->functions;
+        $functions = $this->functions;
+        if (!$this->isCoreIndex()) {
+            $functions = array_merge($functions, self::$coreIndex->getFunctions());
+        }
+        return $functions;
     }
 
     public function addClass(ClassData $class) {
@@ -198,5 +221,10 @@ class Index
     }
     public function addParsedFile($file) {
         $this->parsedFiles[$file] = $file;
+    }
+
+    private function isCoreIndex()
+    {
+        return $this === self::$coreIndex;
     }
 }

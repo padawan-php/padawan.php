@@ -27,7 +27,7 @@ Feature: Class Scope
         }
         """
         When I type "$this->" on the 7 line
-        And ask for completion
+        And I ask for completion
         Then I should get:
             | Name |
             | method1 |
@@ -61,7 +61,7 @@ Feature: Class Scope
         """
         When I type "$a = new SomeClass;" on the 20 line
         And I type "$a->" on the 21 line
-        And ask for completion
+        And I ask for completion
         Then I should get:
             | Name |
             | method3 |
@@ -112,7 +112,7 @@ Feature: Class Scope
         """
         When I type "$a = new SomeClass;" on the 39 line
         And I type "$a->method1()->" on the 40 line
-        And ask for completion
+        And I ask for completion
         Then I should get:
             | Name |
             | aPublicProperty |

@@ -77,7 +77,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When ask for completion
+     * @When I ask for completion
      */
     public function askForCompletion()
     {

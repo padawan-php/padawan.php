@@ -8,15 +8,29 @@ Feature: Names Completion
         """
         <?php
 
-        function test_1(){}
-        function test_2(){}
-        function n_test_3(){}
-        function other(){}
+        function padawan_test_1(){}
+        function padawan_test_2(){}
+        function n_padawan_test_3(){}
+        function padawan_other(){}
         """
-        When I type "test" on the 7 line
-        And ask for completion
+        When I type "padawan_test" on the 7 line
+        And I ask for completion
         Then I should get:
             | Name |
-            | test_1 |
-            | test_2 |
-            | n_test_3 |
+            | padawan_test_1 |
+            | padawan_test_2 |
+            | n_padawan_test_3 |
+
+    Scenario: Getting core functions with prefix
+        Given there is a file with:
+        """
+        <?php
+
+        function array_pop_custom(){}
+        """
+        When I type "array_pop" on the 4 line
+        And I ask for completion
+        Then I should get:
+            | Name |
+            | array_pop_custom |
+            | array_pop |
