@@ -4,8 +4,8 @@ namespace Parser;
 
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Name;
-use Entity\FQN;
-use Entity\Node\Uses;
+use Domain\Core\FQN;
+use Domain\Core\Node\Uses;
 
 class NamespaceParser {
     public function parse(Namespace_ $node) {

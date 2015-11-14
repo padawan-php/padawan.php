@@ -5,10 +5,10 @@ namespace Parser;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tag;
 use phpDocumentor\Reflection\DocBlock\Context;
-use Entity\Node\Comment;
-use Entity\Node\MethodParam;
-use Entity\Node\Variable;
-use Entity\Node\ClassProperty;
+use Domain\Core\Node\Comment;
+use Domain\Core\Node\MethodParam;
+use Domain\Core\Node\Variable;
+use Domain\Core\Node\ClassProperty;
 
 class CommentParser
 {
@@ -101,7 +101,7 @@ class CommentParser
      * Creates FQN by type string
      *
      * @param string $type
-     * @return \Entity\FQCN
+     * @return \Domain\Core\FQCN
      */
     protected function getFQCN($type) {
         return $this->useParser->parseType($type);

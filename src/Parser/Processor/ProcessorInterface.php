@@ -2,7 +2,7 @@
 
 namespace Parser\Processor;
 
-use Entity\Node\Uses;
+use Domain\Core\Node\Uses;
 
 interface ProcessorInterface {
     public function setFileInfo(Uses $fqcn, $file);

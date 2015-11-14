@@ -4,8 +4,8 @@ namespace Parser\Transformer;
 
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Param;
-use Entity\Node\FunctionData;
-use Entity\Node\MethodParam;
+use Domain\Core\Node\FunctionData;
+use Domain\Core\Node\MethodParam;
 use Parser\CommentParser;
 use Parser\ParamParser;
 use Parser\UseParser;

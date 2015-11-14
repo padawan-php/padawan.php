@@ -2,15 +2,15 @@
 
 use Parser\CommentParser;
 use Parser\UseParser;
-use Entity\Node\Comment;
-use Entity\Node\Uses;
-use Entity\FQCN;
+use Domain\Core\Node\Comment;
+use Domain\Core\Node\Uses;
+use Domain\Core\FQCN;
 
 describe('CommentParser', function() {
     beforeEach(function() {
         $this->useParser = new UseParser;
         $this->uses = new Uses(
-            $this->useParser->parseFQCN('Entity\Node')
+            $this->useParser->parseFQCN('Domain\Core\Node')
         );
         $this->useParser->setUses(
             $this->uses
@@ -43,7 +43,7 @@ DOCBLOCK;
         it('returns FQCN', function() {
             $comment = $this->comment;
             expect($comment->getReturn())->to->be->an->instanceof(FQCN::class);
-            expect($comment->getReturn()->toString())->to->equal('Entity\Node\Comment');
+            expect($comment->getReturn()->toString())->to->equal('Domain\Core\Node\Comment');
         });
     });
     describe('createMethodParam()', function() {
@@ -57,7 +57,7 @@ DOCBLOCK;
             $var = array_pop($comment->getVars());
             expect($var->getType())->to->be->an->instanceof(FQCN::class);
             expect($var->getType()->toString())->to->equal(
-                'Entity\Node\Comment'
+                'Domain\Core\Node\Comment'
             );
         });
     });

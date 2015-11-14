@@ -1,22 +1,25 @@
 <?php
 
-use Complete\Resolver\NodeTypeResolver;
-use Entity\Completion\Scope;
-use Entity\Completion\Scope\FileScope;
-use Entity\FQCN;
-use Entity\FQN;
-use Entity\Index;
-use Entity\Node\ClassData;
-use Entity\Node\ClassProperty;
-use Entity\Node\MethodData;
-use Entity\Node\Variable;
-use Parser\UseParser;
+use Framework\Complete\Resolver\NodeTypeResolver;
+use Domain\Core\Completion\Scope;
+use Domain\Core\Completion\Scope\FileScope;
+use Domain\Core\FQCN;
+use Domain\Core\FQN;
+use Domain\Core\Index;
+use Domain\Core\Node\ClassData;
+use Domain\Core\Node\ClassProperty;
+use Domain\Core\Node\MethodData;
+use Domain\Core\Node\Variable;
+use Domain\Core\Node\FunctionData;
 use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Name;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Parser\UseParser;
 
 function createClass($classFQN, $fqcn) {
     $class = new ClassData($classFQN, 'dummy/path/class.php');
@@ -105,6 +108,18 @@ describe('NodeTypeResolver', function() {
                 $node->var = $this->node;
                 $node->name = 'param2';
                 expect($this->resolver->getLastChainNodeType($node, $this->index, $this->scope))
+                    ->to->equal($this->var->getType());
+            });
+        });
+        describe('Function call', function(){
+            beforeEach(function() {
+                $this->node = new FuncCall(new Name('functionName'));
+                $function = new FunctionData('functionName');
+                $function->setReturn($this->var->getType());
+                $this->index->addFunction($function);
+            });
+            it("returns type after method call", function() {
+                expect($this->resolver->getLastChainNodeType($this->node, $this->index, $this->scope))
                     ->to->equal($this->var->getType());
             });
         });

@@ -2,7 +2,10 @@
 
 namespace Command;
 
-class CompleteCommand extends AbstractCommand {
+use Framework\Complete\CompleteEngine;
+
+class CompleteCommand extends AbstractCommand
+{
 
     /**
      * Runs command
@@ -11,7 +14,7 @@ class CompleteCommand extends AbstractCommand {
      */
     public function run(array $arguments = []) {
         $project = $arguments["project"];
-        $completeEngine = $this->getContainer()->get("Complete\CompleteEngine");
+        $completeEngine = $this->getContainer()->get(CompleteEngine::class);
         $column = $arguments['column'];
         $file = $arguments['filepath'];
         $line = $arguments['line'];

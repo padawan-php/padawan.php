@@ -2,8 +2,8 @@
 
 namespace Parser;
 
-use Entity\FQCN;
-use Entity\Node\Uses;
+use Domain\Core\FQCN;
+use Domain\Core\Node\Uses;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Use_;
 

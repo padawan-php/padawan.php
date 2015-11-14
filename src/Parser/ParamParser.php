@@ -4,7 +4,7 @@ namespace Parser;
 
 use PhpParser\Node\Param;
 use PhpParser\Node\Name;
-use Entity\Node\MethodParam;
+use Domain\Core\Node\MethodParam;
 
 class ParamParser {
     public function __construct(UseParser $useParser) {

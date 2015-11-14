@@ -2,10 +2,10 @@
 
 namespace Parser\Processor;
 
-use Entity\FQCN;
-use Entity\FQN;
-use Entity\Node\Uses;
-use Entity\Completion\Scope\FileScope;
+use Domain\Core\FQCN;
+use Domain\Core\FQN;
+use Domain\Core\Node\Uses;
+use Domain\Core\Completion\Scope\FileScope;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node\Stmt\Class_;

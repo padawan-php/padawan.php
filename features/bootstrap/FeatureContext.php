@@ -5,13 +5,14 @@ use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Application\HTTP\App;
-use Entity\Project;
-use Entity\Index;
+use Domain\Core\Project;
+use Domain\Core\Index;
 use Fake\Request;
 use Fake\Response;
 use DI\Container;
 use Psr\Log\LoggerInterface;
 use Monolog\Handler\NullHandler;
+use Framework\Generator\IndexGenerator;
 
 /**
  * Defines application features from the specific context.
@@ -51,7 +52,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $file = uniqid() . ".php";
         $container = $this->app->getContainer();
-        $generator = $container->get("Generator\IndexGenerator");
+        $generator = $container->get(IndexGenerator::class);
         $processor = $generator->getProcessor();
         $parser = $generator->getClassUtils()->getParser();
         $parser->addProcessor($processor);
@@ -97,7 +98,9 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function iShouldGet(TableNode $table)
     {
         if (isset($this->response["error"])) {
-            throw new \Exception($this->response["error"]);
+            throw new \Exception(
+                sprintf("Application response contains error: %s", $this->response["error"])
+            );
         }
         $columns = $table->getRow(0);
         $result = array_map(function ($item) use($columns) {

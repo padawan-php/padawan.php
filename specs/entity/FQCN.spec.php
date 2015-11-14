@@ -1,7 +1,7 @@
 <?php
 
-use Entity\FQCN;
-use Entity\FQN;
+use Domain\Core\FQCN;
+use Domain\Core\FQN;
 
 describe('FQCN', function() {
     describe('__construct()', function() {

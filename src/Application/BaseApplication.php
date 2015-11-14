@@ -2,8 +2,8 @@
 
 namespace Application;
 
-use Entity\Project;
-use Entity\Index;
+use Domain\Core\Project;
+use Domain\Core\Index;
 use Command\ErrorCommand;
 use DI\Container;
 use DI\ContainerBuilder;

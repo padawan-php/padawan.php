@@ -2,9 +2,9 @@
 
 namespace Parser;
 
-use Entity\FQN;
-use Entity\Node\Uses;
-use Utils\PathResolver;
+use Domain\Core\FQN;
+use Domain\Core\Node\Uses;
+use Framework\Utils\PathResolver;
 use PhpParser\Parser as ASTGenerator;
 use PhpParser\NodeTraverser as Traverser;
 use Psr\Log\LoggerInterface;

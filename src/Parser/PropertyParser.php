@@ -2,7 +2,7 @@
 
 namespace Parser;
 
-use Entity\Node\ClassProperty;
+use Domain\Core\Node\ClassProperty;
 use PhpParser\Node\Stmt\PropertyProperty as Property;
 
 class PropertyParser {

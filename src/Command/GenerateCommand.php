@@ -2,24 +2,27 @@
 
 namespace Command;
 
-use Entity\Project;
+use Domain\Core\Project;
+use Domain\Core\Index;
+use Framework\Generator\IndexGenerator;
+use Framework\IO\Writer;
 
 class GenerateCommand extends AbstractCommand
 {
     public function run(array $arguments = [])
     {
-        $generator = $this->get("Generator\IndexGenerator");
+        $generator = $this->get(IndexGenerator::class);
         $rootDir = getcwd();
         if (array_key_exists("rootDir", $arguments)) {
             $rootDir = $arguments["rootDir"];
         }
         $project = new Project(
-            $this->get("Entity\Index"),
+            $this->get(Index::class),
             $rootDir
         );
 
         $generator->generateIndex($project);
-        $indexWriter = $this->get('IO\Writer');
+        $indexWriter = $this->get(Writer::class);
 
         $indexWriter->write($project);
         return [

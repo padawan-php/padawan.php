@@ -1,12 +1,12 @@
 <?php
 
-use Complete\Resolver\ContextResolver;
-use Complete\Resolver\NodeTypeResolver;
+use Framework\Complete\Resolver\ContextResolver;
+use Framework\Complete\Resolver\NodeTypeResolver;
 use Parser\ErrorFreePhpParser;
 use Parser\UseParser;
 use PhpParser\Lexer;
-use Entity\Completion\Context;
-use Entity\Index;
+use Domain\Core\Completion\Context;
+use Domain\Core\Index;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\EventDispatcher\EventDispatcher;

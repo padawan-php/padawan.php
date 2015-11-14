@@ -2,8 +2,8 @@
 
 namespace Parser;
 
-use Entity;
-use Entity\Node;
+use Domain\Core;
+use Domain\Core\Node;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Property;
@@ -39,8 +39,8 @@ class ClassParser {
         $this->useParser = $useParser;
     }
 
-    public function parse(Class_ $node, Entity\FQN $fqn, $file) {
-        $fqcn = new Entity\FQCN($node->name, $fqn);
+    public function parse(Class_ $node, Core\FQN $fqn, $file) {
+        $fqcn = new Core\FQCN($node->name, $fqn);
         $classData = new Node\ClassData($fqcn, $file);
         if ($node->extends instanceof Name) {
             $classData->setParent(
@@ -80,7 +80,7 @@ class ClassParser {
     /**
      * Parses Method node though $methodsParser
      *
-     * @return MethodData
+     * @return Node\MethodData
      */
     protected function parseMethod(ClassMethod $node)
     {
@@ -90,7 +90,7 @@ class ClassParser {
     /**
      * Parses Property node through $propertiesParser
      *
-     * @return ClassProperty
+     * @return Node\ClassProperty
      */
     protected function parseProperty(PropertyProperty $node, $modifier, $comments)
     {
@@ -101,11 +101,11 @@ class ClassParser {
     /**
      * Parses doc comments trough $docParser
      *
-     * @param \Entity\Node\ClassData $classData
+     * @param Node\ClassData $classData
      */
     protected function parseDocComments($classData, $node)
     {
-        /** @var \Entity\Node\Comment $comment */
+        /** @var Node\Comment $comment */
         $comment = $this->docParser->parse($node);
         $classData->doc = $comment->getDoc();
     }

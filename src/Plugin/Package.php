@@ -2,7 +2,7 @@
 
 namespace Plugin;
 
-use Utils\PathResolver;
+use Framework\Utils\PathResolver;
 
 class Package
 {

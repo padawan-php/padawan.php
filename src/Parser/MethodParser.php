@@ -2,9 +2,9 @@
 
 namespace Parser;
 
-use Entity\Node\MethodData;
-use Entity\Node\MethodParam;
-use Entity\Node\Comment;
+use Domain\Core\Node\MethodData;
+use Domain\Core\Node\MethodParam;
+use Domain\Core\Node\Comment;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Param;
 use PhpParser\Node\Name;

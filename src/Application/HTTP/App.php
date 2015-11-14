@@ -2,13 +2,17 @@
 
 namespace Application\HTTP;
 
-use Entity\Project;
-use Entity\Index;
+use Domain\Core\Project;
+use Domain\Core\Index;
 use Command\ErrorCommand;
 use DI\Container;
 use Application\BaseApplication;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Framework\IO\Reader;
+
+
+define("STUBS_DIR", dirname(dirname(dirname(__DIR__))) . '/stubs');
 
 
 class App extends BaseApplication
@@ -18,6 +22,16 @@ class App extends BaseApplication
         $this->router = new Router;
         parent::__construct($noFsIO);
         $this->dispatcher = $this->container->get(EventDispatcher::class);
+        $this->coreIndex = $this->container->get(Reader::class)->read(
+            STUBS_DIR,
+            $this->coreIndex
+        )->getIndex();
+        if (!empty($this->coreIndex)) {
+            $indexClass = new \ReflectionClass(Index::class);
+            $coreIndexProperty = $indexClass->getProperty("coreIndex");
+            $coreIndexProperty->setAccessible(true);
+            $coreIndexProperty->setValue($this->coreIndex);
+        }
     }
     public function handle($request, $response, $data)
     {
@@ -85,7 +99,10 @@ class App extends BaseApplication
                 $project = $this->projectsPool[$rootDir];
             } else {
                 if (!$this->noFsIO) {
-                    $project = $this->container->get("IO\Reader")->read($rootDir);
+                    $project = $this->container->get(Reader::class)->read(
+                        $rootDir,
+                        $this->coreIndex
+                    );
                 }
                 if (empty($project)) {
                     $project = $this->createEmptyProject($rootDir);
@@ -103,4 +120,5 @@ class App extends BaseApplication
     }
 
     private $dispatcher;
+    private $coreIndex;
 }
