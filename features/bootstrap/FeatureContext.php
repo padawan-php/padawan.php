@@ -53,9 +53,10 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $file = uniqid() . ".php";
         $container = $this->app->getContainer();
         $generator = $container->get(IndexGenerator::class);
-        $processor = $generator->getProcessor();
+        $walker = $generator->getWalker();
         $parser = $generator->getClassUtils()->getParser();
-        $parser->addProcessor($processor);
+        $parser->addWalker($walker);
+        $parser->setIndex($this->project->getIndex());
         $this->content = $string->getRaw();
         $scope = $parser->parseContent($file, $this->content, null, false);
         $generator->processFileScope($this->project->getIndex(), $scope);
@@ -107,14 +108,14 @@ class FeatureContext implements Context, SnippetAcceptingContext
             $hash = [];
             switch(count($columns)) {
                 case 2:
-                    $hash["Signature"] = $item["Signature"];
+                    $hash["Signature"] = $item["signature"];
                 case 1:
                     $hash["Name"] = $item["name"];
                     break;
             }
             return $hash;
         }, $this->response["completion"]);
-        expect($table->getColumnsHash())->to->be->equal($result);
+        expect($table->getColumnsHash())->to->loosely->equal($result);
     }
 
     /** @var App */

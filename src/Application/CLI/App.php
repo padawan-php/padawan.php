@@ -14,6 +14,9 @@ class App extends BaseApplication
     public function handle($request, $response, $data)
     {
         $result = parent::handle($request, $response, $data);
+        if (array_key_exists("error", $result)) {
+            printf("Error: %s\n", $result["error"]);
+        }
         return $result;
     }
     protected function getArguments($request, $response, $data)

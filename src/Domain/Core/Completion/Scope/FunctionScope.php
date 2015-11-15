@@ -13,6 +13,7 @@ class FunctionScope extends AbstractChildScope
     {
         parent::__construct($scope);
         $this->function = $function;
+        $scope->addFunction($function);
         foreach ($function->arguments as $param) {
             $this->addVar($param);
         }

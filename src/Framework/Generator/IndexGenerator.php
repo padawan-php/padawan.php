@@ -12,7 +12,7 @@ use Framework\Utils\PathResolver;
 use Framework\Utils\Composer;
 use Framework\Utils\ClassUtils;
 use Psr\Log\LoggerInterface;
-use Parser\Processor\FileNodesProcessor;
+use Parser\Walker\IndexGeneratingWalker;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Domain\Generator\IndexGenerator as IndexGeneratorInterface;
 
@@ -25,14 +25,14 @@ class IndexGenerator implements IndexGeneratorInterface
         PathResolver $path,
         ClassUtils $class,
         LoggerInterface $logger,
-        FileNodesProcessor $processor,
         EventDispatcher $dispatcher,
-        FilesFinder $filesFinder
+        FilesFinder $filesFinder,
+        IndexGeneratingWalker $walker
     ) {
         $this->path             = $path;
         $this->classUtils       = $class;
         $this->logger           = $logger;
-        $this->processor        = $processor;
+        $this->walker           = $walker;
         $this->dispatcher       = $dispatcher;
         $this->filesFinder      = $filesFinder;
     }
@@ -89,16 +89,17 @@ class IndexGenerator implements IndexGeneratorInterface
         }
         $this->processFileScope(
             $index,
-            $this->createScopeForFile($file, $createCache)
+            $this->createScopeForFile($file, $index, $createCache)
         );
         $index->addParsedFile($file);
     }
-    public function createScopeForFile($file, $createCache = true)
+    public function createScopeForFile($file, Index $index, $createCache = true)
     {
         $startParser = microtime(1);
-        $processor = $this->processor;
+        $walker = $this->walker;
         $parser = $this->getClassUtils()->getParser();
-        $parser->addProcessor($processor);
+        $parser->addWalker($walker);
+        $parser->setIndex($index);
         $nodes = $parser->parseFile($file, null, $createCache);
         $end = microtime(1) - $startParser;
         $this->getLogger()
@@ -111,8 +112,9 @@ class IndexGenerator implements IndexGeneratorInterface
     }
     public function processFileScope(Index $index, FileScope $scope)
     {
-        $nodesNum = count($scope->getClasses()) + count($scope->getInterfaces());
-        $this->getLogger()->debug('Processing nodes ' . $nodesNum);
+        $this->getLogger()->debug(sprintf("Processing %s classes", count($scope->getClasses())));
+        $this->getLogger()->debug(sprintf("Processing %s interfaces", count($scope->getInterfaces())));
+        $this->getLogger()->debug(sprintf("Processing %s functions", count($scope->getFunctions())));
         foreach ($scope->getClasses() as $classData) {
             $this->getLogger()->debug('Processing node ' . $classData->fqcn->toString());
             $index->addFQCN($classData->fqcn);
@@ -135,9 +137,9 @@ class IndexGenerator implements IndexGeneratorInterface
         return $this->logger;
     }
 
-    public function getProcessor()
+    public function getWalker()
     {
-        return $this->processor;
+        return $this->walker;
     }
 
     /** @return ClassUtils */
@@ -180,9 +182,9 @@ class IndexGenerator implements IndexGeneratorInterface
 
     /**
      *
-     * @var IndexProcessor
+     * @var IndexGeneratingWalker
      */
-    protected $processor;
+    protected $walker;
 
     /** @var EventDispatcher */
     protected $dispatcher;

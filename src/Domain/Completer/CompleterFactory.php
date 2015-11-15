@@ -6,7 +6,7 @@ use Domain\Core\Completion\Context;
 use Domain\Core\Completion\Scope;
 use Domain\Core\Project;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Framework\Complete\Resolver\CustomCompleterEvent;
+use Domain\Event\CustomCompleterEvent;
 
 class CompleterFactory
 {

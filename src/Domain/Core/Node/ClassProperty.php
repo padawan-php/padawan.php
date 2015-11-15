@@ -13,8 +13,9 @@ class ClassProperty
     public $defauls     = "";
     public $doc         = "";
 
-    public function __construct($name = "") {
+    public function __construct($name = "", $type = "") {
         $this->name = $name;
+        $this->type = $type;
     }
 
     public function getType() {

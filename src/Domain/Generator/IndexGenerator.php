@@ -14,7 +14,7 @@ interface IndexGenerator
 
     public function processFile(Index $index, $file, $rewrite = false, $createCache = true);
 
-    public function createScopeForFile($file, $createCache = true);
+    public function createScopeForFile($file, Index $index, $createCache = true);
 
     public function processFileScope(Index $index, FileScope $scope);
 }

@@ -5,7 +5,8 @@ namespace Domain\Core\Node;
 use Domain\Core\FQCN;
 use Domain\Core\Collection\MethodsCollection;
 
-class InterfaceData {
+class InterfaceData
+{
     public $fqcn;
     public $interfaces      = [];
     public $constants       = [];
@@ -30,6 +31,14 @@ class InterfaceData {
     }
     public function addMethod(MethodData $method) {
         $this->methods->add($method);
+    }
+    public function getMethod($methodName)
+    {
+        return $this->methods->get($methodName);
+    }
+    public function hasMethod($methodName)
+    {
+        return $this->methods->get($methodName) !== null;
     }
     public function getInterfaces() {
         return $this->interfaces;

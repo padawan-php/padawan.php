@@ -11,21 +11,13 @@ use PhpParser\Node\Stmt\PropertyProperty;
 use PhpParser\Node\Stmt\ClassConst;
 use PhpParser\Node\Name;
 
-/**
- * SomeComment
- */
-class ClassParser {
-    /**
-     * @property ClassParser
-     */
+class ClassParser
+{
     private $docParser;
     private $methodsParser;
     private $propertiesParser;
     private $useParser;
 
-    /**
-     * Constructor
-     */
     public function __construct(
         CommentParser $docParser,
         MethodParser $methodsParser,

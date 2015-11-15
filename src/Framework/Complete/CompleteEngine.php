@@ -10,8 +10,8 @@ use Parser\Parser;
 use Domain\Generator\IndexGenerator;
 use Domain\Completer\CompleterFactory;
 use Framework\Complete\Resolver\ContextResolver;
-use Parser\Processor\FileNodesProcessor;
-use Parser\Processor\ScopeProcessor;
+use Parser\Walker\IndexGeneratingWalker;
+use Parser\Walker\ScopeWalker;
 use Psr\Log\LoggerInterface;
 
 class CompleteEngine {
@@ -20,18 +20,18 @@ class CompleteEngine {
         IndexGenerator $generator,
         ContextResolver $contextResolver,
         CompleterFactory $completer,
-        FileNodesProcessor $fileProcessor,
-        ScopeProcessor $scopeProcessor,
+        IndexGeneratingWalker $indexGeneratingWalker,
+        ScopeWalker $scopeWalker,
         LoggerInterface $logger
     ) {
-        $this->parser           = $parser;
-        $this->generator        = $generator;
-        $this->contextResolver  = $contextResolver;
-        $this->completerFactory = $completer;
-        $this->fileProcessor    = $fileProcessor;
-        $this->scopeProcessor   = $scopeProcessor;
-        $this->logger           = $logger;
-        $this->cachePool        = [];
+        $this->parser                   = $parser;
+        $this->generator                = $generator;
+        $this->contextResolver          = $contextResolver;
+        $this->completerFactory         = $completer;
+        $this->indexGeneratingWalker    = $indexGeneratingWalker;
+        $this->scopeWalker              = $scopeWalker;
+        $this->logger                   = $logger;
+        $this->cachePool                = [];
     }
     public function createCompletion(
         Project $project,
@@ -123,7 +123,8 @@ class CompleteEngine {
         }
         if (empty($scope)) {
             $parser = $this->parser;
-            $parser->addProcessor($this->fileProcessor);
+            $parser->addWalker($this->indexGeneratingWalker);
+            $parser->setIndex($project->getIndex());
             $nodes = $parser->parseContent($file, $content);
             $this->generator->processFileScope(
                 $project->getIndex(),
@@ -131,9 +132,9 @@ class CompleteEngine {
             );
             /** @var \Domain\Core\Node\Uses */
             $uses = $parser->getUses();
-            $this->scopeProcessor->setIndex($project->getIndex());
-            $this->scopeProcessor->setLine($line);
-            $parser->addProcessor($this->scopeProcessor);
+            $this->scopeWalker->setLine($line);
+            $parser->addWalker($this->scopeWalker);
+            $parser->setIndex($project->getIndex());
             $scope = $parser->parseContent($file, $content, $uses);
             $contentHash = hash('sha1', $content);
             $this->cachePool[$file] = [$contentHash, $nodes, $scope];
@@ -157,10 +158,10 @@ class CompleteEngine {
     private $generator;
     private $contextResolver;
     private $completerFactory;
-    /** @property FileNodesProcessor */
-    private $fileProcessor;
-    /** @property ScopeProcessor */
-    private $scopeProcessor;
+    /** @property IndexGeneratingWalker */
+    private $indexGeneratingWalker;
+    /** @property ScopeWalker */
+    private $scopeWalker;
     private $cachePool;
     /** @var LoggerInterface */
     private $logger;

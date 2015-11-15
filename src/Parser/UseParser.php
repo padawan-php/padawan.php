@@ -15,6 +15,7 @@ class UseParser {
             $fqcn = $this->parseFQCN($use->name->toString());
             $this->uses->add($fqcn, $use->alias);
         }
+        return $this->uses;
     }
 
     /**
@@ -36,7 +37,7 @@ class UseParser {
     }
     public function getFQCN(Name $node = null){
         if($node === null) {
-                    return $node;
+            return $node;
         }
         if($node->isFullyQualified()){
             return $this->parseFQCN($node->toString());

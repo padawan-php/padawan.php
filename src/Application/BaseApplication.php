@@ -29,15 +29,15 @@ abstract class BaseApplication
             return $command->run([]);
         }
         $arguments = $this->getArguments($request, $response, $data);
-        try {
+        //try {
             $result = $command->run(
                 $arguments
             );
-        } catch (\Exception $e) {
-            $result = [
-                "error" => $e->getMessage()
-            ];
-        }
+        //} catch (\Exception $e) {
+            //$result = [
+                //"error" => $e->getMessage()
+            //];
+        //}
 
         return $result;
     }

@@ -25,7 +25,7 @@ class Parser {
         $this->traverser        = $traverser;
         $this->useParser        = $useParser;
         $this->namespaceParser  = $namespaceParser;
-        $this->processors       = [];
+        $this->walker           = [];
         $this->astPool          = [];
         $this->logger           = $logger;
     }
@@ -65,13 +65,12 @@ class Parser {
                 $this->astPool[$file] = [$hash, $ast];
             }
         }
-        $this->logger->addInfo(sprintf("Traversing with %s processors",
-            count($this->processors)
+        $this->logger->addInfo(sprintf("Traversing with %s walkers",
+            count($this->walkers)
         ));
         $this->traverser->traverse($ast);
         $nodes = $this->getResultScopes();
-        $this->clearProcessors();
-        $this->logger->addInfo('Found ' . count($nodes) . ' scopes');
+        $this->clearWalkers();
         return $nodes;
     }
     public function setUses(Uses $uses)
@@ -88,33 +87,39 @@ class Parser {
     {
         return $this->useParser->parseFQCN($fqcn);
     }
-    public function addProcessor(Processor\ProcessorInterface $processor)
+    public function addWalker($walker)
     {
-        $this->processors[] = $processor;
-        $this->traverser->addVisitor($processor);
+        $this->walkers[] = $walker;
+        $this->traverser->addVisitor($walker);
     }
-    public function clearProcessors() {
-        foreach ($this->processors AS $processor) {
-            $this->traverser->removeVisitor($processor);
+    public function clearWalkers() {
+        foreach ($this->walkers AS $walker) {
+            $this->traverser->removeVisitor($walker);
         }
-        $this->processors = [];
+        $this->walkers = [];
     }
     public function getResultScopes()
     {
         $nodes = [];
-        foreach ($this->processors as $processor) {
-            $nodes[] = $processor->getResultScope();
+        foreach ($this->walkers as $walker) {
+            $nodes[] = $walker->getResultScope();
         }
         if (count($nodes) === 1) {
             return array_pop($nodes);
         }
         return $nodes;
     }
+    public function setIndex($index)
+    {
+        foreach ($this->walkers as $walker) {
+            $walker->setIndex($index);
+        }
+    }
 
     protected function setFileInfo(Uses $uses, $file)
     {
-        foreach ($this->processors AS $processor) {
-            $processor->setFileInfo($uses, $file);
+        foreach ($this->walkers as $walker) {
+            $walker->updateFileInfo($uses, $file);
         }
     }
 
@@ -125,8 +130,8 @@ class Parser {
     private $parser;
     /** @var Traverser */
     private $traverser;
-    /** @var Processor\ProcessorInterface[] */
-    private $processors;
+    /** @var Walker\WalkerInterface[] */
+    private $walker;
     private $astPool;
     private $logger;
     /** @var NamespaceParser */

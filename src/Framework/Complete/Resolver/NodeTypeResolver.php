@@ -56,7 +56,7 @@ class NodeTypeResolver
             || $node instanceof StaticCall
         ) {
             return $this->getLastChainNodeType($node, $index, $scope);
-        } elseif ($node instanceof New_) {
+        } elseif ($node instanceof New_ && $node->class instanceof Name) {
             return $this->useParser->getFQCN($node->class);
         }
         return null;

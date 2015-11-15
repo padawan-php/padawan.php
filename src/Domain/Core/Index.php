@@ -51,7 +51,7 @@ class Index
         if (array_key_exists($str, $this->classes)) {
             return $this->classes[$str];
         }
-        if (!$this->isCoreIndex()) {
+        if ($this->hasCoreIndex()) {
             return self::$coreIndex->findClassByFQCN($fqcn);
         }
     }
@@ -64,7 +64,7 @@ class Index
         if (array_key_exists($str, $this->interfaces)) {
             return $this->interfaces[$str];
         }
-        if (!$this->isCoreIndex()) {
+        if ($this->hasCoreIndex()) {
             return self::$coreIndex->findInterfaceByFQCN($fqcn);
         }
     }
@@ -77,7 +77,7 @@ class Index
         if (array_key_exists($functionName, $this->functions)) {
             return $this->functions[$functionName];
         }
-        if (!$this->isCoreIndex()) {
+        if ($this->hasCoreIndex()) {
             return self::$coreIndex->findFunctionByName($functionName);
         }
     }
@@ -112,7 +112,7 @@ class Index
     public function getClasses()
     {
         $classes = $this->classes;
-        if (!$this->isCoreIndex()) {
+        if ($this->hasCoreIndex()) {
             $classes = array_merge($classes, self::$coreIndex->getClasses());
         }
         return $classes;
@@ -124,7 +124,7 @@ class Index
     public function getInterfaces()
     {
         $interfaces = $this->interfaces;
-        if (!$this->isCoreIndex()) {
+        if ($this->hasCoreIndex()) {
             $interfaces = array_merge($interfaces, self::$coreIndex->getInterfaces());
         }
         return $interfaces;
@@ -136,7 +136,7 @@ class Index
     public function getFunctions()
     {
         $functions = $this->functions;
-        if (!$this->isCoreIndex()) {
+        if ($this->hasCoreIndex()) {
             $functions = array_merge($functions, self::$coreIndex->getFunctions());
         }
         return $functions;
@@ -223,8 +223,8 @@ class Index
         $this->parsedFiles[$file] = $file;
     }
 
-    private function isCoreIndex()
+    private function hasCoreIndex()
     {
-        return $this === self::$coreIndex;
+        return $this !== self::$coreIndex && !empty(self::$coreIndex);
     }
 }

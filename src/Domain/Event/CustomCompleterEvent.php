@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Complete\Resolver;
+namespace Domain\Event;
 
 use Domain\Core\Completion\Context;
 use Domain\Core\Project;

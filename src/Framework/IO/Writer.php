@@ -16,8 +16,6 @@ class Writer extends BasicIO
     protected function prepare(Project $project)
     {
         $index = $project->getIndex();
-        $r = new \ReflectionObject($index);
-        $r->setStaticPropertyValue("coreIndex", null);
         $str = serialize($project);
         return $str;
     }

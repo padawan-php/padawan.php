@@ -19,11 +19,10 @@ class FileScope extends AbstractScope
     public function __construct(FQN $namespace, Uses $uses = null)
     {
         $this->uses = $uses;
-        $this->namespace = $namespace;
     }
     public function getNamespace()
     {
-        return $this->namespace;
+        return $this->uses->getFQCN();
     }
     public function getUses()
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Parser\Processor;
+namespace Parser\Walker;
 
 use Parser\UseParser;
 use Parser\CommentParser;
@@ -26,7 +26,7 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Expr\Closure;
 
-class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
+class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
 {
     public function __construct(
         UseParser $useParser,
@@ -64,7 +64,7 @@ class ScopeProcessor extends NodeVisitorAbstract implements ProcessorInterface
         if (!$this->isIn($node, $this->line)) {
         }
     }
-    public function setFileInfo(Uses $uses, $file)
+    public function updateFileInfo(Uses $uses, $file)
     {
         $this->scope = new FileScope($uses->getFQCN(), $uses);
         $this->fileScope = $this->scope;

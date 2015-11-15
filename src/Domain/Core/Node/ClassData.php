@@ -63,7 +63,10 @@ class ClassData
     }
     public function setParent($parent)
     {
-        $this->parent = $parent;
+        if ($this === $parent) {
+            throw new \Exception("Parent class and child class could not be same");
+        }
+        $this->parent = null;
         if ($parent instanceof ClassData) {
             foreach ($this->methods->all() as $method) {
                 if ($method->doc === Comment::INHERIT_MARK) {
@@ -75,6 +78,7 @@ class ClassData
                 }
             }
         }
+        $this->parent = $parent;
     }
     public function addInterface($interface)
     {
@@ -84,6 +88,22 @@ class ClassData
     public function addMethod(MethodData $method)
     {
         $this->methods->add($method);
+    }
+    public function getMethod($methodName)
+    {
+        return $this->methods->get($methodName);
+    }
+    public function hasMethod($methodName)
+    {
+        return $this->methods->get($methodName) !== null;
+    }
+    public function getProp($propName)
+    {
+        return $this->properties->get($propName);
+    }
+    public function hasProp($propName)
+    {
+        return $this->properties->get($propName) !== null;
     }
     public function addProp(ClassProperty $prop)
     {
