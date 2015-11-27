@@ -1,7 +1,7 @@
 <?php
 
-use Domain\Core\FQCN;
-use Domain\Core\FQN;
+use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Core\FQN;
 
 describe('FQCN', function() {
     describe('__construct()', function() {

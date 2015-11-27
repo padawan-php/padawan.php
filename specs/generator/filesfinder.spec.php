@@ -1,9 +1,9 @@
 <?php
 
-use Framework\Generator\FilesFinder;
-use Framework\Utils\PathResolver;
-use Domain\Core\Project;
-use Domain\Core\Index;
+use Padawan\Framework\Generator\FilesFinder;
+use Padawan\Framework\Utils\PathResolver;
+use Padawan\Domain\Core\Project;
+use Padawan\Domain\Core\Index;
 use Prophecy\Argument;
 
 describe('FilesFinder', function() {

@@ -1,16 +1,16 @@
 <?php
 
-use Parser\CommentParser;
-use Parser\UseParser;
-use Domain\Core\Node\Comment;
-use Domain\Core\Node\Uses;
-use Domain\Core\FQCN;
+use Padawan\Parser\CommentParser;
+use Padawan\Parser\UseParser;
+use Padawan\Domain\Core\Node\Comment;
+use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Core\FQCN;
 
 describe('CommentParser', function() {
     beforeEach(function() {
         $this->useParser = new UseParser;
         $this->uses = new Uses(
-            $this->useParser->parseFQCN('Domain\Core\Node')
+            $this->useParser->parseFQCN('Padawan\Domain\Core\Node')
         );
         $this->useParser->setUses(
             $this->uses
@@ -43,7 +43,7 @@ DOCBLOCK;
         it('returns FQCN', function() {
             $comment = $this->comment;
             expect($comment->getReturn())->to->be->an->instanceof(FQCN::class);
-            expect($comment->getReturn()->toString())->to->equal('Domain\Core\Node\Comment');
+            expect($comment->getReturn()->toString())->to->equal(Comment::class);
         });
     });
     describe('createMethodParam()', function() {
@@ -57,7 +57,7 @@ DOCBLOCK;
             $var = array_pop($comment->getVars());
             expect($var->getType())->to->be->an->instanceof(FQCN::class);
             expect($var->getType()->toString())->to->equal(
-                'Domain\Core\Node\Comment'
+                Comment::class
             );
         });
     });

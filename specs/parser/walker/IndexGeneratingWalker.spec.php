@@ -1,7 +1,7 @@
 <?php
 
 use Prophecy\Argument;
-use Parser\Walker\IndexGeneratingWalker;
+use Padawan\Parser\Walker\IndexGeneratingWalker;
 use PhpParser\NodeTraverser;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Interface_;
@@ -11,17 +11,17 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\Echo_;
 use PhpParser\Node\Expr\Assign;
-use Parser\ClassParser;
-use Parser\InterfaceParser;
-use Parser\UseParser;
-use Parser\NamespaceParser;
-use Parser\Transformer\FunctionTransformer;
-use Parser\Transformer\ClassAssignmentTransformer;
-use Domain\Core\Node\ClassData;
-use Domain\Core\Node\FunctionData;
-use Domain\Core\Node\InterfaceData;
-use Domain\Core\Node\Uses;
-use Domain\Core\FQCN;
+use Padawan\Parser\ClassParser;
+use Padawan\Parser\InterfaceParser;
+use Padawan\Parser\UseParser;
+use Padawan\Parser\NamespaceParser;
+use Padawan\Parser\Transformer\FunctionTransformer;
+use Padawan\Parser\Transformer\ClassAssignmentTransformer;
+use Padawan\Domain\Core\Node\ClassData;
+use Padawan\Domain\Core\Node\FunctionData;
+use Padawan\Domain\Core\Node\InterfaceData;
+use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Core\FQCN;
 
 describe('IndexGeneratingWalker', function(){
     beforeEach(function (){

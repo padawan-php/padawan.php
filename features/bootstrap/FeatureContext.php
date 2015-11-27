@@ -4,15 +4,15 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Application\HTTP\App;
-use Domain\Core\Project;
-use Domain\Core\Index;
+use Padawan\Framework\Application\HTTP\App;
+use Padawan\Domain\Core\Project;
+use Padawan\Domain\Core\Index;
 use Fake\Request;
 use Fake\Response;
 use DI\Container;
 use Psr\Log\LoggerInterface;
 use Monolog\Handler\NullHandler;
-use Framework\Generator\IndexGenerator;
+use Padawan\Framework\Generator\IndexGenerator;
 
 /**
  * Defines application features from the specific context.

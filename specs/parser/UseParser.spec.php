@@ -1,8 +1,8 @@
 <?php
 
-use Parser\UseParser;
-use Domain\Core\Node\Uses;
-use Domain\Core\FQCN;
+use Padawan\Parser\UseParser;
+use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Core\FQCN;
 
 describe('UseParser', function() {
     beforeEach(function() {
@@ -20,6 +20,7 @@ describe('UseParser', function() {
         it('splits complex name by \\', function() {
             $fqcn = $this->useParser->parseFQCN(Uses::class);
             expect($fqcn->getParts())->to->equal([
+                'Padawan',
                 'Domain',
                 'Core',
                 'Node',
@@ -45,6 +46,7 @@ describe('UseParser', function() {
         it('works with array-type', function() {
             $fqcn = $this->useParser->parseFQCN(Uses::class . '[]');
             expect($fqcn->getParts())->to->equal([
+                'Padawan',
                 'Domain',
                 'Core',
                 'Node',

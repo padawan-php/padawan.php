@@ -21,7 +21,8 @@
         "symfony/event-dispatcher": "^2.6",
         "doctrine/cache": "^1.4",
         "symfony/console": "^2.7",
-        "php-di/php-di": "^5.1"
+        "php-di/php-di": "^5.1",
+        "php-di/symfony2-bridge": "^1.1"
     },
     "require-dev": {
         "behat/behat": "~3.0",

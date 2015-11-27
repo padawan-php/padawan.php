@@ -1,0 +1,168 @@
+<?php
+
+namespace Padawan\Framework\Complete;
+
+use Padawan\Domain\Core\Project;
+use Padawan\Domain\Core\Completion\Scope;
+use Padawan\Domain\Core\Completion\Scope\FileScope;
+use Padawan\Domain\Core\FQN;
+use \Padawan\Parser\Parser;
+use Padawan\Domain\Generator\IndexGenerator;
+use Padawan\Domain\Completer\CompleterFactory;
+use Padawan\Framework\Complete\Resolver\ContextResolver;
+use \Padawan\Parser\Walker\IndexGeneratingWalker;
+use \Padawan\Parser\Walker\ScopeWalker;
+use Psr\Log\LoggerInterface;
+
+class CompleteEngine {
+    public function __construct(
+        Parser $parser,
+        IndexGenerator $generator,
+        ContextResolver $contextResolver,
+        CompleterFactory $completer,
+        IndexGeneratingWalker $indexGeneratingWalker,
+        ScopeWalker $scopeWalker,
+        LoggerInterface $logger
+    ) {
+        $this->parser                   = $parser;
+        $this->generator                = $generator;
+        $this->contextResolver          = $contextResolver;
+        $this->completerFactory         = $completer;
+        $this->indexGeneratingWalker    = $indexGeneratingWalker;
+        $this->scopeWalker              = $scopeWalker;
+        $this->logger                   = $logger;
+        $this->cachePool                = [];
+    }
+    public function createCompletion(
+        Project $project,
+        $content,
+        $line,
+        $column,
+        $file
+    ) {
+        $start = microtime(1);
+        $entries = [];
+        if ($line) {
+            list($lines,, $completionLine) = $this->prepareContent(
+                $content,
+                $line,
+                $column
+            );
+            try {
+                $scope = $this->processFileContent($project, $lines, $line, $file);
+                if (empty($scope)) {
+                    $scope = new FileScope(new FQN);
+                }
+                $this->logger->debug(sprintf(
+                    "%s seconds for ast processing",
+                    (microtime(1) - $start)
+                ));
+            } catch (\Exception $e) {
+                $scope = new FileScope(new FQN);
+            }
+            $entries = $this->findEntries($project, $scope, $completionLine, $column);
+            $this->logger->debug(sprintf(
+                "%s seconds for entries generation",
+                (microtime(1) - $start)
+            ));
+        } elseif (!empty($content)) {
+            $this->processFileContent($project, $content, $line, $file);
+        }
+
+        return [
+            "entries" => $entries,
+            "context" => []
+        ];
+    }
+
+    /**
+     * @param string $badLine
+     */
+    protected function findEntries(Project $project, Scope $scope, $badLine, $column)
+    {
+        $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
+        $completer = $this->completerFactory->getCompleter($context, $project);
+        if ($completer) {
+            return $completer->getEntries($project, $context);
+        }
+        return [];
+    }
+    /**
+     * @TODO
+     * Should check for bad lines
+     */
+    protected function prepareContent($content, $line, $column) {
+        $lines = explode(PHP_EOL, $content);
+        if ($line > count($lines)) {
+            $badLine = "";
+        } else {
+            $badLine = $lines[$line - 1];
+        }
+        $completionLine = substr($badLine, 0, $column - 1);
+        $lines[$line - 1] = "";
+        return [$lines, trim($badLine), trim($completionLine)];
+    }
+
+    /**
+     * @return Scope
+     */
+    protected function processFileContent(Project $project, $lines, $line, $file) {
+        if (is_array($lines)) {
+            $content = implode("\n", $lines);
+        } else {
+            $content = $lines;
+        }
+        if (empty($content)) {
+            return;
+        }
+        if (!array_key_exists($file, $this->cachePool)) {
+            $this->cachePool[$file] = [0, [], []];
+        }
+        if ($this->isValidCache($file, $content)) {
+            list(,, $scope) = $this->cachePool[$file];
+        }
+        if (empty($scope)) {
+            $parser = $this->parser;
+            $parser->addWalker($this->indexGeneratingWalker);
+            $parser->setIndex($project->getIndex());
+            $nodes = $parser->parseContent($file, $content);
+            $this->generator->processFileScope(
+                $project->getIndex(),
+                $nodes
+            );
+            /** @var \Padawan\Domain\Core\Node\Uses */
+            $uses = $parser->getUses();
+            $this->scopeWalker->setLine($line);
+            $parser->addWalker($this->scopeWalker);
+            $parser->setIndex($project->getIndex());
+            $scope = $parser->parseContent($file, $content, $uses);
+            $contentHash = hash('sha1', $content);
+            $this->cachePool[$file] = [$contentHash, $nodes, $scope];
+        }
+        if ($scope) {
+            return $scope;
+        }
+        return null;
+    }
+
+    private function isValidCache($file, $content)
+    {
+        $contentHash = hash('sha1', $content);
+        list($hash) = $this->cachePool[$file];
+        return $hash === $contentHash;
+    }
+
+    /** @var Parser */
+    private $parser;
+    /** @property IndexGenerator */
+    private $generator;
+    private $contextResolver;
+    private $completerFactory;
+    /** @property IndexGeneratingWalker */
+    private $indexGeneratingWalker;
+    /** @property ScopeWalker */
+    private $scopeWalker;
+    private $cachePool;
+    /** @var LoggerInterface */
+    private $logger;
+}

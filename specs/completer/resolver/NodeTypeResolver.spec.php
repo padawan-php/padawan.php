@@ -1,16 +1,16 @@
 <?php
 
-use Framework\Complete\Resolver\NodeTypeResolver;
-use Domain\Core\Completion\Scope;
-use Domain\Core\Completion\Scope\FileScope;
-use Domain\Core\FQCN;
-use Domain\Core\FQN;
-use Domain\Core\Index;
-use Domain\Core\Node\ClassData;
-use Domain\Core\Node\ClassProperty;
-use Domain\Core\Node\MethodData;
-use Domain\Core\Node\Variable;
-use Domain\Core\Node\FunctionData;
+use Padawan\Framework\Complete\Resolver\NodeTypeResolver;
+use Padawan\Domain\Core\Completion\Scope;
+use Padawan\Domain\Core\Completion\Scope\FileScope;
+use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Core\FQN;
+use Padawan\Domain\Core\Index;
+use Padawan\Domain\Core\Node\ClassData;
+use Padawan\Domain\Core\Node\ClassProperty;
+use Padawan\Domain\Core\Node\MethodData;
+use Padawan\Domain\Core\Node\Variable;
+use Padawan\Domain\Core\Node\FunctionData;
 use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\MethodCall;
@@ -19,7 +19,7 @@ use PhpParser\Node\Name;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Parser\UseParser;
+use Padawan\Parser\UseParser;
 
 function createClass($classFQN, $fqcn) {
     $class = new ClassData($classFQN, 'dummy/path/class.php');
