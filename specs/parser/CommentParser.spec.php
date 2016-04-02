@@ -48,13 +48,13 @@ DOCBLOCK;
     });
     describe('createMethodParam()', function() {
         it('sets var name', function() {
-            $comment = $this->comment;
-            $var = array_shift($comment->getVars());
+            $vars = $this->comment->getVars();
+            $var = array_shift($vars);
             expect($var->getName())->to->equal('myParamName');
         });
         it('sets var type', function() {
-            $comment = $this->comment;
-            $var = array_pop($comment->getVars());
+            $vars = $this->comment->getVars();
+            $var = array_pop($vars);
             expect($var->getType())->to->be->an->instanceof(FQCN::class);
             expect($var->getType()->toString())->to->equal(
                 Comment::class

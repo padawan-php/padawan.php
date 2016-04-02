@@ -3,6 +3,7 @@
 use Prophecy\Argument;
 use Padawan\Parser\Walker\IndexGeneratingWalker;
 use PhpParser\NodeTraverser;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Function_;
@@ -11,6 +12,7 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\Echo_;
 use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\Variable as NodeVar;
 use Padawan\Parser\ClassParser;
 use Padawan\Parser\InterfaceParser;
 use Padawan\Parser\UseParser;
@@ -18,6 +20,7 @@ use Padawan\Parser\NamespaceParser;
 use Padawan\Parser\Transformer\FunctionTransformer;
 use Padawan\Parser\Transformer\ClassAssignmentTransformer;
 use Padawan\Domain\Core\Node\ClassData;
+use Padawan\Domain\Core\Node\MethodData;
 use Padawan\Domain\Core\Node\FunctionData;
 use Padawan\Domain\Core\Node\InterfaceData;
 use Padawan\Domain\Core\Node\Uses;
@@ -39,13 +42,17 @@ describe('IndexGeneratingWalker', function(){
             $this->functionTransformer->reveal(),
             $this->classAssignmentTransformer->reveal()
         );
-        $this->walker->updateFileInfo(new Uses, "");
+        $uses = new Uses(new FQCN(""));
+        $this->walker->updateFileInfo($uses, "");
     });
     describe('->enterNode()', function(){
         describe('Class node', function(){
             beforeEach(function(){
+                $class = new ClassData(new FQCN("Name"), "");
+                $class->addMethod(new MethodData("__construct"));
+                $class->addMethod(new MethodData("not_construct"));
                 $this->classParser->parse(Argument::any(), Argument::any(), Argument::any())
-                    ->willReturn(new ClassData(new FQCN, ""));
+                    ->willReturn($class);
             });
             it('enteres Class node', function(){
                 expect($this->walker->enterNode(new Class_("")))->to->equal(null);
@@ -82,7 +89,7 @@ describe('IndexGeneratingWalker', function(){
         describe('Interface node', function(){
             beforeEach(function(){
                 $this->interfaceParser->parse(Argument::any(), Argument::any(), Argument::any())
-                    ->willReturn(new InterfaceData(new FQCN, ""));
+                    ->willReturn(new InterfaceData(new FQCN(""), ""));
             });
             it('enteres Interface node', function(){
                 expect($this->walker->enterNode(new Interface_("")))->to->equal(null);
@@ -92,7 +99,7 @@ describe('IndexGeneratingWalker', function(){
         });
         describe('Namespace node', function(){
             it('tranforms namespace node', function(){
-                expect($this->walker->enterNode(new Namespace_("Test")))->to->equal(null);
+                expect($this->walker->enterNode(new Namespace_(new Name("Test"))))->to->equal(null);
             });
         });
         describe('Use node', function(){
@@ -101,23 +108,25 @@ describe('IndexGeneratingWalker', function(){
                     ->willReturn(new Uses);
             });
             it('tranforms use nodes', function(){
-                expect($this->walker->enterNode(new Use_("Test")))->to->equal(null);
+                expect($this->walker->enterNode(new Use_([])))->to->equal(null);
             });
         });
         it('skips other nodes', function(){
-            expect($this->walker->enterNode(new Echo_))->to->equal(NodeTraverser::DONT_TRAVERSE_CHILDREN);
+            expect($this->walker->enterNode(new Echo_([])))->to->equal(NodeTraverser::DONT_TRAVERSE_CHILDREN);
         });
     });
     describe('->leaveNode()', function(){
         describe('when in MethodScope', function(){
             beforeEach(function(){
+                $class = new ClassData(new FQCN(""), "");
+                $class->addMethod(new MethodData("__construct"));
                 $this->classParser->parse(Argument::any(), Argument::any(), Argument::any())
-                    ->willReturn(new ClassData(new FQCN, ""));
+                    ->willReturn($class);
                 $this->walker->enterNode(new Class_("Name"));
                 $this->walker->enterNode(new ClassMethod("__construct"));
             });
             it('transforms assignment statements in MethodScope', function(){
-                $this->walker->leaveNode(new Assign(null, null));
+                $this->walker->leaveNode(new Assign(new NodeVar(""), new NodeVar("")));
                 $this->classAssignmentTransformer->transform(
                     Argument::any(),
                     Argument::any(),
@@ -127,7 +136,7 @@ describe('IndexGeneratingWalker', function(){
             });
         });
         it('doesn\'t transform assignment statements when not in MethodScope', function(){
-            $this->walker->leaveNode(new Assign(null, null));
+            $this->walker->leaveNode(new Assign(new NodeVar(""), new NodeVar("")));
             $this->classAssignmentTransformer->transform(
                 Argument::any(),
                 Argument::any(),

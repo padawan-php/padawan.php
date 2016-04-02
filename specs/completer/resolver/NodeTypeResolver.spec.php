@@ -53,16 +53,18 @@ describe('NodeTypeResolver', function() {
     });
     describe('->getType()', function() {
         it('returns variable type from scope', function() {
-            $node = new NodeVar;
-            $node->name = $this->var->getName();
+            $node = new NodeVar($this->var->getName());
             expect($this->resolver->getLastChainNodeType($node, $this->index, $this->scope))
                 ->to->equal($this->var->getType());
         });
         describe('Properties', function() {
             beforeEach(function() {
-                $this->node = new PropertyFetch;
-                $this->node->var = new NodeVar;
-                $this->node->var->name = $this->var->getName();
+                $this->node = new PropertyFetch(
+                    new NodeVar(
+                        $this->var->getName()
+                    ),
+                    ""
+                );
             });
             it('returns null for unknown property', function() {
                 $this->node->name = 'param';
@@ -77,9 +79,7 @@ describe('NodeTypeResolver', function() {
         });
         describe('Method', function() {
             beforeEach(function() {
-                $this->node = new MethodCall;
-                $this->node->var = new NodeVar;
-                $this->node->var->name = $this->var->getName();
+                $this->node = new MethodCall(new NodeVar($this->var->getName()), "");
             });
             it('returns null for unknown method', function() {
                 $this->node->name = 'method';
@@ -94,19 +94,21 @@ describe('NodeTypeResolver', function() {
         });
         describe('Complex', function() {
             beforeEach(function() {
-                $this->node = new MethodCall;
-                $this->node->name = 'method2';
-                $this->node->var = new PropertyFetch;
-                $this->node->var->name = 'param2';
-                $this->node->var->var = new MethodCall;
-                $this->node->var->var->name = 'method2';
-                $this->node->var->var->var = new NodeVar;
-                $this->node->var->var->var->name = $this->var->getName();
+                $this->node = new MethodCall(
+                    new PropertyFetch(
+                        new MethodCall(
+                            new NodeVar(
+                                $this->var->getName()
+                            ),
+                            "method2"
+                        ),
+                        "param2"
+                    ),
+                    "method2"
+                );
             });
             it('returns type for known property in complex chain', function() {
-                $node = new PropertyFetch;
-                $node->var = $this->node;
-                $node->name = 'param2';
+                $node = new PropertyFetch($this->node, "param2");
                 expect($this->resolver->getLastChainNodeType($node, $this->index, $this->scope))
                     ->to->equal($this->var->getType());
             });
