@@ -1,12 +1,8 @@
 language: php
 php:
-    - 5.5
-    - 5.6
-matrix:
-    allow_failures:
-        - php:
-            - 7
-            - hhvm
+    - '5.5'
+    - '5.6'
+    - '7.0'
 install:
     - composer install
-script: bin/peridot specs/ && bin/behat
+script: bin/peridot specs/ && bin/behat --colors

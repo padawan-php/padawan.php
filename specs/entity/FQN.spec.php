@@ -1,6 +1,6 @@
 <?php
 
-use Entity\FQN;
+use Padawan\Domain\Core\FQN;
 
 describe('FQN', function() {
     describe('__construct()', function() {

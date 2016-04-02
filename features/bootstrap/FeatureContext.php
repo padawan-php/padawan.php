@@ -1,18 +1,18 @@
 <?php
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Application\HTTP\App;
-use Entity\Project;
-use Entity\Index;
+use Padawan\Framework\Application\HTTP\App;
+use Padawan\Domain\Core\Project;
+use Padawan\Domain\Core\Index;
 use Fake\Request;
 use Fake\Response;
 use DI\Container;
 use Psr\Log\LoggerInterface;
 use Monolog\Handler\NullHandler;
+use Padawan\Framework\Generator\IndexGenerator;
 
 /**
  * Defines application features from the specific context.
@@ -52,18 +52,18 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $file = uniqid() . ".php";
         $container = $this->app->getContainer();
-        $generator = $container->get("Generator\IndexGenerator");
-        $processor = $generator->getProcessor();
-        $processor->clearResultNodes();
+        $generator = $container->get(IndexGenerator::class);
+        $walker = $generator->getWalker();
         $parser = $generator->getClassUtils()->getParser();
-        $parser->addProcessor($processor);
+        $parser->addWalker($walker);
+        $parser->setIndex($this->project->getIndex());
         $this->content = $string->getRaw();
         $scope = $parser->parseContent($file, $this->content, null, false);
         $generator->processFileScope($this->project->getIndex(), $scope);
     }
 
     /**
-     * @When I type :code on the :linenum line
+     * @When I type :code on the :line line
      */
     public function iTypeOnTheLine($code, $linenum)
     {
@@ -78,7 +78,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
-     * @When ask for completion
+     * @When I ask for completion
      */
     public function askForCompletion()
     {
@@ -99,14 +99,23 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function iShouldGet(TableNode $table)
     {
         if (isset($this->response["error"])) {
-            throw new \Exception($this->response["error"]);
+            throw new \Exception(
+                sprintf("Application response contains error: %s", $this->response["error"])
+            );
         }
-        $result = array_map(function ($item) {
-            return [
-                'Name' => $item["name"]
-            ];
+        $columns = $table->getRow(0);
+        $result = array_map(function ($item) use($columns) {
+            $hash = [];
+            switch(count($columns)) {
+                case 2:
+                    $hash["Signature"] = $item["signature"];
+                case 1:
+                    $hash["Name"] = $item["name"];
+                    break;
+            }
+            return $hash;
         }, $this->response["completion"]);
-        expect($table->getColumnsHash())->to->be->equal($result);
+        expect($table->getColumnsHash())->to->loosely->equal($result);
     }
 
     /** @var App */

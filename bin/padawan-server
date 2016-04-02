@@ -8,7 +8,7 @@ ini_set('display_errors', 'stderr');
 
 use React\Http\Response;
 use React\Http\Request;
-use Application\HTTP\App;
+use Padawan\Framework\Application\HTTP\App;
 
 $autoloaders = [
     __DIR__ . '/../../../autoload.php',

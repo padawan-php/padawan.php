@@ -1,9 +1,9 @@
 <?php
 
-use Generator\FilesFinder;
-use Utils\PathResolver;
-use Entity\Project;
-use Entity\Index;
+use Padawan\Framework\Generator\FilesFinder;
+use Padawan\Framework\Utils\PathResolver;
+use Padawan\Domain\Core\Project;
+use Padawan\Domain\Core\Index;
 use Prophecy\Argument;
 
 describe('FilesFinder', function() {
@@ -22,9 +22,9 @@ describe('FilesFinder', function() {
         $this->files = new FilesFinder($this->mock->reveal());
         $this->project = new Project(new Index, "/project");
     });
-    describe('->getProjectFiles()', function() {
+    describe('->findProjectFiles()', function() {
         it('returns all php files from project', function() {
-            expect($this->files->getProjectFiles($this->project))->to->be->equal([
+            expect($this->files->findProjectFiles($this->project))->to->be->equal([
                 '/test/TestClass.php',
                 '/some/AnotherFile.php',
                 '/peridot.php'

@@ -1,6 +1,6 @@
 <?php
 
-use Utils\PathResolver;
+use Padawan\Framework\Utils\PathResolver;
 use Phine\Path\Path;
 
 describe('PathResolver', function() {

@@ -1,16 +1,16 @@
 <?php
 
-use Parser\CommentParser;
-use Parser\UseParser;
-use Entity\Node\Comment;
-use Entity\Node\Uses;
-use Entity\FQCN;
+use Padawan\Parser\CommentParser;
+use Padawan\Parser\UseParser;
+use Padawan\Domain\Core\Node\Comment;
+use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Core\FQCN;
 
 describe('CommentParser', function() {
     beforeEach(function() {
         $this->useParser = new UseParser;
         $this->uses = new Uses(
-            $this->useParser->parseFQCN('Entity\Node')
+            $this->useParser->parseFQCN('Padawan\Domain\Core\Node')
         );
         $this->useParser->setUses(
             $this->uses
@@ -43,21 +43,21 @@ DOCBLOCK;
         it('returns FQCN', function() {
             $comment = $this->comment;
             expect($comment->getReturn())->to->be->an->instanceof(FQCN::class);
-            expect($comment->getReturn()->toString())->to->equal('Entity\Node\Comment');
+            expect($comment->getReturn()->toString())->to->equal(Comment::class);
         });
     });
     describe('createMethodParam()', function() {
         it('sets var name', function() {
-            $comment = $this->comment;
-            $var = array_shift($comment->getVars());
+            $vars = $this->comment->getVars();
+            $var = array_shift($vars);
             expect($var->getName())->to->equal('myParamName');
         });
         it('sets var type', function() {
-            $comment = $this->comment;
-            $var = array_pop($comment->getVars());
+            $vars = $this->comment->getVars();
+            $var = array_pop($vars);
             expect($var->getType())->to->be->an->instanceof(FQCN::class);
             expect($var->getType()->toString())->to->equal(
-                'Entity\Node\Comment'
+                Comment::class
             );
         });
     });

@@ -16,11 +16,13 @@
         "phine/path": "~1.0",
         "nikic/php-parser": "~1.1",
         "monolog/monolog": "~1.13",
-        "mnapoli/php-di": "~4.4",
         "react/react": "0.4.*",
         "phpdocumentor/reflection-docblock": "~2.0",
         "symfony/event-dispatcher": "^2.6",
-        "doctrine/cache": "^1.4"
+        "doctrine/cache": "^1.4",
+        "symfony/console": "^2.7",
+        "php-di/php-di": "^5.1",
+        "php-di/symfony2-bridge": "^1.1"
     },
     "require-dev": {
         "behat/behat": "~3.0",

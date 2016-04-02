@@ -1,8 +1,8 @@
 <?php
 
-use Parser\UseParser;
-use Entity\Node\Uses;
-use Entity\FQCN;
+use Padawan\Parser\UseParser;
+use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Core\FQCN;
 
 describe('UseParser', function() {
     beforeEach(function() {
@@ -20,7 +20,9 @@ describe('UseParser', function() {
         it('splits complex name by \\', function() {
             $fqcn = $this->useParser->parseFQCN(Uses::class);
             expect($fqcn->getParts())->to->equal([
-                'Entity',
+                'Padawan',
+                'Domain',
+                'Core',
                 'Node',
                 'Uses'
             ]);
@@ -44,7 +46,9 @@ describe('UseParser', function() {
         it('works with array-type', function() {
             $fqcn = $this->useParser->parseFQCN(Uses::class . '[]');
             expect($fqcn->getParts())->to->equal([
-                'Entity',
+                'Padawan',
+                'Domain',
+                'Core',
                 'Node',
                 'Uses'
             ]);
@@ -96,9 +100,10 @@ describe('UseParser', function() {
             expect($fqcn->isScalar())->to->be->true;
         });
         it('works with absolute names', function() {
-            $fqcn = $this->useParser->parseType('\Entity\Project');
+            $fqcn = $this->useParser->parseType('\Domain\Core\Project');
             expect($fqcn->getParts())->to->equal([
-                'Entity',
+                'Domain',
+                'Core',
                 'Project'
             ]);
 
