@@ -1,6 +1,6 @@
 <?php
 
-namespace Padawan\Framework\Application\CLI;
+namespace Padawan\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,7 +10,7 @@ use Padawan\Domain\Core\Index;
 use Padawan\Domain\Generator\IndexGenerator;
 use Padawan\Framework\IO\Writer;
 
-class GenerateCommand extends Command
+class GenerateCommand extends CliCommand
 {
     protected function configure()
     {

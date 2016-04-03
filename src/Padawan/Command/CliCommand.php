@@ -1,11 +1,11 @@
 <?php
 
-namespace Padawan\Framework\Application\CLI;
+namespace Padawan\Command;
 
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Component\Console\Command\Command;
 use Padawan\Framework\Application\CLI;
 
-abstract class Command extends SymfonyCommand
+abstract class CliCommand extends Command
 {
     public function getContainer()
     {
@@ -18,7 +18,7 @@ abstract class Command extends SymfonyCommand
     }
 
     /**
-     * @return CLI
+     * @return \Padawan\Framework\Application\Cli
      */
     public function getApplication()
     {
