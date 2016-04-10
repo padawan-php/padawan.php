@@ -59,6 +59,7 @@ class Parser {
             catch (\Exception $e) {
                 $this->logger->addError(sprintf("Parsing failed in file %s\n", $file));
                 $this->logger->error($e);
+                $this->clearWalkers();
                 return null;
             }
             if ($createCache) {
