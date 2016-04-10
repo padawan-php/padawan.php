@@ -10,7 +10,6 @@ class Cli extends Application
     public function __construct()
     {
         parent::__construct("Padawan CLI");
-        $this->loadCommands();
     }
 
     /**

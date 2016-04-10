@@ -11,14 +11,22 @@ define("PADAWAN_VERSION", "0.3");
 /**
  * Class Application
  */
-class Application extends BaseApplication
+abstract class Application extends BaseApplication
 {
     public function __construct($name = "Padawan")
     {
         parent::__construct($name, PADAWAN_VERSION);
         $this->createContainer();
         $this->setAutoExit(false);
+        $this->loadCommands();
     }
+
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    abstract protected function loadCommands();
 
     private function createContainer()
     {

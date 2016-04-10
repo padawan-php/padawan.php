@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+use Padawan\Framework\Application\Socket as App;
+use Padawan\Framework\Application\Socket\SocketOutput;
+
 set_time_limit(0);
 ini_set('memory_limit', '2048M');
 ini_set('xdebug.max_nesting_level', '9000');
@@ -31,32 +34,24 @@ $port = 15155;
 Amp\run(function() use ($port) {
     $socket = Amp\Socket\listen("tcp://0.0.0.0:" . $port);
     $server = new Amp\Socket\Server($socket);
+    $app = new App();
     printf("Started padawan server on %d\n", $port);
     while ($client = (yield $server->accept())) {
-        Amp\resolve(onClient($client));
+        Amp\resolve(onClient($client, $app));
     }
 });
 
 // Generator coroutine is a lightweight "thread" for each client
-function onClient(Amp\Socket\Client $client) {
+function onClient(Amp\Socket\Client $client, App $app) {
+    $startedAt = microtime(true);
     /** @var $client \Amp\Socket\Client */
     $clientId = $client->id();
     echo "+ connected: {$clientId}\n";
     $content = (yield $client->read());
-    echo "data read from {$clientId}: {$content}\n";
-    $request = json_encode($content);
-    if ($client->alive()) {
-        yield $client->write(json_encode([
-            "completion" => [
-                [
-                    "name" => "test",
-                    "description" => "",
-                    "signature" => "",
-                    "menu" => ""
-                ]
-            ]
-        ]));
-        $client->close();
-    }
-    echo "- disconnected {$clientId}\n";
+    $request = json_decode($content);
+    $output = new SocketOutput($client);
+    yield from $app->handle($request, $output);
+    yield $client->close();
+    $totalTime = microtime(true) - $startedAt;
+    echo "- disconnected {$clientId} after {$totalTime}\n";
 }

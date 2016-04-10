@@ -14,7 +14,7 @@ class GenerateCommand extends CliCommand
 {
     protected function configure()
     {
-        $this->setName("generate")
+        $this->setName("complete")
             ->setDescription("Generates new index for the project")
             ->addArgument(
                 "path",

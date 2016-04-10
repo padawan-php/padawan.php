@@ -3,6 +3,8 @@
 use Monolog\Logger;
 use Padawan\Domain\Generator\IndexGenerator;
 use Padawan\Framework\Generator\IndexGenerator as IndexGeneratorImpl;
+use Padawan\Domain\ProjectRepository;
+use Padawan\Framework\Project\Repository as ProjectRepositoryImpl;
 
 return [
     Psr\Log\LoggerInterface::class => DI\factory(function() {
@@ -13,5 +15,6 @@ return [
         ));
         return $logger;
     }),
-    IndexGenerator::class => DI\object(IndexGeneratorImpl::class)
+    IndexGenerator::class => DI\object(IndexGeneratorImpl::class),
+    ProjectRepository::class => DI\object(ProjectRepositoryImpl::class)
 ];
