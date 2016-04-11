@@ -13,6 +13,8 @@ use DI\Container;
 use Psr\Log\LoggerInterface;
 use Monolog\Handler\NullHandler;
 use Padawan\Framework\Generator\IndexGenerator;
+use Padawan\Domain\Core\Completion\Scope;
+use Padawan\Domain\Core\Completion\Scope\FileScope;
 
 /**
  * Defines application features from the specific context.
@@ -60,6 +62,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $this->content = $string->getRaw();
         $scope = $parser->parseContent($file, $this->content, null, false);
         $generator->processFileScope($this->project->getIndex(), $scope);
+        $this->scope = $scope;
     }
 
     /**
@@ -127,4 +130,6 @@ class FeatureContext implements Context, SnippetAcceptingContext
     private $column;
     private $content;
     private $response;
+    /** @var Scope */
+    private $scope;
 }
