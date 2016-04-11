@@ -50,8 +50,16 @@ function onClient(Amp\Socket\Client $client, App $app) {
     $content = (yield $client->read());
     $request = json_decode($content);
     $output = new SocketOutput($client);
-    yield from $app->handle($request, $output);
-    yield $client->close();
+    try {
+        yield from $app->handle($request, $output);
+    } catch (\Throwable $e) {
+        yield $output->write(json_encode([
+            "error" => $e->getMessage()
+        ]));
+    }
+    if ($client->alive()) {
+        yield $client->close();
+    }
     $totalTime = microtime(true) - $startedAt;
     echo "- disconnected {$clientId} after {$totalTime}\n";
 }

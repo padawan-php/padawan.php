@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
 use Padawan\Domain\ProjectRepository;
+use Padawan\Framework\Project\Persister;
 
 class CompleteCommand extends AsyncCommand
 {
@@ -50,24 +51,39 @@ class CompleteCommand extends AsyncCommand
         $project = $projectRepository->findByPath($path);
 
         $completeEngine = $this->getContainer()->get(CompleteEngine::class);
-        $completion = $completeEngine->createCompletion(
-            $project,
-            $content,
-            $line,
-            $column,
-            $file
-        );
+        /** @var Persister */
+        $persister = $this->getContainer()->get(Persister::class);
+        try {
+            $completion = $completeEngine->createCompletion(
+                $project,
+                $content,
+                $line,
+                $column,
+                $file
+            );
 
-        yield $output->write(
-            json_encode(
-                [
-                    "completion" => $this->prepareEntries(
-                        $completion["entries"]
-                    ),
-                    "context" => $completion["context"]
-                ]
-            )
-        );
+            yield $output->write(
+                json_encode(
+                    [
+                        "completion" => $this->prepareEntries(
+                            $completion["entries"]
+                        ),
+                        "context" => $completion["context"]
+                    ]
+                )
+            );
+            yield $output->disconnect();
+            yield $persister->save($project);
+        } catch (\Exception $e) {
+            yield $output->write(
+                json_encode(
+                    [
+                        "completion" => [],
+                        "context" => []
+                    ]
+                )
+            );
+        }
     }
     protected function prepareEntries(array $entries) {
         $result = [];

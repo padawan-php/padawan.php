@@ -13,9 +13,9 @@ use Padawan\Domain\Core\Index;
  */
 class Repository implements ProjectRepository
 {
-    public function __construct(Reader $reader)
+    public function __construct(Persister $persister)
     {
-        $this->reader = $reader;
+        $this->persister = $persister;
         $this->pool = [];
     }
     public function findByPath($path)
@@ -28,13 +28,14 @@ class Repository implements ProjectRepository
 
     private function read($path)
     {
-        $project = $this->reader->read($path);
+        $project = $this->persister->load($path);
         if (!empty($project)) {
             return $project;
         } else {
             return new Project(new Index, $path);
         }
     }
+
     private $pool;
-    private $reader;
+    private $persister;
 }

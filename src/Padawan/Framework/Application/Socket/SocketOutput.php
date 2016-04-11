@@ -25,4 +25,9 @@ class SocketOutput extends NullOutput
     {
         return $this->client->write($message . "\n");
     }
+
+    public function disconnect()
+    {
+        return $this->client->close();
+    }
 }

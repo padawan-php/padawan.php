@@ -8,7 +8,7 @@ use Padawan\Framework\Utils\PathResolver;
 use PhpParser\Parser as ASTGenerator;
 use PhpParser\NodeTraverser as Traverser;
 use Psr\Log\LoggerInterface;
-use \Padawan\Parser\NamespaceParser;
+use Padawan\Parser\NamespaceParser;
 
 class Parser {
 
@@ -57,9 +57,10 @@ class Parser {
                 $ast = $this->parser->parse($content);
             }
             catch (\Exception $e) {
-                $this->logger->addError(sprintf("Parsing failed in file %s\n", $file));
+                $this->logger->error(sprintf("Parsing failed in file %s\n", $file));
                 $this->logger->error($e);
-                return null;
+                $this->clearWalkers();
+                return [];
             }
             if ($createCache) {
                 $this->astPool[$file] = [$hash, $ast];

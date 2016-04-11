@@ -2,10 +2,22 @@
 
 namespace Padawan\Command;
 
-class KillCommand implements CommandInterface
+
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Amp;
+
+class KillCommand extends AsyncCommand
 {
-    public function run(array $arguments = [])
+    protected function configure()
     {
-        die();
+        $this->setName("kill")
+            ->setDescription("Stops padawan server");
+    }
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        yield $output->disconnect();
+        printf("Goodbye\n");
+        yield Amp\stop();
     }
 }

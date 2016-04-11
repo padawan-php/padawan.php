@@ -6,6 +6,7 @@ use Padawan\Framework\Application;
 use Padawan\Framework\Application\Socket\SocketOutput;
 use Symfony\Component\Console\Input\ArrayInput;
 use Padawan\Command\CompleteCommand;
+use Padawan\Command\KillCommand;
 
 /**
  * Class Socket
@@ -31,7 +32,6 @@ class Socket extends Application
         foreach($request->params as $key=>$value) {
             $arrayForInput[$key] =  $value;
         }
-        $arrayForInput['data'] = $request->data;
         $input = new ArrayInput($arrayForInput);
         $command = $this->find($request->command);
         try {
@@ -47,5 +47,6 @@ class Socket extends Application
     protected function loadCommands()
     {
         $this->add(new CompleteCommand);
+        $this->add(new KillCommand);
     }
 }

@@ -8,13 +8,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Index;
 use Padawan\Domain\Generator\IndexGenerator;
-use Padawan\Framework\IO\Writer;
+use Padawan\Framework\Project\Persister;
 
 class GenerateCommand extends CliCommand
 {
     protected function configure()
     {
-        $this->setName("complete")
+        $this->setName("generate")
             ->setDescription("Generates new index for the project")
             ->addArgument(
                 "path",
@@ -37,9 +37,9 @@ class GenerateCommand extends CliCommand
             );
 
             $generator->generateIndex($project);
-            $indexWriter = $this->get(Writer::class);
+            $persister = $this->get(Persister::class);
 
-            $indexWriter->write($project);
+            $persister->save($project);
             $output->writeln("<info>Index generated</info>");
         } catch (\Exception $e) {
             $output->writeln(sprintf("<error>Error: %s</error>", $e->getMessage()));
