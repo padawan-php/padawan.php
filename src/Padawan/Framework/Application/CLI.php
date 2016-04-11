@@ -8,6 +8,7 @@ use DI\Container;
 use DI\ContainerBuilder;
 use Doctrine\Common\Cache\ArrayCache;
 use Padawan\Framework\Application\CLI;
+use Padawan\Command\PluginCommand;
 
 class CLI extends Application
 {
@@ -29,6 +30,7 @@ class CLI extends Application
     protected function loadCommands()
     {
         $this->add(new CLI\GenerateCommand);
+        $this->add(new PluginCommand);
     }
 
     private function initializeContainer()
