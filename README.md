@@ -94,9 +94,8 @@ Roadmap
 
 Now in progress:
 
-* Add completion for built-in php classes and functions
 * Implement `go to definition`, `go to assingment`, `show documentation`
-* Add plugins for editors(emacs, sublime text, atom and etc.)
+* Add plugins for editors(emacs, atom and etc.)
 * Extend type guessing(process classes' contructors, class doc-comment, foreach loops)
 * Implement index updating
 
