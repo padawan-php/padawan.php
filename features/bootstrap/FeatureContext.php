@@ -4,11 +4,10 @@ use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Padawan\Framework\Application\HTTP\App;
+use Padawan\Framework\Application\Socket;
 use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Index;
-use Fake\Request;
-use Fake\Response;
+use Fake\Output;
 use DI\Container;
 use Psr\Log\LoggerInterface;
 use Monolog\Handler\NullHandler;
@@ -36,7 +35,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
     public function createApplication()
     {
-        $this->app = new App(true);
+        $this->app = new Socket();
         $container = $this->app->getContainer();
         $container->get("Psr\\Log\\LoggerInterface")->popHandler();
         $container->get("Psr\\Log\\LoggerInterface")->pushHandler(new NullHandler());
@@ -85,15 +84,21 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function askForCompletion()
     {
-        $request = new Request("complete", [
-            'line' => $this->line + 1,
-            'column' => $this->column + 1,
-            'file' => $this->filename
-        ], $this->content);
-        $this->response = json_decode(
-            $this->app->handle($request, new Response, $request->body),
-            true
-        );
+        $request = new \stdclass;
+        $request->command = "complete";
+        $request->params = new \stdclass;
+        $request->params->line = $this->line + 1;
+        $request->params->column = $this->column + 1;
+        $request->params->filepath = $this->filename;
+        $request->params->path = $this->path;
+        $request->params->data = $this->content;
+
+        $output = new Output;
+        $app = $this->app;
+        Amp\run(function() use ($request, $output, $app) {
+            yield from $app->handle($request, $output);
+        });
+        $this->response = json_decode($output->output[0], 1);
     }
 
     /**
@@ -125,6 +130,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     private $app;
     /** @var Project */
     private $project;
+    private $path;
     private $filename;
     private $line;
     private $column;
