@@ -7,6 +7,7 @@ use Padawan\Framework\Application\Socket\SocketOutput;
 use Symfony\Component\Console\Input\ArrayInput;
 use Padawan\Command\CompleteCommand;
 use Padawan\Command\KillCommand;
+use Padawan\Command\ListCommand;
 
 /**
  * Class Socket
@@ -47,6 +48,7 @@ class Socket extends Application
     protected function loadCommands()
     {
         $this->add(new CompleteCommand);
+        $this->add(new ListCommand);
         $this->add(new KillCommand);
     }
 }
