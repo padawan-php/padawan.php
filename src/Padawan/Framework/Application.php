@@ -7,6 +7,7 @@ use DI\ContainerBuilder;
 use Symfony\Component\Console\Application as BaseApplication;
 
 define("PADAWAN_VERSION", "0.3");
+define("STUBS_DIR", dirname(dirname(dirname(__DIR__))) . '/stubs');
 
 /**
  * Class Application

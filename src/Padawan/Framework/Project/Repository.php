@@ -17,6 +17,7 @@ class Repository implements ProjectRepository
     {
         $this->persister = $persister;
         $this->pool = [];
+        $this->loadCoreIndex();
     }
     public function findByPath($path)
     {
@@ -36,6 +37,19 @@ class Repository implements ProjectRepository
         }
     }
 
+    private function loadCoreIndex()
+    {
+        if (self::$coreIndex) {
+            return;
+        }
+        self::$coreIndex = $this->read(STUBS_DIR)->getIndex();
+        $indexClass = new \ReflectionClass(Index::class);
+        $coreIndexProperty = $indexClass->getProperty("coreIndex");
+        $coreIndexProperty->setAccessible(true);
+        $coreIndexProperty->setValue(self::$coreIndex);
+    }
+
+    private static $coreIndex;
     private $pool;
     private $persister;
 }
