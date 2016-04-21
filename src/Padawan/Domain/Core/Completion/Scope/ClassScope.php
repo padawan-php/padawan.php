@@ -43,4 +43,14 @@ class ClassScope extends AbstractChildScope
     {
         return $this->class;
     }
+
+    private function addClass($class)
+    {
+        $this->class = $class;
+    }
+
+    private function addInterface($class)
+    {
+        $this->class = $class;
+    }
 }

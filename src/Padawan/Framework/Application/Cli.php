@@ -4,6 +4,7 @@ namespace Padawan\Framework\Application;
 
 use Padawan\Framework\Application;
 use Padawan\Command\GenerateCommand;
+use Padawan\Command\PluginCommand;
 
 class Cli extends Application
 {
@@ -23,5 +24,6 @@ class Cli extends Application
     protected function loadCommands()
     {
         $this->add(new GenerateCommand);
+        $this->add(new PluginCommand);
     }
 }
