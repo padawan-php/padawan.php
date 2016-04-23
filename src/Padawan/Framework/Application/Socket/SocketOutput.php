@@ -18,6 +18,9 @@ class SocketOutput extends NullOutput
 
     public function write($message, $newline = false, $options = 0)
     {
+        if (is_array($message)) {
+            $message = implode("\n", $message);
+        }
         return $this->client->write($message);
     }
 
