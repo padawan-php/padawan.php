@@ -3,7 +3,7 @@
 namespace Padawan\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Padawan\Framework\Application\CLI;
+use Padawan\Framework\Application\Cli;
 
 abstract class CliCommand extends Command
 {
@@ -18,7 +18,7 @@ abstract class CliCommand extends Command
     }
 
     /**
-     * @return \Padawan\Framework\Application\Cli
+     * @return Cli
      */
     public function getApplication()
     {

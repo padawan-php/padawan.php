@@ -30,4 +30,6 @@ class SocketOutput extends NullOutput
     {
         return $this->client->close();
     }
+
+    private $client;
 }

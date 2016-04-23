@@ -2,6 +2,7 @@
 
 namespace Padawan\Framework\Application;
 
+use DI\Container;
 use Padawan\Framework\Application;
 use Padawan\Command\GenerateCommand;
 use Padawan\Command\PluginCommand;

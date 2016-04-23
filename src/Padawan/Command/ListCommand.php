@@ -2,12 +2,12 @@
 
 namespace Padawan\Command;
 
-use Padawan\Domain\ProjectRepository;
 use Padawan\Domain\Core\Project;
+use Padawan\Domain\ProjectRepository;
 use Padawan\Domain\Core\Node\ClassData;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputInterface;
+use Padawan\Framework\Application\Socket\SocketOutput;
 
 /**
  * Class ListCommand
@@ -24,10 +24,9 @@ class ListCommand extends AsyncCommand
                 "Path to the project root"
             );
     }
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function executeAsync(InputInterface $input, SocketOutput $output)
     {
         $path = $input->getArgument("path");
-        $container = $this->getContainer();
 
         $projectRepository = $this->getContainer()->get(ProjectRepository::class);
         /** @var Project */

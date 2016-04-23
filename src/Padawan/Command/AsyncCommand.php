@@ -3,13 +3,19 @@
 namespace Padawan\Command;
 
 use DI\Container;
+use Padawan\Framework\Application\Socket;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Padawan\Framework\Application\Socket\SocketOutput;
 use Symfony\Component\Console\Exception\ExceptionInterface;
 
 abstract class AsyncCommand extends Command
 {
+
+    /**
+     * @return \Generator
+     */
     public function run(InputInterface $input, OutputInterface $output)
     {
         // force the creation of the synopsis before the merge with the app definition
@@ -42,11 +48,31 @@ abstract class AsyncCommand extends Command
         return $this->execute($input, $output);
     }
 
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        if ($output instanceof SocketOutput) {
+            return $this->executeAsync($input, $output);
+        }
+    }
+
+    /**
+     * @return \Generator
+     */
+    abstract protected function executeAsync(InputInterface $input, SocketOutput $output);
+
     /**
      * @return Container
      */
     public function getContainer()
     {
         return $this->getApplication()->getContainer();
+    }
+
+    /**
+     * @return Socket
+     */
+    public function getApplication()
+    {
+        return parent::getApplication();
     }
 }

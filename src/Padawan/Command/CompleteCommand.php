@@ -5,7 +5,7 @@ namespace Padawan\Command;
 use Padawan\Framework\Complete\CompleteEngine;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Output\OutputInterface;
+use Padawan\Framework\Application\Socket\SocketOutput;
 use Padawan\Domain\ProjectRepository;
 use Padawan\Framework\Project\Persister;
 
@@ -38,14 +38,13 @@ class CompleteCommand extends AsyncCommand
                 "Path to file relative to project root"
             );
     }
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function executeAsync(InputInterface $input, SocketOutput $output)
     {
         $column = $input->getArgument("column");
         $file = $input->getArgument("filepath");
         $line = $input->getArgument("line");
         $content = $input->getArgument("data");
         $path = $input->getArgument("path");
-        $container = $this->getContainer();
 
         $projectRepository = $this->getContainer()->get(ProjectRepository::class);
         $project = $projectRepository->findByPath($path);
