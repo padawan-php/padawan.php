@@ -16,6 +16,7 @@ class KillCommand extends AsyncCommand
     }
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        yield $output->write(json_encode([]));
         yield $output->disconnect();
         printf("Goodbye\n");
         yield Amp\stop();
