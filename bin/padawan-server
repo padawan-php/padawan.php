@@ -51,7 +51,7 @@ function onClient(Amp\Socket\Client $client, App $app) {
     $request = json_decode($content);
     $output = new SocketOutput($client);
     try {
-        yield from $app->handle($request, $output);
+        yield Amp\resolve($app->handle($request, $output));
     } catch (\Throwable $e) {
         yield $output->write(json_encode([
             "error" => $e->getMessage()

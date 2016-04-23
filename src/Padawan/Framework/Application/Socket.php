@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Padawan\Command\CompleteCommand;
 use Padawan\Command\KillCommand;
 use Padawan\Command\ListCommand;
+use Amp;
 
 /**
  * Class Socket
@@ -36,7 +37,7 @@ class Socket extends Application
         $input = new ArrayInput($arrayForInput);
         $command = $this->find($request->command);
         try {
-            yield from $command->run($input, $output);
+            yield Amp\resolve($command->run($input, $output));
         } catch (\Exception $e) {
             printf("Error: %s\n", $e->getMessage());
             yield $output->write(json_encode([

@@ -96,7 +96,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $output = new Output;
         $app = $this->app;
         Amp\run(function() use ($request, $output, $app) {
-            yield from $app->handle($request, $output);
+            yield Amp\resolve($app->handle($request, $output));
         });
         $this->response = json_decode($output->output[0], 1);
     }
