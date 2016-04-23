@@ -2,13 +2,14 @@
 
 namespace Padawan\Framework\Application;
 
-use Padawan\Framework\Application;
-use Padawan\Framework\Application\Socket\SocketOutput;
-use Symfony\Component\Console\Input\ArrayInput;
-use Padawan\Command\CompleteCommand;
+use Amp;
+use Padawan\Command\AsyncCommand;
 use Padawan\Command\KillCommand;
 use Padawan\Command\ListCommand;
-use Amp;
+use Padawan\Framework\Application;
+use Padawan\Command\CompleteCommand;
+use Symfony\Component\Console\Input\ArrayInput;
+use Padawan\Framework\Application\Socket\SocketOutput;
 
 /**
  * Class Socket
@@ -37,7 +38,9 @@ class Socket extends Application
         $input = new ArrayInput($arrayForInput);
         $command = $this->find($request->command);
         try {
-            yield Amp\resolve($command->run($input, $output));
+            if ($command instanceof AsyncCommand) {
+                yield Amp\resolve($command->run($input, $output));
+            }
         } catch (\Exception $e) {
             printf("Error: %s\n", $e->getMessage());
             yield $output->write(json_encode([
