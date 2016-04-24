@@ -1,14 +1,17 @@
 #!/usr/bin/env php
 <?php
 
+use Padawan\Framework\Application\Socket as App;
+use Padawan\Framework\Application\Socket\SocketOutput;
+
 set_time_limit(0);
 ini_set('memory_limit', '2048M');
 ini_set('xdebug.max_nesting_level', '9000');
 ini_set('display_errors', 'stderr');
 
-use React\Http\Response;
-use React\Http\Request;
-use Padawan\Framework\Application\HTTP\App;
+if (function_exists("cli_set_process_title")) {
+    @cli_set_process_title("padawan-server");
+}
 
 $autoloaders = [
     __DIR__ . '/../../../autoload.php',
@@ -26,60 +29,37 @@ foreach ($autoloaders as $autoloader) {
 
 require(AUTOLOAD_PATH);
 
-$noFsIO = false;
 $port = 15155;
 
-foreach ($argv as $arg) {
-    if ($arg === '--no-io') {
-        $noFsIO = true;
-    } elseif (strpos($arg, '=') !== false) {
-        list($name, $value) = explode('=', $arg);
-        if ($name === '--port') {
-            $port = $value;
-        } elseif ($name === '--host') {
-            $host = $value;
-        }
+Amp\run(function() use ($port) {
+    $socket = Amp\Socket\listen("tcp://0.0.0.0:" . $port);
+    $server = new Amp\Socket\Server($socket);
+    $app = new App();
+    printf("Started padawan server on %d\n", $port);
+    while ($client = (yield $server->accept())) {
+        Amp\resolve(onClient($client, $app));
     }
+});
+
+// Generator coroutine is a lightweight "thread" for each client
+function onClient(Amp\Socket\Client $client, App $app) {
+    $startedAt = microtime(true);
+    /** @var $client \Amp\Socket\Client */
+    $clientId = $client->id();
+    echo "+ connected: {$clientId}\n";
+    $content = (yield $client->read());
+    $request = json_decode($content);
+    $output = new SocketOutput($client);
+    try {
+        yield Amp\resolve($app->handle($request, $output));
+    } catch (\Throwable $e) {
+        yield $output->write(json_encode([
+            "error" => $e->getMessage()
+        ]));
+    }
+    if ($client->alive()) {
+        yield $client->close();
+    }
+    $totalTime = microtime(true) - $startedAt;
+    echo "- disconnected {$clientId} after {$totalTime}\n";
 }
-
-$app = new App($noFsIO);
-$handler = function ($request, Response $response) use ($app) {
-    $start = microtime(1);
-    printf("%s %s\n", $request->getMethod(), $request->getPath());
-    if($request->getMethod() !== 'POST'){
-        $app->setResponseHeaders($response);
-        $response->end('');
-        return;
-    }
-    $headers = $request->getHeaders();
-    $body = new \stdClass;
-    $body->data = "";
-    $body->receivedLength = 0;
-    $body->dataLength = $headers['Content-Length'];
-    $request->on("data", function ($data) use (
-        $request,
-        $response,
-        $app,
-        $body,
-        $start
-    ) {
-        $body->data .= $data;
-        $body->receivedLength += strlen($data);
-        if($body->receivedLength >= $body->dataLength){
-            $response->end($app->handle($request, $response, $body->data));
-            printf("Response time: %s\n", microtime(1) - $start);
-        }
-    });
-};
-
-$loop = React\EventLoop\Factory::create();
-$socket = new React\Socket\Server($loop);
-$http = new React\Http\Server($socket);
-
-$http->on('request', $handler);
-
-$socket->listen($port);
-
-echo "Started http server on 127.0.0.1:{$port}\n";
-
-$loop->run();

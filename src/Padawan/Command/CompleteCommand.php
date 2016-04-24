@@ -3,35 +3,86 @@
 namespace Padawan\Command;
 
 use Padawan\Framework\Complete\CompleteEngine;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Domain\ProjectRepository;
+use Padawan\Framework\Project\Persister;
 
-class CompleteCommand extends AbstractCommand
+class CompleteCommand extends AsyncCommand
 {
 
-    /**
-     * Runs command
-     *
-     * @return array
-     */
-    public function run(array $arguments = []) {
-        $project = $arguments["project"];
+    protected function configure()
+    {
+        $this->setName("complete")
+            ->setDescription("Finds completion")
+            ->addArgument(
+                "path",
+                InputArgument::REQUIRED,
+                "Path to the project root"
+            )->addArgument(
+                "column",
+                InputArgument::REQUIRED,
+                "Column number of cursor position"
+            )->addArgument(
+                "line",
+                InputArgument::REQUIRED,
+                "Line number of cursor position"
+            )->addArgument(
+                "data",
+                InputArgument::REQUIRED,
+                "File contents"
+            )->addArgument(
+                "filepath",
+                InputArgument::REQUIRED,
+                "Path to file relative to project root"
+            );
+    }
+    protected function executeAsync(InputInterface $input, SocketOutput $output)
+    {
+        $column = $input->getArgument("column");
+        $file = $input->getArgument("filepath");
+        $line = $input->getArgument("line");
+        $content = $input->getArgument("data");
+        $path = $input->getArgument("path");
+
+        $projectRepository = $this->getContainer()->get(ProjectRepository::class);
+        $project = $projectRepository->findByPath($path);
+
         $completeEngine = $this->getContainer()->get(CompleteEngine::class);
-        $column = $arguments['column'];
-        $file = $arguments['filepath'];
-        $line = $arguments['line'];
-        $content = $arguments['contents'];
-        $completion = $completeEngine->createCompletion(
-            $project,
-            $content,
-            $line,
-            $column,
-            $file
-        );
-        return [
-            "completion" => $this->prepareEntries(
-                $completion["entries"]
-            ),
-            "context" => $completion["context"]
-        ];
+        /** @var Persister */
+        $persister = $this->getContainer()->get(Persister::class);
+        try {
+            $completion = $completeEngine->createCompletion(
+                $project,
+                $content,
+                $line,
+                $column,
+                $file
+            );
+
+            yield $output->write(
+                json_encode(
+                    [
+                        "completion" => $this->prepareEntries(
+                            $completion["entries"]
+                        ),
+                        "context" => $completion["context"]
+                    ]
+                )
+            );
+            yield $output->disconnect();
+            yield $persister->save($project);
+        } catch (\Exception $e) {
+            yield $output->write(
+                json_encode(
+                    [
+                        "completion" => [],
+                        "context" => []
+                    ]
+                )
+            );
+        }
     }
     protected function prepareEntries(array $entries) {
         $result = [];

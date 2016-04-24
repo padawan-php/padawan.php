@@ -22,6 +22,5 @@ foreach ($autoloaders as $autoloader) {
 
 require(AUTOLOAD_PATH);
 
-$arguments = [];
-$app = new \Padawan\Framework\Application\CLI("padawan", "0.3");
+$app = new \Padawan\Framework\Application\Cli();
 $app->run();

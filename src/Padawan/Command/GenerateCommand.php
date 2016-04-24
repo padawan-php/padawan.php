@@ -1,6 +1,6 @@
 <?php
 
-namespace Padawan\Framework\Application\CLI;
+namespace Padawan\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -8,9 +8,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Index;
 use Padawan\Domain\Generator\IndexGenerator;
-use Padawan\Framework\IO\Writer;
+use Padawan\Framework\Project\Persister;
 
-class GenerateCommand extends Command
+class GenerateCommand extends CliCommand
 {
     protected function configure()
     {
@@ -37,9 +37,9 @@ class GenerateCommand extends Command
             );
 
             $generator->generateIndex($project);
-            $indexWriter = $this->get(Writer::class);
+            $persister = $this->get(Persister::class);
 
-            $indexWriter->write($project);
+            $persister->save($project);
             $output->writeln("<info>Index generated</info>");
         } catch (\Exception $e) {
             $output->writeln(sprintf("<error>Error: %s</error>", $e->getMessage()));

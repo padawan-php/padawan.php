@@ -5,7 +5,6 @@ namespace Padawan\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Output\OutputInterface;
-use Padawan\Framework\Application\CLI\Command as CliCommand;
 use Padawan\Plugin\Package;
 
 class PluginCommand extends CliCommand

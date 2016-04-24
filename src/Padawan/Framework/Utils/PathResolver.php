@@ -42,11 +42,6 @@ class PathResolver
         } else {
             throw new \Exception(sprintf("File not found %s", $filePath));
         }
-        if ($this->create($filePath)) {
-            return "";
-        } else {
-            throw new \Exception(sprintf("Unable to create file %s", $filePath));
-        }
     }
     public function create($filePath, $isDir = false)
     {
