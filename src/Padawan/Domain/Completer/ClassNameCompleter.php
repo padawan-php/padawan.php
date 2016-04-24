@@ -24,4 +24,9 @@ class ClassNameCompleter implements CompleterInterface
         }
         return $entries;
     }
+
+    public function canHandle(Project $project, Context $context)
+    {
+        return $context->isClassName();
+    }
 }

@@ -6,7 +6,8 @@ use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Completion\Context;
 use Padawan\Domain\Core\Completion\Entry;
 
-class InterfaceNameCompleter implements CompleterInterface {
+class InterfaceNameCompleter implements CompleterInterface
+{
     public function getEntries(Project $project, Context $context) {
         $entries = [];
         foreach ($project->getIndex()->getInterfaces() as $interface) {
@@ -14,6 +15,11 @@ class InterfaceNameCompleter implements CompleterInterface {
             $entries[] = new Entry($fqcn->toString());
         }
         return $entries;
+    }
+
+    public function canHandle(Project $project, Context $context)
+    {
+        return $context->isInterfaceName();
     }
 }
 

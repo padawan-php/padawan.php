@@ -20,54 +20,38 @@ class CompleterFactory
         StaticCompleter $staticCompleter,
         UseCompleter $useCompleter,
         VarCompleter $varCompleter,
-        NameCompleter $nameCompleter,
+        GlobalFunctionsCompleter $functionsCompleter,
         EventDispatcher $dispatcher
     ) {
-        $this->classNameCompleter = $classNameCompleter;
-        $this->interfaceNameCompleter = $interfaceNameCompleter;
-        $this->namespaceCompleter = $namespaceCompleter;
-        $this->objectCompleter = $objectCompleter;
-        $this->staticCompleter = $staticCompleter;
-        $this->useCompleter = $useCompleter;
-        $this->varCompleter = $varCompleter;
-        $this->nameCompleter = $nameCompleter;
+        $this->completers = [
+            $classNameCompleter,
+            $interfaceNameCompleter,
+            $namespaceCompleter,
+            $objectCompleter,
+            $staticCompleter,
+            $useCompleter,
+            $varCompleter,
+            $functionsCompleter
+        ];
         $this->dispatcher = $dispatcher;
     }
-    public function getCompleter(Context $context, Project $project)
+
+    public function getCompleters(Project $project, Context $context)
     {
-        if ($context->isNamespace()) {
-            return $this->namespaceCompleter;
-        } elseif ($context->isUse()) {
-            return $this->useCompleter;
-        } elseif ($context->isClassName()) {
-            return $this->classNameCompleter;
-        } elseif ($context->isInterfaceName()) {
-            return $this->interfaceNameCompleter;
-        } elseif ($context->isThis() || $context->isObject()) {
-            return $this->objectCompleter;
-        } elseif ($context->isClassStatic()) {
-            return $this->staticCompleter;
-        } elseif ($context->isVar()) {
-            return $this->varCompleter;
-        } elseif ($context->isString() || $context->isEmpty()) {
-            return $this->nameCompleter;
+        $completers = [];
+        foreach($this->completers as $completer) {
+            if ($completer->canHandle($project, $context)) {
+                $completers[] = $completer;
+            }
         }
         $event = new CustomCompleterEvent($project, $context);
         $this->dispatcher->dispatch(self::CUSTOM_COMPLETER, $event);
-        $completer = $event->completer;
-        if ($completer) {
-            return $completer;
+        if ($event->completer instanceof CompleterInterface) {
+            $completers[] = $event->completer;
         }
-        return null;
+        return $completers;
     }
 
-    private $classNameCompleter;
-    private $interfaceNameCompleter;
-    private $namespaceCompleter;
-    private $objectCompleter;
-    private $staticCompleter;
-    private $useCompleter;
-    private $varCompleter;
-    private $nameCompleter;
+    private $completers;
     private $dispatcher;
 }

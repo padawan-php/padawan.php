@@ -114,12 +114,13 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $columns = $table->getRow(0);
         $result = array_map(function ($item) use($columns) {
             $hash = [];
-            switch(count($columns)) {
-                case 2:
-                    $hash["Signature"] = $item["signature"];
-                case 1:
-                    $hash["Name"] = $item["name"];
-                    break;
+            $map = [
+                "Name" => "name",
+                "Signature" => "signature",
+                "Menu" => "menu"
+            ];
+            foreach ($columns as $column) {
+                $hash[$column] = $item[$map[$column]];
             }
             return $hash;
         }, $this->response["completion"]);

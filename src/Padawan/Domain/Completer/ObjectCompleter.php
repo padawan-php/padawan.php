@@ -12,7 +12,7 @@ use Padawan\Domain\Core\Completion\Entry;
 use Padawan\Domain\Core\Collection\Specification;
 use Psr\Log\LoggerInterface;
 
-class ObjectCompleter
+class ObjectCompleter extends AbstractInCodeBodyCompleter
 {
     public function __construct(LoggerInterface $logger)
     {
@@ -53,6 +53,11 @@ class ObjectCompleter
         }
         ksort($entries);
         return $entries;
+    }
+
+    public function canHandle(Project $project, Context $context)
+    {
+        return parent::canHandle($project, $context) && ($context->isThis() || $context->isObject());
     }
 
     /**

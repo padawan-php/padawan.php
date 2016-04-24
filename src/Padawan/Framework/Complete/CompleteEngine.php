@@ -6,12 +6,12 @@ use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Completion\Scope;
 use Padawan\Domain\Core\Completion\Scope\FileScope;
 use Padawan\Domain\Core\FQN;
-use \Padawan\Parser\Parser;
+use Padawan\Parser\Parser;
 use Padawan\Domain\Generator\IndexGenerator;
 use Padawan\Domain\Completer\CompleterFactory;
 use Padawan\Framework\Complete\Resolver\ContextResolver;
-use \Padawan\Parser\Walker\IndexGeneratingWalker;
-use \Padawan\Parser\Walker\ScopeWalker;
+use Padawan\Parser\Walker\IndexGeneratingWalker;
+use Padawan\Parser\Walker\ScopeWalker;
 use Psr\Log\LoggerInterface;
 
 class CompleteEngine {
@@ -81,11 +81,12 @@ class CompleteEngine {
     protected function findEntries(Project $project, Scope $scope, $badLine, $column)
     {
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
-        $completer = $this->completerFactory->getCompleter($context, $project);
-        if ($completer) {
-            return $completer->getEntries($project, $context);
+        $completers = $this->completerFactory->getCompleters($project, $context);
+        $entries = [];
+        foreach($completers as $completer) {
+            $entries = array_merge($entries, $completer->getEntries($project, $context));
         }
-        return [];
+        return $entries;
     }
     /**
      * @TODO

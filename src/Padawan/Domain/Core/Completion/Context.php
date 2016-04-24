@@ -49,6 +49,8 @@ class Context
         } elseif ($token->isString()) {
             $this->addType(self::T_ANY_NAME);
             $this->setData($token->getSymbol());
+        } elseif ($token->isTerminate()) {
+            $this->setData($token->getSymbol());
         }
     }
 
