@@ -8,6 +8,7 @@ use Padawan\Domain\Core\Node\ClassData;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Utils\PathResolver;
 
 /**
  * Class ListCommand
@@ -29,13 +30,15 @@ class ListCommand extends AsyncCommand
         $path = $input->getArgument("path");
 
         $projectRepository = $this->getContainer()->get(ProjectRepository::class);
+        /** @var PathResolver */
+        $pathResolver = $this->getContainer()->get(PathResolver::class);
         /** @var Project */
         $project = $projectRepository->findByPath($path);
         $classesList = [];
         foreach ($project->getIndex()->getClasses() as $class) {
             $classesList[] = [
                 'fqcn' => $class->fqcn->toString(),
-                'filepath' => $class->file
+                'filepath' => $pathResolver->join([$path, $class->file])
             ];
         }
         yield $output->write(json_encode($classesList));

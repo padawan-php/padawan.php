@@ -33,7 +33,7 @@ class PathResolver
     }
     public function join($elements)
     {
-        return $this->path->join($elements);
+        return str_replace("//", "/", $this->path->join($elements));
     }
     public function read($filePath)
     {
