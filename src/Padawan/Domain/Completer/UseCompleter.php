@@ -6,7 +6,7 @@ use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Completion\Context;
 use Padawan\Domain\Core\Completion\Entry;
 
-class UseCompleter implements CompleterInterface
+class UseCompleter extends AbstractFileInfoCompleter
 {
     public function getEntries(Project $project, Context $context)
     {
@@ -27,5 +27,10 @@ class UseCompleter implements CompleterInterface
             );
         }
         return $entries;
+    }
+
+    public function canHandle(Project $project, Context $context)
+    {
+        return parent::canHandle($project, $context) && $context->isUse();
     }
 }

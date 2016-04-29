@@ -12,7 +12,7 @@ use Padawan\Domain\Core\Completion\Entry;
 use Padawan\Domain\Core\Collection\Specification;
 use Psr\Log\LoggerInterface;
 
-class StaticCompleter
+class StaticCompleter extends AbstractInCodeBodyCompleter
 {
     public function __construct(LoggerInterface $logger)
     {
@@ -58,6 +58,11 @@ class StaticCompleter
         }
         ksort($entries);
         return $entries;
+    }
+
+    public function canHandle(Project $project, Context $context)
+    {
+        return parent::canHandle($project, $context) && $context->isClassStatic();
     }
 
     /**

@@ -6,7 +6,9 @@ use Padawan\Domain\Core\Project;
 use Padawan\Domain\Core\Completion\Context;
 use Padawan\Domain\Core\Completion\Entry;
 
-class NamespaceCompleter implements CompleterInterface {
+class NamespaceCompleter extends AbstractFileInfoCompleter
+{
+
     public function getEntries(Project $project, Context $context) {
         $entries = [];
         $postfix = trim($context->getData());
@@ -20,5 +22,10 @@ class NamespaceCompleter implements CompleterInterface {
         }
         $entries = array_values($entries);
         return $entries;
+    }
+
+    public function canHandle(Project $project, Context $context)
+    {
+        return parent::canHandle($project, $context) && $context->isNamespace();
     }
 }
