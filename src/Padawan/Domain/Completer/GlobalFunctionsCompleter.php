@@ -39,7 +39,7 @@ class GlobalFunctionsCompleter extends AbstractInCodeBodyCompleter
         }
         return parent::canHandle($project, $context)
             && ($context->isString() || $context->isEmpty())
-            && strlen($postfix) > 2
+            && strlen($postfix) > 0
             ;
     }
 }
