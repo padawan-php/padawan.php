@@ -60,7 +60,7 @@ class Parser {
                 $this->logger->error(sprintf("Parsing failed in file %s\n", $file));
                 $this->logger->error($e);
                 $this->clearWalkers();
-                return [];
+                return;
             }
             if ($createCache) {
                 $this->astPool[$file] = [$hash, $ast];
