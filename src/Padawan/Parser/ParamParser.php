@@ -4,7 +4,7 @@ namespace Padawan\Parser;
 
 use PhpParser\Node\Param;
 use PhpParser\Node\Name;
-use Padawan\Domain\Core\Node\MethodParam;
+use Padawan\Domain\Project\Node\MethodParam;
 
 class ParamParser {
     public function __construct(UseParser $useParser) {

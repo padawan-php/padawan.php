@@ -2,10 +2,10 @@
 
 namespace Padawan\Framework\Complete;
 
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Completion\Scope;
-use Padawan\Domain\Core\Completion\Scope\FileScope;
-use Padawan\Domain\Core\FQN;
+use Padawan\Domain\Project;
+use Padawan\Domain\Scope;
+use Padawan\Domain\Scope\FileScope;
+use Padawan\Domain\Project\FQN;
 use Padawan\Parser\Parser;
 use Padawan\Domain\Generator\IndexGenerator;
 use Padawan\Domain\Completer\CompleterFactory;
@@ -131,7 +131,7 @@ class CompleteEngine {
                 $project->getIndex(),
                 $nodes
             );
-            /** @var \Padawan\Domain\Core\Node\Uses */
+            /** @var \Padawan\Domain\Project\Node\Uses */
             $uses = $parser->getUses();
             $this->scopeWalker->setLine($line);
             $parser->addWalker($this->scopeWalker);

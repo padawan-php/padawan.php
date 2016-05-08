@@ -2,8 +2,8 @@
 
 namespace Padawan\Parser\Walker;
 
-use Padawan\Domain\Core\Node\Uses;
-use Padawan\Domain\Core\Index;
+use Padawan\Domain\Project\Node\Uses;
+use Padawan\Domain\Project\Index;
 
 interface WalkerInterface
 {

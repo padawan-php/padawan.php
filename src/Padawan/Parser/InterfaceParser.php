@@ -2,9 +2,9 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\FQCN;
-use Padawan\Domain\Core\Node\InterfaceData;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\Node\InterfaceData;
 use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\ClassMethod;
 

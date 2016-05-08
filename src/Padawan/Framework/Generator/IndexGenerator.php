@@ -2,12 +2,12 @@
 
 namespace Padawan\Framework\Generator;
 
-use Padawan\Domain\Core\Node\ClassData;
-use Padawan\Domain\Core\Node\InterfaceData;
+use Padawan\Domain\Project\Node\ClassData;
+use Padawan\Domain\Project\Node\InterfaceData;
 use Padawan\Domain\Event\IndexGenerationEvent;
-use Padawan\Domain\Core\Index;
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Completion\Scope\FileScope;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Project;
+use Padawan\Domain\Scope\FileScope;
 use Padawan\Framework\Utils\PathResolver;
 use Padawan\Framework\Utils\Composer;
 use Padawan\Framework\Utils\ClassUtils;

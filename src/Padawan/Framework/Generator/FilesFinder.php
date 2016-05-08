@@ -3,7 +3,7 @@
 namespace Padawan\Framework\Generator;
 
 use Padawan\Framework\Utils\PathResolver;
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Project;
 use Padawan\Domain\Generator\FilesFinder as FilesFinderInterface;
 
 class FilesFinder implements FilesFinderInterface

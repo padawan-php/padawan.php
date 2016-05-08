@@ -2,13 +2,13 @@
 
 namespace Padawan\Parser\Walker;
 
-use Padawan\Domain\Core\Completion\Scope\FileScope;
-use Padawan\Domain\Core\Completion\Scope\ClassScope;
-use Padawan\Domain\Core\Completion\Scope\FunctionScope;
-use Padawan\Domain\Core\Completion\Scope\MethodScope;
-use Padawan\Domain\Core\Node\Uses;
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\Index;
+use Padawan\Domain\Scope\FileScope;
+use Padawan\Domain\Scope\ClassScope;
+use Padawan\Domain\Scope\FunctionScope;
+use Padawan\Domain\Scope\MethodScope;
+use Padawan\Domain\Project\Node\Uses;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\Index;
 use Padawan\Parser\Transformer\FunctionTransformer;
 use Padawan\Parser\Transformer\ClassAssignmentTransformer;
 use Padawan\Parser\ClassParser;

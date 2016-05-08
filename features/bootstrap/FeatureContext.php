@@ -5,15 +5,15 @@ use Behat\Behat\Context\SnippetAcceptingContext;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Padawan\Framework\Application\Socket;
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Index;
+use Padawan\Domain\Project;
+use Padawan\Domain\Project\Index;
 use Fake\Output;
 use DI\Container;
 use Psr\Log\LoggerInterface;
 use Monolog\Handler\NullHandler;
 use Padawan\Framework\Generator\IndexGenerator;
-use Padawan\Domain\Core\Completion\Scope;
-use Padawan\Domain\Core\Completion\Scope\FileScope;
+use Padawan\Domain\Scope;
+use Padawan\Domain\Scope\FileScope;
 
 /**
  * Defines application features from the specific context.
@@ -37,8 +37,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $this->app = new Socket();
         $container = $this->app->getContainer();
-        $container->get("Psr\\Log\\LoggerInterface")->popHandler();
-        $container->get("Psr\\Log\\LoggerInterface")->pushHandler(new NullHandler());
+        $container->get(LoggerInterface::class)->popHandler();
+        $container->get(LoggerInterface::class)->pushHandler(new NullHandler());
     }
 
     public function createProject()

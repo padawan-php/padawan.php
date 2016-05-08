@@ -2,9 +2,9 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Core\Node\MethodData;
-use Padawan\Domain\Core\Node\MethodParam;
-use Padawan\Domain\Core\Node\Comment;
+use Padawan\Domain\Project\Node\MethodData;
+use Padawan\Domain\Project\Node\MethodParam;
+use Padawan\Domain\Project\Node\Comment;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Param;
 use PhpParser\Node\Name;

@@ -2,7 +2,7 @@
 
 namespace Padawan\Domain\Generator;
 
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Project;
 
 interface FilesFinder
 {

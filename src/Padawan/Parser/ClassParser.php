@@ -2,8 +2,8 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Core;
-use Padawan\Domain\Core\Node;
+use Padawan\Domain\Project;
+use Padawan\Domain\Project\Node;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Stmt\Property;
@@ -31,8 +31,8 @@ class ClassParser
         $this->useParser = $useParser;
     }
 
-    public function parse(Class_ $node, Core\FQN $fqn, $file) {
-        $fqcn = new Core\FQCN($node->name, $fqn);
+    public function parse(Class_ $node, Project\FQN $fqn, $file) {
+        $fqcn = new Project\FQCN($node->name, $fqn);
         $classData = new Node\ClassData($fqcn, $file);
         if ($node->extends instanceof Name) {
             $classData->setParent(

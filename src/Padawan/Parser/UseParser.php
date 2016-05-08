@@ -2,8 +2,8 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Core\FQCN;
-use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\Node\Uses;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Use_;
 

@@ -2,7 +2,7 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Core\Node\ClassProperty;
+use Padawan\Domain\Project\Node\ClassProperty;
 use PhpParser\Node\Stmt\PropertyProperty as Property;
 
 class PropertyParser {

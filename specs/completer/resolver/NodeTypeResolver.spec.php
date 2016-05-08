@@ -1,16 +1,16 @@
 <?php
 
 use Padawan\Framework\Complete\Resolver\NodeTypeResolver;
-use Padawan\Domain\Core\Completion\Scope;
-use Padawan\Domain\Core\Completion\Scope\FileScope;
-use Padawan\Domain\Core\FQCN;
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\Index;
-use Padawan\Domain\Core\Node\ClassData;
-use Padawan\Domain\Core\Node\ClassProperty;
-use Padawan\Domain\Core\Node\MethodData;
-use Padawan\Domain\Core\Node\Variable;
-use Padawan\Domain\Core\Node\FunctionData;
+use Padawan\Domain\Scope;
+use Padawan\Domain\Scope\FileScope;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Project\Node\ClassData;
+use Padawan\Domain\Project\Node\ClassProperty;
+use Padawan\Domain\Project\Node\MethodData;
+use Padawan\Domain\Project\Node\Variable;
+use Padawan\Domain\Project\Node\FunctionData;
 use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\MethodCall;

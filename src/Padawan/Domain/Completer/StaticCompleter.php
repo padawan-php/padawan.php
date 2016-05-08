@@ -2,14 +2,14 @@
 
 namespace Padawan\Domain\Completer;
 
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\FQCN;
-use Padawan\Domain\Core\Node\MethodData;
-use Padawan\Domain\Core\Node\ClassProperty;
-use Padawan\Domain\Core\Node\InterfaceData;
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Completion\Entry;
-use Padawan\Domain\Core\Collection\Specification;
+use Padawan\Domain\Project;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\Node\MethodData;
+use Padawan\Domain\Project\Node\ClassProperty;
+use Padawan\Domain\Project\Node\InterfaceData;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Completion\Entry;
+use Padawan\Domain\Project\Collection\Specification;
 use Psr\Log\LoggerInterface;
 
 class StaticCompleter extends AbstractInCodeBodyCompleter

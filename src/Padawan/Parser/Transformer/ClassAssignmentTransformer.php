@@ -4,11 +4,11 @@ namespace Padawan\Parser\Transformer;
 
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\PropertyFetch;
-use Padawan\Domain\Core\Node\ClassData;
-use Padawan\Domain\Core\Node\ClassProperty;
+use Padawan\Domain\Project\Node\ClassData;
+use Padawan\Domain\Project\Node\ClassProperty;
 use Padawan\Framework\Complete\Resolver\NodeTypeResolver;
 use PhpParser\Node\Expr\Variable;
-use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Project\FQCN;
 
 class ClassAssignmentTransformer
 {

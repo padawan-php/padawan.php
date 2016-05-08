@@ -2,9 +2,9 @@
 
 use Padawan\Parser\CommentParser;
 use Padawan\Parser\UseParser;
-use Padawan\Domain\Core\Node\Comment;
-use Padawan\Domain\Core\Node\Uses;
-use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Project\Node\Comment;
+use Padawan\Domain\Project\Node\Uses;
+use Padawan\Domain\Project\FQCN;
 
 describe('CommentParser', function() {
     beforeEach(function() {

@@ -3,10 +3,10 @@
 namespace Padawan\Framework\Complete\Resolver;
 
 use Padawan\Domain\Event\TypeResolveEvent;
-use Padawan\Domain\Core\Index;
-use Padawan\Domain\Core\FQCN;
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\Completion\Scope;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Scope;
 use Padawan\Parser\UseParser;
 use PhpParser\Node\Name;
 use PhpParser\Node\Expr\Variable;
@@ -18,8 +18,8 @@ use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\Assign;
 use Psr\Log\LoggerInterface;
-use Padawan\Domain\Core\Chain;
-use Padawan\Domain\Core\Chain\MethodCall as ChainMethodCall;
+use Padawan\Domain\Project\Chain;
+use Padawan\Domain\Project\Chain\MethodCall as ChainMethodCall;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class NodeTypeResolver

@@ -2,8 +2,8 @@
 
 namespace Padawan\Domain\Event;
 
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Project;
 use Symfony\Component\EventDispatcher\Event;
 
 class CustomCompleterEvent extends Event

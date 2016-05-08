@@ -2,13 +2,13 @@
 
 namespace Padawan\Framework\Complete\Resolver;
 
-use Padawan\Domain\Core\Completion\Token;
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Completion\Scope;
-use Padawan\Domain\Core\Completion\Scope\FileScope;
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\Index;
-use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Completion\Token;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Scope;
+use Padawan\Domain\Scope\FileScope;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Project\FQCN;
 use Padawan\Parser\ErrorFreePhpParser;
 use Padawan\Parser\UseParser;
 use Psr\Log\LoggerInterface;

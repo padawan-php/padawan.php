@@ -2,8 +2,8 @@
 
 use Padawan\Framework\Generator\FilesFinder;
 use Padawan\Framework\Utils\PathResolver;
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Index;
+use Padawan\Domain\Project;
+use Padawan\Domain\Project\Index;
 use Prophecy\Argument;
 
 describe('FilesFinder', function() {
