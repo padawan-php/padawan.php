@@ -13,7 +13,8 @@ use Amp\File;
  */
 class Persister
 {
-    const INDEX_FILE = ".padawan/project";
+    const PADAWAN_DIR = ".padawan";
+    const INDEX_FILE = "project";
 
     public function __construct(PathResolver $path)
     {
@@ -22,6 +23,7 @@ class Persister
 
     public function save(Project $project)
     {
+        $this->checkForPadawanDir($project->getRootFolder());
         return File\put($this->getProjectIndexFilePath($project->getRootFolder()), $this->serialize($project));
     }
 
@@ -39,7 +41,9 @@ class Persister
             return;
         }
     }
-    protected function unserialize($rawProject) {
+
+    private function unserialize($rawProject)
+    {
         return unserialize($rawProject);
     }
 
@@ -47,6 +51,7 @@ class Persister
     {
         return $this->path->join([
             $rootDir,
+            self::PADAWAN_DIR,
             self::INDEX_FILE
         ]);
     }
@@ -56,8 +61,21 @@ class Persister
         return serialize($project);
     }
 
-    private function readFromFile($filename) {
+    private function readFromFile($filename)
+    {
         return $this->path->read($filename);
+    }
+
+    private function checkForPadawanDir($dir)
+    {
+        $padawanDir = $this->path->join([$dir, self::PADAWAN_DIR]);
+        if ($this->path->isDir($padawanDir)) {
+            return;
+        }
+        if ($this->path->exists($padawanDir)) {
+            $this->path->remove($padawanDir);
+        }
+        $this->path->create($padawanDir, true);
     }
 
     /**
