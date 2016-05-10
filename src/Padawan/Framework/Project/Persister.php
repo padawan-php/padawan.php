@@ -4,7 +4,7 @@ namespace Padawan\Framework\Project;
 
 
 use Padawan\Framework\Utils\PathResolver;
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Project;
 use \__PHP_Incomplete_Class;
 use Amp\File;
 

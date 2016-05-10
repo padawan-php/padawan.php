@@ -2,12 +2,12 @@
 
 namespace Padawan\Domain\Completer;
 
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Completion\Scope;
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Node\Variable;
-use Padawan\Domain\Core\Completion\Entry;
-use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Scope;
+use Padawan\Domain\Project;
+use Padawan\Domain\Project\Node\Variable;
+use Padawan\Domain\Completion\Entry;
+use Padawan\Domain\Project\FQCN;
 
 class VarCompleter extends AbstractInCodeBodyCompleter
 {

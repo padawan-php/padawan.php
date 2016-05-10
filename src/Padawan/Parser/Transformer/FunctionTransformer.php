@@ -4,8 +4,8 @@ namespace Padawan\Parser\Transformer;
 
 use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Param;
-use Padawan\Domain\Core\Node\FunctionData;
-use Padawan\Domain\Core\Node\MethodParam;
+use Padawan\Domain\Project\Node\FunctionData;
+use Padawan\Domain\Project\Node\MethodParam;
 use Padawan\Parser\CommentParser;
 use Padawan\Parser\ParamParser;
 use Padawan\Parser\UseParser;

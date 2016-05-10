@@ -2,7 +2,7 @@
 
 namespace Padawan\Domain;
 
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Project;
 
 /**
  * Interface ProjectRepository

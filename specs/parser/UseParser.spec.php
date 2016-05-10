@@ -1,8 +1,8 @@
 <?php
 
 use Padawan\Parser\UseParser;
-use Padawan\Domain\Core\Node\Uses;
-use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Project\Node\Uses;
+use Padawan\Domain\Project\FQCN;
 
 describe('UseParser', function() {
     beforeEach(function() {
@@ -22,7 +22,7 @@ describe('UseParser', function() {
             expect($fqcn->getParts())->to->equal([
                 'Padawan',
                 'Domain',
-                'Core',
+                'Project',
                 'Node',
                 'Uses'
             ]);
@@ -48,7 +48,7 @@ describe('UseParser', function() {
             expect($fqcn->getParts())->to->equal([
                 'Padawan',
                 'Domain',
-                'Core',
+                'Project',
                 'Node',
                 'Uses'
             ]);

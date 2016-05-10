@@ -2,12 +2,12 @@
 
 namespace Padawan\Domain\Completer;
 
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Completion\Scope\FileScope;
-use Padawan\Domain\Core\Completion\Scope\MethodScope;
-use Padawan\Domain\Core\Completion\Scope\ClosureScope;
-use Padawan\Domain\Core\Completion\Scope\FunctionScope;
+use Padawan\Domain\Project;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Scope\FileScope;
+use Padawan\Domain\Scope\MethodScope;
+use Padawan\Domain\Scope\ClosureScope;
+use Padawan\Domain\Scope\FunctionScope;
 
 /**
  * Class AbstractInCodeBodyCompleter

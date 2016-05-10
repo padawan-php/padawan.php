@@ -2,8 +2,8 @@
 
 namespace Padawan\Domain\Completer;
 
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Completion\Context;
+use Padawan\Domain\Project;
+use Padawan\Domain\Completion\Context;
 
 interface CompleterInterface {
     public function getEntries(Project $project, Context $context);

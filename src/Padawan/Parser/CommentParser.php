@@ -5,10 +5,10 @@ namespace Padawan\Parser;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tag;
 use phpDocumentor\Reflection\DocBlock\Context;
-use Padawan\Domain\Core\Node\Comment;
-use Padawan\Domain\Core\Node\MethodParam;
-use Padawan\Domain\Core\Node\Variable;
-use Padawan\Domain\Core\Node\ClassProperty;
+use Padawan\Domain\Project\Node\Comment;
+use Padawan\Domain\Project\Node\MethodParam;
+use Padawan\Domain\Project\Node\Variable;
+use Padawan\Domain\Project\Node\ClassProperty;
 
 class CommentParser
 {
@@ -101,7 +101,7 @@ class CommentParser
      * Creates FQN by type string
      *
      * @param string $type
-     * @return \Padawan\Domain\Core\FQCN
+     * @return \Padawan\Domain\Project\FQCN
      */
     protected function getFQCN($type) {
         return $this->useParser->parseType($type);

@@ -2,10 +2,10 @@
 
 namespace Padawan\Domain\Completer;
 
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Completion\Entry;
-use Padawan\Domain\Core\Node\FunctionData;
+use Padawan\Domain\Project;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Completion\Entry;
+use Padawan\Domain\Project\Node\FunctionData;
 
 class GlobalFunctionsCompleter extends AbstractInCodeBodyCompleter
 {

@@ -2,9 +2,9 @@
 
 namespace Padawan\Command;
 
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Project;
 use Padawan\Domain\ProjectRepository;
-use Padawan\Domain\Core\Node\ClassData;
+use Padawan\Domain\Project\Node\ClassData;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Padawan\Framework\Application\Socket\SocketOutput;

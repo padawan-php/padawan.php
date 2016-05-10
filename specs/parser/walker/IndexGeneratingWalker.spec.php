@@ -19,12 +19,12 @@ use Padawan\Parser\UseParser;
 use Padawan\Parser\NamespaceParser;
 use Padawan\Parser\Transformer\FunctionTransformer;
 use Padawan\Parser\Transformer\ClassAssignmentTransformer;
-use Padawan\Domain\Core\Node\ClassData;
-use Padawan\Domain\Core\Node\MethodData;
-use Padawan\Domain\Core\Node\FunctionData;
-use Padawan\Domain\Core\Node\InterfaceData;
-use Padawan\Domain\Core\Node\Uses;
-use Padawan\Domain\Core\FQCN;
+use Padawan\Domain\Project\Node\ClassData;
+use Padawan\Domain\Project\Node\MethodData;
+use Padawan\Domain\Project\Node\FunctionData;
+use Padawan\Domain\Project\Node\InterfaceData;
+use Padawan\Domain\Project\Node\Uses;
+use Padawan\Domain\Project\FQCN;
 
 describe('IndexGeneratingWalker', function(){
     beforeEach(function (){

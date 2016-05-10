@@ -2,8 +2,8 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\Node\Uses;
 use Padawan\Framework\Utils\PathResolver;
 use PhpParser\Parser as ASTGenerator;
 use PhpParser\NodeTraverser as Traverser;

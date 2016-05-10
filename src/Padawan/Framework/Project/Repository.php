@@ -5,8 +5,8 @@ namespace Padawan\Framework\Project;
 
 use Padawan\Framework\IO\Reader;
 use Padawan\Domain\ProjectRepository;
-use Padawan\Domain\Core\Project;
-use Padawan\Domain\Core\Index;
+use Padawan\Domain\Project;
+use Padawan\Domain\Project\Index;
 
 /**
  * Class Repository

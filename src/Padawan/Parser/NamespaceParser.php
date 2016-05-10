@@ -4,8 +4,8 @@ namespace Padawan\Parser;
 
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Name;
-use Padawan\Domain\Core\FQN;
-use Padawan\Domain\Core\Node\Uses;
+use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\Node\Uses;
 
 class NamespaceParser {
     public function parse(Namespace_ $node) {

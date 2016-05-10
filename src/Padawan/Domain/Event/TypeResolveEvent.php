@@ -2,8 +2,8 @@
 
 namespace Padawan\Domain\Event;
 
-use Padawan\Domain\Core\FQCN;
-use Padawan\Domain\Core\Chain;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\Chain;
 use Symfony\Component\EventDispatcher\Event;
 
 class TypeResolveEvent extends Event

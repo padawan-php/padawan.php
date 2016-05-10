@@ -3,7 +3,7 @@
 namespace Padawan\Domain\Event;
 
 use Symfony\Component\EventDispatcher\Event;
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Project;
 
 class IndexGenerationEvent extends Event
 {

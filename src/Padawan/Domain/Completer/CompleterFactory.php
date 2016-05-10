@@ -2,9 +2,9 @@
 
 namespace Padawan\Domain\Completer;
 
-use Padawan\Domain\Core\Completion\Context;
-use Padawan\Domain\Core\Completion\Scope;
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Scope;
+use Padawan\Domain\Project;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Padawan\Domain\Event\CustomCompleterEvent;
 

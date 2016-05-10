@@ -2,9 +2,9 @@
 
 namespace Padawan\Domain\Generator;
 
-use Padawan\Domain\Core\Completion\Scope\FileScope;
-use Padawan\Domain\Core\Index;
-use Padawan\Domain\Core\Project;
+use Padawan\Domain\Scope\FileScope;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Project;
 
 interface IndexGenerator
 {
