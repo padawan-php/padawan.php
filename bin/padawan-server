@@ -47,10 +47,9 @@ function onClient(Amp\Socket\Client $client, App $app) {
     /** @var $client \Amp\Socket\Client */
     $clientId = $client->id();
     echo "+ connected: {$clientId}\n";
-    $content = (yield $client->read());
-    $request = json_decode($content);
-    $output = new SocketOutput($client);
     try {
+        $request = yield Amp\resolve(loadRequest($client));
+        $output = new SocketOutput($client);
         yield Amp\resolve($app->handle($request, $output));
     } catch (\Throwable $e) {
         yield $output->write(json_encode([
@@ -62,4 +61,15 @@ function onClient(Amp\Socket\Client $client, App $app) {
     }
     $totalTime = microtime(true) - $startedAt;
     echo "- disconnected {$clientId} after {$totalTime}\n";
+}
+
+function loadRequest(Amp\Socket\Client $client) {
+    $content = "";
+    while($chunk = (yield $client->read())) {
+        $content .= $chunk;
+        $request = json_decode($content);
+        if ($request) {
+            return $request;
+        }
+    }
 }
