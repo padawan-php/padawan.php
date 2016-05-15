@@ -4,6 +4,7 @@ namespace Padawan\Domain\Completer;
 
 use Padawan\Domain\Project;
 use Padawan\Domain\Project\FQCN;
+use Padawan\Domain\Project\ClassRepository;
 use Padawan\Domain\Project\Node\MethodData;
 use Padawan\Domain\Project\Node\ClassProperty;
 use Padawan\Domain\Project\Node\InterfaceData;
@@ -14,9 +15,19 @@ use Psr\Log\LoggerInterface;
 
 class ObjectCompleter extends AbstractInCodeBodyCompleter
 {
-    public function __construct(LoggerInterface $logger)
-    {
+
+    /** @property LoggerInterface */
+    private $logger;
+
+    /** @property ClassRepository */
+    private $classRepository;
+
+    public function __construct(
+        LoggerInterface $logger,
+        ClassRepository $classRepository
+    ) {
         $this->logger = $logger;
+        $this->classRepository = $classRepository;
     }
     public function getEntries(Project $project, Context $context)
     {
@@ -28,10 +39,7 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
         }
         $index = $project->getIndex();
         $this->logger->debug('Creating completion for ' . $fqcn->toString());
-        $class = $index->findClassByFQCN($fqcn);
-        if (empty($class)) {
-            $class = $index->findInterfaceByFQCN($fqcn);
-        }
+        $class = $this->classRepository->findByName($project, $fqcn);
         if (empty($class)) {
             return [];
         }
@@ -83,7 +91,4 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
             $type
         );
     }
-
-    /** @property LoggerInterface */
-    private $logger;
 }

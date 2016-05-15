@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Padawan\Framework\Application\Socket\SocketOutput;
 use Padawan\Domain\ProjectRepository;
-use Padawan\Framework\Project\Persister;
+use Padawan\Framework\Domain\Project\Persister;
 
 class CompleteCommand extends AsyncCommand
 {

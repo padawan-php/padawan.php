@@ -1,6 +1,6 @@
 <?php
 
-namespace Padawan\Framework\Project;
+namespace Padawan\Framework\Domain\Project;
 
 
 use Padawan\Framework\Utils\PathResolver;

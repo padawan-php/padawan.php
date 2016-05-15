@@ -3,12 +3,23 @@
 namespace Padawan\Domain\Completer;
 
 use Padawan\Domain\Project;
-use Padawan\Domain\Completion\Context;
 use Padawan\Domain\Completion\Entry;
+use Padawan\Domain\Completion\Context;
+use Padawan\Domain\Project\ClassRepository;
 use Padawan\Domain\Project\Node\FunctionData;
 
 class GlobalFunctionsCompleter extends AbstractInCodeBodyCompleter
 {
+
+    /** @property ClassRepository */
+    private $classRepository;
+
+    public function __construct(
+        ClassRepository $classRepository
+    ) {
+        $this->classRepository = $classRepository;
+    }
+
     public function getEntries(Project $project, Context $context)
     {
         $entries = [];
