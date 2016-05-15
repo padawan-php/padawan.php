@@ -48,7 +48,7 @@ function onClient(Amp\Socket\Client $client, App $app) {
     $clientId = $client->id();
     echo "+ connected: {$clientId}\n";
     try {
-        $request = yield Amp\resolve(loadRequest($client));
+        $request = (yield Amp\resolve(loadRequest($client)));
         $output = new SocketOutput($client);
         yield Amp\resolve($app->handle($request, $output));
     } catch (\Throwable $e) {
@@ -60,7 +60,7 @@ function onClient(Amp\Socket\Client $client, App $app) {
         yield $client->close();
     }
     $totalTime = microtime(true) - $startedAt;
-    echo "- disconnected {$clientId} after {$totalTime}\n";
+    echo "- Full request completed for {$clientId} after {$totalTime}\n";
 }
 
 function loadRequest(Amp\Socket\Client $client) {
