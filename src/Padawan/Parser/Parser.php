@@ -5,7 +5,7 @@ namespace Padawan\Parser;
 use Padawan\Domain\Project\FQN;
 use Padawan\Domain\Project\Node\Uses;
 use Padawan\Framework\Utils\PathResolver;
-use PhpParser\Parser as ASTGenerator;
+use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser as Traverser;
 use Psr\Log\LoggerInterface;
 use Padawan\Parser\NamespaceParser;
@@ -13,7 +13,7 @@ use Padawan\Parser\NamespaceParser;
 class Parser {
 
     public function __construct(
-        ASTGenerator $parser,
+        ParserFactory $parserFactory,
         PathResolver $path,
         Traverser $traverser,
         UseParser $useParser,
@@ -21,7 +21,7 @@ class Parser {
         LoggerInterface $logger
     ) {
         $this->path             = $path;
-        $this->parser           = $parser;
+        $this->parserFactory    = $parserFactory;
         $this->traverser        = $traverser;
         $this->useParser        = $useParser;
         $this->namespaceParser  = $namespaceParser;
@@ -54,7 +54,8 @@ class Parser {
         )));
         if (!$createCache || $oldHash !== $hash || empty($ast)) {
             try {
-                $ast = $this->parser->parse($content);
+                $parser = $this->parserFactory->create(ParserFactory::PREFER_PHP5);
+                $ast = $parser->parse($content);
             }
             catch (\Exception $e) {
                 $this->logger->error(sprintf("Parsing failed in file %s\n", $file));
@@ -127,8 +128,8 @@ class Parser {
     private $parsedClasses = [];
     /** @var PathResolver */
     private $path;
-    /** @var PhpParser */
-    private $parser;
+    /** @var ParserFactory */
+    private $parserFactory;
     /** @var Traverser */
     private $traverser;
     /** @var Walker\WalkerInterface[] */
