@@ -17,11 +17,10 @@
         "nikic/php-parser": "2.1",
         "monolog/monolog": "~1.13",
         "phpdocumentor/reflection-docblock": "~2.0",
-        "symfony/event-dispatcher": "^2.6",
+        "symfony/event-dispatcher": "~2.6 || ~3.0",
         "doctrine/cache": "^1.4",
-        "symfony/console": "^2.7",
+        "symfony/console": "~2.7 || ~3.0",
         "php-di/php-di": "^5.1",
-        "php-di/symfony2-bridge": "^1.1",
         "amphp/file": "^0.1.2",
         "amphp/socket": "^0.9.6"
     },
