@@ -2,7 +2,7 @@
 
 namespace Padawan\Parser;
 
-use PhpParser\Parser as ASTGenerator;
+use PhpParser\Parser\Php5 as ASTGenerator;
 
 class ErrorFreePhpParser extends ASTGenerator {
     public function parse($content) {
