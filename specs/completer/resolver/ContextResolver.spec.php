@@ -1,21 +1,22 @@
 <?php
 
+use Monolog\Logger;
+use PhpParser\Lexer;
+use Padawan\Parser\UseParser;
+use Monolog\Handler\NullHandler;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Completion\Context;
+use Padawan\Parser\ErrorFreePhpParser;
+use Padawan\Framework\Domain\Project\InMemoryIndex;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Padawan\Framework\Complete\Resolver\ContextResolver;
 use Padawan\Framework\Complete\Resolver\NodeTypeResolver;
-use Padawan\Parser\ErrorFreePhpParser;
-use Padawan\Parser\UseParser;
-use PhpParser\Lexer;
-use Padawan\Domain\Completion\Context;
-use Padawan\Domain\Project\Index;
-use Monolog\Logger;
-use Monolog\Handler\NullHandler;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 describe('ContextResolver', function() {
     beforeEach(function() {
         $logger = new Logger('spec');
         $logger->pushHandler(new NullHandler);
-        $this->index = new Index;
+        $this->index = new InMemoryIndex;
         $this->parser = new ErrorFreePhpParser(new Lexer);
         $this->useParser = new UseParser;
         $this->typeResolver = new NodeTypeResolver($logger, $this->useParser, new EventDispatcher);

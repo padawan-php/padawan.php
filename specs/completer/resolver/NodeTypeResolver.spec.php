@@ -1,25 +1,26 @@
 <?php
 
-use Padawan\Framework\Complete\Resolver\NodeTypeResolver;
 use Padawan\Domain\Scope;
-use Padawan\Domain\Scope\FileScope;
-use Padawan\Domain\Project\FQCN;
+use Padawan\Parser\UseParser;
 use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\FQCN;
 use Padawan\Domain\Project\Index;
-use Padawan\Domain\Project\Node\ClassData;
-use Padawan\Domain\Project\Node\ClassProperty;
-use Padawan\Domain\Project\Node\MethodData;
-use Padawan\Domain\Project\Node\Variable;
-use Padawan\Domain\Project\Node\FunctionData;
-use PhpParser\Node\Expr\Variable as NodeVar;
-use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\MethodCall;
+use Padawan\Domain\Scope\FileScope;
+use PhpParser\Node\Expr\PropertyFetch;
+use Padawan\Domain\Project\Node\Variable;
+use Padawan\Domain\Project\Node\ClassData;
+use Padawan\Domain\Project\Node\MethodData;
+use PhpParser\Node\Expr\Variable as NodeVar;
+use Padawan\Domain\Project\Node\FunctionData;
+use Padawan\Domain\Project\Node\ClassProperty;
+use Padawan\Framework\Domain\Project\InMemoryIndex;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Name;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Padawan\Parser\UseParser;
+use Padawan\Framework\Complete\Resolver\NodeTypeResolver;
 
 function createClass($classFQN, $fqcn) {
     $class = new ClassData($classFQN, 'dummy/path/class.php');
@@ -39,7 +40,7 @@ describe('NodeTypeResolver', function() {
         $logger->pushHandler(new NullHandler);
         $this->resolver = new NodeTypeResolver($logger, new UseParser, new EventDispatcher);
         $this->scope = new FileScope(new FQN);
-        $this->index = new Index;
+        $this->index = new InMemoryIndex;
         $this->var = new Variable('test');
         $fqcn = new FQCN('ClassName', 'Some\\Path');
         $fqcn2 = new FQCN('AnotherClassName', 'Another\\Path\\To\\It');

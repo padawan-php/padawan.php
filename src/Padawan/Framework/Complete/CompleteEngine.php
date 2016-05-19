@@ -3,6 +3,7 @@
 namespace Padawan\Framework\Complete;
 
 use Padawan\Domain\Project;
+use Padawan\Domain\Project\File;
 use Padawan\Domain\Scope;
 use Padawan\Domain\Scope\FileScope;
 use Padawan\Domain\Project\FQN;
@@ -14,7 +15,8 @@ use Padawan\Parser\Walker\IndexGeneratingWalker;
 use Padawan\Parser\Walker\ScopeWalker;
 use Psr\Log\LoggerInterface;
 
-class CompleteEngine {
+class CompleteEngine
+{
     public function __construct(
         Parser $parser,
         IndexGenerator $generator,
@@ -107,7 +109,7 @@ class CompleteEngine {
     /**
      * @return Scope
      */
-    protected function processFileContent(Project $project, $lines, $line, $file) {
+    protected function processFileContent(Project $project, $lines, $line, $filePath) {
         if (is_array($lines)) {
             $content = implode("\n", $lines);
         } else {
@@ -116,29 +118,37 @@ class CompleteEngine {
         if (empty($content)) {
             return;
         }
-        if (!array_key_exists($file, $this->cachePool)) {
-            $this->cachePool[$file] = [0, [], []];
+        if (!array_key_exists($filePath, $this->cachePool)) {
+            $this->cachePool[$filePath] = [0, [], []];
         }
-        if ($this->isValidCache($file, $content)) {
-            list(,, $scope) = $this->cachePool[$file];
+        if ($this->isValidCache($filePath, $content)) {
+            list(,$fileScope, $scope) = $this->cachePool[$filePath];
+        }
+        $index = $project->getIndex();
+        $file = $index->findFileByPath($filePath);
+        $hash = sha1($content);
+        if (empty($file)) {
+            $file = new File($filePath);
         }
         if (empty($scope)) {
             $parser = $this->parser;
             $parser->addWalker($this->indexGeneratingWalker);
             $parser->setIndex($project->getIndex());
-            $nodes = $parser->parseContent($file, $content);
+            $fileScope = $parser->parseContent($filePath, $content);
             $this->generator->processFileScope(
+                $file,
                 $project->getIndex(),
-                $nodes
+                $fileScope,
+                $hash
             );
             /** @var \Padawan\Domain\Project\Node\Uses */
             $uses = $parser->getUses();
             $this->scopeWalker->setLine($line);
             $parser->addWalker($this->scopeWalker);
             $parser->setIndex($project->getIndex());
-            $scope = $parser->parseContent($file, $content, $uses);
+            $scope = $parser->parseContent($filePath, $content, $uses);
             $contentHash = hash('sha1', $content);
-            $this->cachePool[$file] = [$contentHash, $nodes, $scope];
+            $this->cachePool[$filePath] = [$contentHash, $fileScope, $scope];
         }
         if ($scope) {
             return $scope;
