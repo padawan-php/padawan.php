@@ -2,19 +2,20 @@
 
 namespace Padawan\Domain\Generator;
 
-use Padawan\Domain\Scope\FileScope;
-use Padawan\Domain\Project\Index;
 use Padawan\Domain\Project;
+use Padawan\Domain\Project\File;
+use Padawan\Domain\Project\Index;
+use Padawan\Domain\Scope\FileScope;
 
 interface IndexGenerator
 {
     public function generateIndex(Project $project);
 
-    public function generateProjectIndex(Project $project);
+    public function generateProjectIndex(Project $project, $rewrite = true);
 
-    public function processFile(Index $index, $file, $rewrite = false, $createCache = true);
+    public function processFile(Index $index, $filePath, $rewrite = true);
 
-    public function createScopeForFile($file, Index $index, $createCache = true);
+    public function createScopeForFile(File $file, $content, Index $index, $rewrite = true);
 
-    public function processFileScope(Index $index, FileScope $scope);
+    public function processFileScope(File $file, Index $index, FileScope $scope);
 }

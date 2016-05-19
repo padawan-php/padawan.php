@@ -18,7 +18,7 @@ class ClassRepository implements ClassRepositoryInterface
         $index = $project->getIndex();
         $class = $index->findClassByFQCN($name);
         if (empty($class)) {
-            $class = $index->findInterfaceByFQCN($fqcn);
+            $class = $index->findInterfaceByFQCN($name);
         }
         return $class;
     }

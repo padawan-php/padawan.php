@@ -5,8 +5,10 @@ namespace Padawan\Framework\Generator;
 use Padawan\Domain\Project\Node\ClassData;
 use Padawan\Domain\Project\Node\InterfaceData;
 use Padawan\Domain\Event\IndexGenerationEvent;
-use Padawan\Domain\Project\Index;
+use Padawan\Framework\Domain\Project\InMemoryIndex;
 use Padawan\Domain\Project;
+use Padawan\Domain\Project\File;
+use Padawan\Domain\Project\Index;
 use Padawan\Domain\Scope\FileScope;
 use Padawan\Framework\Utils\PathResolver;
 use Padawan\Framework\Utils\Composer;
@@ -51,7 +53,7 @@ class IndexGenerator implements IndexGeneratorInterface
         return $index;
     }
 
-    public function generateProjectIndex(Project $project)
+    public function generateProjectIndex(Project $project, $rewrite = true)
     {
         // You know what this mean
         gc_disable();
@@ -62,7 +64,7 @@ class IndexGenerator implements IndexGeneratorInterface
         $all = count($files);
         foreach ($files as $file) {
             $start = microtime(1);
-            $this->processFile($index, $file, false, false);
+            $this->processFile($index, $file, $rewrite);
             $end = microtime(1) - $start;
 
             $this->getLogger()->debug("Indexing: [$end]s");
@@ -78,60 +80,62 @@ class IndexGenerator implements IndexGeneratorInterface
 
     public function processFile(
         Index $index,
-        $file,
-        $rewrite = false,
-        $createCache = true
+        $filePath,
+        $rewrite = true
     ) {
         $this->getLogger()
-            ->info("processing $file");
-        if ($index->isParsed($file) && !$rewrite) {
-            return;
+            ->info("processing $filePath");
+        $file = $index->findFileByPath($filePath);
+        if (empty($file)) {
+            $file = new File($filePath);
         }
-        $this->processFileScope(
-            $index,
-            $this->createScopeForFile($file, $index, $createCache)
-        );
-        $index->addParsedFile($file);
+        $filePath = $this->path->getAbsolutePath($file->path());
+        $content = $this->path->read($filePath);
+        $hash = sha1($content);
+        if ($rewrite || $file->isChanged($hash)) {
+            $scope = $this->createScopeForFile($file, $content, $index, $rewrite);
+            $this->processFileScope(
+                $file,
+                $index,
+                $scope,
+                $hash
+            );
+        }
     }
-    public function createScopeForFile($file, Index $index, $createCache = true)
+    public function createScopeForFile(File $file, $content, Index $index, $rewrite = true)
     {
         $startParser = microtime(1);
         $walker = $this->walker;
         $parser = $this->getClassUtils()->getParser();
         $parser->addWalker($walker);
         $parser->setIndex($index);
-        $nodes = $parser->parseFile($file, null, $createCache);
+        $scope = $parser->parseContent($file->path(), $content, null);
         $end = microtime(1) - $startParser;
-        $this->getLogger()
-            ->info("Parsing: [$end]s");
-        if (is_array($nodes)) {
-            print_r($nodes);
-            die();
-        }
-        return $nodes;
+        $this->getLogger()->info("Parsing: [$end]s");
+        return $scope;
     }
-    public function processFileScope(Index $index, FileScope $scope = null)
+    public function processFileScope(File $file, Index $index, FileScope $scope = null, $hash = null)
     {
         if (empty($scope)) {
             return;
+        }
+        if (empty($hash)) {
+            throw new \Exception("Contents hash could not be empty");
         }
         $this->getLogger()->debug(sprintf("Processing %s classes", count($scope->getClasses())));
         $this->getLogger()->debug(sprintf("Processing %s interfaces", count($scope->getInterfaces())));
         $this->getLogger()->debug(sprintf("Processing %s functions", count($scope->getFunctions())));
         foreach ($scope->getClasses() as $classData) {
             $this->getLogger()->debug('Processing node ' . $classData->fqcn->toString());
-            $index->addFQCN($classData->fqcn);
-            $index->addClass($classData);
         }
         foreach ($scope->getInterfaces() as $interfaceData) {
             $this->getLogger()->debug('Processing node ' . $interfaceData->fqcn->toString());
-            $index->addFQCN($interfaceData->fqcn);
-            $index->addInterface($interfaceData);
         }
         foreach ($scope->getFunctions() as $functionData) {
             $this->getLogger()->debug('Processing node ' . $functionData->name);
-            $index->addFunction($functionData);
         }
+        $file->updateScope($scope, $hash);
+        $index->addFile($file);
     }
 
     /** @return LoggerInterface */

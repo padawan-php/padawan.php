@@ -4,7 +4,7 @@ use Monolog\Logger;
 use Padawan\Domain\Generator\IndexGenerator;
 use Padawan\Framework\Generator\IndexGenerator as IndexGeneratorImpl;
 use Padawan\Domain\ProjectRepository;
-use Padawan\Framework\Domain\Project\Repository as ProjectRepositoryImpl;
+use Padawan\Framework\Domain\ProjectRepository as ProjectRepositoryImpl;
 use Padawan\Domain\Project\ClassRepository;
 use Padawan\Framework\Domain\Project\ClassRepository as ClassRepositoryImpl;
 

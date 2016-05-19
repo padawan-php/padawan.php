@@ -24,7 +24,10 @@ class Persister
     public function save(Project $project)
     {
         $this->checkForPadawanDir($project->getRootFolder());
-        return File\put($this->getProjectIndexFilePath($project->getRootFolder()), $this->serialize($project));
+        return File\put(
+            $this->getProjectIndexFilePath($project->getRootFolder()),
+            $this->serialize($project)
+        );
     }
 
     public function load($rootDir)
@@ -33,7 +36,9 @@ class Persister
             $project = $this->unserialize(
                 $this->readFromFile($this->getProjectIndexFilePath($rootDir))
             );
-            if ($project instanceof __PHP_Incomplete_Class) {
+            if ($project instanceof __PHP_Incomplete_Class
+                || $project->getIndex() instanceof __PHP_Incomplete_Class
+            ) {
                 return;
             }
             return $project;

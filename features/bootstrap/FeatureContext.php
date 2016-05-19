@@ -6,7 +6,9 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Padawan\Framework\Application\Socket;
 use Padawan\Domain\Project;
+use Padawan\Domain\Project\File;
 use Padawan\Domain\Project\Index;
+use Padawan\Framework\Domain\Project\InMemoryIndex;
 use Fake\Output;
 use DI\Container;
 use Psr\Log\LoggerInterface;
@@ -43,7 +45,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
     public function createProject()
     {
-        $this->project = new Project(new Index);
+        $this->project = new Project(new InMemoryIndex);
     }
 
     /**
@@ -51,7 +53,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function thereIsAFileWith(PyStringNode $string)
     {
-        $file = uniqid() . ".php";
+        $filePath = uniqid() . ".php";
+        $file = new File($filePath);
         $container = $this->app->getContainer();
         $generator = $container->get(IndexGenerator::class);
         $walker = $generator->getWalker();
@@ -59,8 +62,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
         $parser->addWalker($walker);
         $parser->setIndex($this->project->getIndex());
         $this->content = $string->getRaw();
-        $scope = $parser->parseContent($file, $this->content, null, false);
-        $generator->processFileScope($this->project->getIndex(), $scope);
+        $scope = $parser->parseContent($filePath, $this->content, null, false);
+        $generator->processFileScope($file, $this->project->getIndex(), $scope, sha1($this->content));
         $this->scope = $scope;
     }
 

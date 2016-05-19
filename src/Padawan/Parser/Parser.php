@@ -10,17 +10,16 @@ use PhpParser\NodeTraverser as Traverser;
 use Psr\Log\LoggerInterface;
 use Padawan\Parser\NamespaceParser;
 
-class Parser {
+class Parser
+{
 
     public function __construct(
         ParserFactory $parserFactory,
-        PathResolver $path,
         Traverser $traverser,
         UseParser $useParser,
         NamespaceParser $namespaceParser,
         LoggerInterface $logger
     ) {
-        $this->path             = $path;
         $this->parserFactory    = $parserFactory;
         $this->traverser        = $traverser;
         $this->useParser        = $useParser;
@@ -29,43 +28,21 @@ class Parser {
         $this->astPool          = [];
         $this->logger           = $logger;
     }
-    public function parseFile($file, Uses $uses = null, $createCache = true)
+    public function parseContent($file, $content, Uses $uses = null)
     {
-        $file = $this->path->getAbsolutePath($file);
-        $content = $this->path->read($file);
-        return $this->parseContent($file, $content, $uses, $createCache);
-    }
-    public function parseContent($file, $content, Uses $uses = null, $createCache = true)
-    {
-        if ($createCache) {
-            $hash = hash('md5', $content);
-            if (!array_key_exists($file, $this->astPool)) {
-                $this->astPool[$file] = [0, 0];
-            }
-            list($oldHash, $ast) = $this->astPool[$file];
-        }
         if (!$uses instanceof Uses) {
             $uses = new Uses(new FQN);
         }
         $this->setUses($uses);
         $this->setFileInfo($uses, $file);
-        $this->logger->addDebug(sprintf('Cache status: %s', (
-            $createCache ? 'active' : 'disabled'
-        )));
-        if (!$createCache || $oldHash !== $hash || empty($ast)) {
-            try {
-                $parser = $this->parserFactory->create(ParserFactory::PREFER_PHP5);
-                $ast = $parser->parse($content);
-            }
-            catch (\Exception $e) {
-                $this->logger->error(sprintf("Parsing failed in file %s\n", $file));
-                $this->logger->error($e);
-                $this->clearWalkers();
-                return;
-            }
-            if ($createCache) {
-                $this->astPool[$file] = [$hash, $ast];
-            }
+        try {
+            $parser = $this->parserFactory->create(ParserFactory::PREFER_PHP5);
+            $ast = $parser->parse($content);
+        } catch (\Exception $e) {
+            $this->logger->error(sprintf("Parsing failed in file %s\n", $file));
+            $this->logger->error($e);
+            $this->clearWalkers();
+            return;
         }
         $this->logger->addInfo(sprintf("Traversing with %s walkers",
             count($this->walkers)
@@ -126,8 +103,6 @@ class Parser {
     }
 
     private $parsedClasses = [];
-    /** @var PathResolver */
-    private $path;
     /** @var ParserFactory */
     private $parserFactory;
     /** @var Traverser */

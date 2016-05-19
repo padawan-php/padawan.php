@@ -1,10 +1,11 @@
 <?php
 
-use Padawan\Framework\Generator\FilesFinder;
-use Padawan\Framework\Utils\PathResolver;
+use Prophecy\Argument;
 use Padawan\Domain\Project;
 use Padawan\Domain\Project\Index;
-use Prophecy\Argument;
+use Padawan\Framework\Utils\PathResolver;
+use Padawan\Framework\Generator\FilesFinder;
+use Padawan\Framework\Domain\Project\InMemoryIndex;
 
 describe('FilesFinder', function() {
     beforeEach(function() {
@@ -20,7 +21,7 @@ describe('FilesFinder', function() {
             return $args[1];
         });
         $this->files = new FilesFinder($this->mock->reveal());
-        $this->project = new Project(new Index, "/project");
+        $this->project = new Project(new InMemoryIndex, "/project");
     });
     describe('->findProjectFiles()', function() {
         it('returns all php files from project', function() {
