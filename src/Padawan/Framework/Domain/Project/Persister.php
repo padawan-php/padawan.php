@@ -3,10 +3,11 @@
 namespace Padawan\Framework\Domain\Project;
 
 
-use Padawan\Framework\Utils\PathResolver;
 use Padawan\Domain\Project;
-use \__PHP_Incomplete_Class;
-use Amp\File;
+use __PHP_Incomplete_Class;
+use React\EventLoop\LoopInterface;
+use React\Filesystem\Filesystem;
+use Padawan\Framework\Utils\PathResolver;
 
 /**
  * Class Persister
@@ -16,18 +17,18 @@ class Persister
     const PADAWAN_DIR = ".padawan";
     const INDEX_FILE = "project";
 
-    public function __construct(PathResolver $path)
+    public function __construct(PathResolver $path, LoopInterface $loop)
     {
         $this->path = $path;
+        $this->fs = Filesystem::create($loop);
     }
 
     public function save(Project $project)
     {
         $this->checkForPadawanDir($project->getRootFolder());
-        return File\put(
-            $this->getProjectIndexFilePath($project->getRootFolder()),
-            $this->serialize($project)
-        );
+        return $this->fs->file(
+            $this->getProjectIndexFilePath($project->getRootFolder())
+        )->putContents($this->serialize($project));
     }
 
     public function load($rootDir)
@@ -88,4 +89,9 @@ class Persister
      * @var PathResolver
      */
     private $path;
+
+    /**
+     * @var Filesystem
+     */
+    private $fs;
 }

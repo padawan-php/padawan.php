@@ -2,7 +2,12 @@
 <?php
 
 use Padawan\Framework\Application\Socket as App;
-use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Application\Socket\HttpOutput;
+use React\Http\Response;
+use React\Http\Request;
+use React\Promise\Deferred;
+use React\EventLoop\Factory;
+use Mkusher\Co;
 
 set_time_limit(0);
 ini_set('memory_limit', '2048M');
@@ -29,49 +34,79 @@ foreach ($autoloaders as $autoloader) {
 
 require(AUTOLOAD_PATH);
 
-$port = 15155;
+runServer();
 
-Amp\run(function() use ($port) {
-    $socket = Amp\Socket\listen("tcp://0.0.0.0:" . $port);
-    $server = new Amp\Socket\Server($socket);
-    $app = new App();
-    printf("Started padawan server on %d\n", $port);
-    while ($client = (yield $server->accept())) {
-        Amp\resolve(onClient($client, $app));
-    }
-});
+function runServer() {
+    $port = 15155;
+    $loop = Factory::create();
+    $app = new App($loop);
 
-// Generator coroutine is a lightweight "thread" for each client
-function onClient(Amp\Socket\Client $client, App $app) {
-    $startedAt = microtime(true);
-    /** @var $client \Amp\Socket\Client */
-    $clientId = $client->id();
-    echo "+ connected: {$clientId}\n";
-    try {
-        $request = (yield Amp\resolve(loadRequest($client)));
-        $output = new SocketOutput($client);
-        if ($client->alive()) {
-            yield Amp\resolve($app->handle($request, $output));
+    $handler = function (Request $request, Response $response) use ($app, $loop) {
+        $start = microtime(1);
+        printf("%s %s\n", $request->getMethod(), $request->getPath());
+        if($request->getMethod() !== 'POST'){
+            $response->close();
+            return;
         }
-    } catch (\Throwable $e) {
-        yield $output->write(json_encode([
-            "error" => $e->getMessage()
-        ]));
-    }
-    if ($client->alive()) {
-        yield $client->close();
-    }
-    $totalTime = microtime(true) - $startedAt;
-    echo "- Full request completed for {$clientId} after {$totalTime}\n";
+        $contents = yield loadRequestData($request);
+        $requestDto = new \stdClass;
+        $requestDto->command = substr($request->getPath(), 1);
+        $requestDto->params = $request->getQuery();
+        if (!empty($contents)) {
+            $requestDto->params["data"] = $contents;
+        }
+        $output = new HttpOutput($response);
+        try {
+            yield $app->handle($requestDto, $output);
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
+        if ($response->isWritable()) {
+            $response->end();
+        }
+        printf("Response time: %s\n", microtime(1) - $start);
+    };
+
+    $socket = new React\Socket\Server($loop);
+    $http = new React\Http\Server($socket);
+
+    $http->on('request', function($request, $response) use ($handler) {
+        Co\await(function() use ($request, $response, $handler) {
+            return $handler($request, $response);
+        })->then(null, function($error) {
+            printf("Unhandled error: %s\n", $error->getMessage());
+        });
+    });
+
+    $socket->listen($port);
+
+    echo "Started http server on 127.0.0.1:{$port}\n";
+
+    $loop->run();
 }
 
-function loadRequest(Amp\Socket\Client $client) {
-    $content = "";
-    while($chunk = (yield $client->read())) {
-        $content .= $chunk;
-        $request = json_decode($content);
-        if ($request) {
-            return $request;
-        }
+function loadRequestData(Request $request) {
+    $headers = $request->getHeaders();
+    $body = new \stdClass;
+    $body->data = "";
+    $body->receivedLength = 0;
+    $body->dataLength = $headers['Content-Length'];
+    $deferred = new Deferred();
+    if ($body->dataLength > 0) {
+        $request->on("data", function ($data) use ($body, $deferred) {
+            $body->data .= $data;
+            $body->receivedLength += strlen($data);
+            if($body->receivedLength >= $body->dataLength){
+                $deferred->resolve(urldecode($body->data));
+            }
+        });
+    } else {
+        $deferred->resolve("");
     }
+
+    $request->on("error", function ($error) use ($deferred) {
+        $deferred->reject($error);
+    });
+
+    return $deferred->promise();
 }

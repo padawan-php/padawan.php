@@ -2,7 +2,6 @@
 
 namespace Padawan\Framework\Application;
 
-use Amp;
 use Padawan\Command\AsyncCommand;
 use Padawan\Command\KillCommand;
 use Padawan\Command\ListCommand;
@@ -10,19 +9,19 @@ use Padawan\Framework\Application;
 use Padawan\Command\CompleteCommand;
 use Padawan\Command\UpdateCommand;
 use Symfony\Component\Console\Input\ArrayInput;
-use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Application\Socket\HttpOutput;
 
 /**
  * Class Socket
  */
 class Socket extends Application
 {
-    public function __construct()
+    public function __construct($loop)
     {
-        parent::__construct("Padawan Server");
+        parent::__construct("Padawan Server", $loop);
     }
 
-    public function handle($request, SocketOutput $output)
+    public function handle($request, HttpOutput $output)
     {
         if (!$request
             || !property_exists($request, "command")
@@ -40,7 +39,7 @@ class Socket extends Application
         $command = $this->find($request->command);
         try {
             if ($command instanceof AsyncCommand) {
-                yield Amp\resolve($command->run($input, $output));
+                yield $command->run($input, $output);
             }
         } catch (\Exception $e) {
             printf("Error: %s\n", $e->getMessage());
@@ -57,4 +56,5 @@ class Socket extends Application
         $this->add(new ListCommand);
         $this->add(new KillCommand);
     }
+
 }

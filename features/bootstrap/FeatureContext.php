@@ -1,21 +1,23 @@
 <?php
 
-use Behat\Behat\Context\Context;
-use Behat\Behat\Context\SnippetAcceptingContext;
-use Behat\Gherkin\Node\PyStringNode;
-use Behat\Gherkin\Node\TableNode;
-use Padawan\Framework\Application\Socket;
-use Padawan\Domain\Project;
-use Padawan\Domain\Project\File;
-use Padawan\Domain\Project\Index;
-use Padawan\Framework\Domain\Project\InMemoryIndex;
+use Mkusher\Co;
 use Fake\Output;
 use DI\Container;
-use Psr\Log\LoggerInterface;
-use Monolog\Handler\NullHandler;
-use Padawan\Framework\Generator\IndexGenerator;
 use Padawan\Domain\Scope;
+use Padawan\Domain\Project;
+use Psr\Log\LoggerInterface;
+use React\EventLoop\Factory;
+use Monolog\Handler\NullHandler;
+use Behat\Behat\Context\Context;
+use Padawan\Domain\Project\File;
+use Padawan\Domain\Project\Index;
+use Behat\Gherkin\Node\TableNode;
 use Padawan\Domain\Scope\FileScope;
+use Behat\Gherkin\Node\PyStringNode;
+use Padawan\Framework\Application\Socket;
+use Padawan\Framework\Generator\IndexGenerator;
+use Behat\Behat\Context\SnippetAcceptingContext;
+use Padawan\Framework\Domain\Project\InMemoryIndex;
 
 /**
  * Defines application features from the specific context.
@@ -37,7 +39,8 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
     public function createApplication()
     {
-        $this->app = new Socket();
+        $this->loop = Factory::create();
+        $this->app = new Socket($this->loop);
         $container = $this->app->getContainer();
         $container->get(LoggerInterface::class)->popHandler();
         $container->get(LoggerInterface::class)->pushHandler(new NullHandler());
@@ -98,10 +101,12 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
         $output = new Output;
         $app = $this->app;
-        Amp\run(function() use ($request, $output, $app) {
-            yield Amp\resolve($app->handle($request, $output));
+        Co\await(function() use ($request, $output, $app) {
+            yield $app->handle($request, $output);
+        })->then(function() use ($output) {
+            $this->response = json_decode($output->output[0], 1);
         });
-        $this->response = json_decode($output->output[0], 1);
+        $this->loop->run();
     }
 
     /**
