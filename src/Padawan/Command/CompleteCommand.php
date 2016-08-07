@@ -5,7 +5,7 @@ namespace Padawan\Command;
 use Padawan\Framework\Complete\CompleteEngine;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
-use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Application\Socket\HttpOutput;
 use Padawan\Domain\ProjectRepository;
 use Padawan\Framework\Domain\Project\Persister;
 
@@ -38,7 +38,7 @@ class CompleteCommand extends AsyncCommand
                 "Path to file relative to project root"
             );
     }
-    protected function executeAsync(InputInterface $input, SocketOutput $output)
+    protected function executeAsync(InputInterface $input, HttpOutput $output)
     {
         $column = $input->getArgument("column");
         $file = $input->getArgument("filepath");
@@ -72,7 +72,6 @@ class CompleteCommand extends AsyncCommand
                 )
             );
             yield $output->disconnect();
-            yield $persister->save($project);
         } catch (\Exception $e) {
             yield $output->write(
                 json_encode(

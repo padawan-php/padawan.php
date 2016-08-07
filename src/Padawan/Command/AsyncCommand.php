@@ -7,7 +7,7 @@ use Padawan\Framework\Application\Socket;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Application\Socket\HttpOutput;
 use Symfony\Component\Console\Exception\ExceptionInterface;
 
 abstract class AsyncCommand extends Command
@@ -50,7 +50,7 @@ abstract class AsyncCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output instanceof SocketOutput) {
+        if ($output instanceof HttpOutput) {
             return $this->executeAsync($input, $output);
         }
     }
@@ -58,7 +58,7 @@ abstract class AsyncCommand extends Command
     /**
      * @return \Generator
      */
-    abstract protected function executeAsync(InputInterface $input, SocketOutput $output);
+    abstract protected function executeAsync(InputInterface $input, HttpOutput $output);
 
     /**
      * @return Container

@@ -21,8 +21,9 @@
         "doctrine/cache": "^1.4",
         "symfony/console": "~2.7 || ~3.0",
         "php-di/php-di": "^5.1",
-        "amphp/file": "^0.1.2",
-        "amphp/socket": "^0.9.6"
+        "react/http": "dev-master",
+        "react/filesystem": "dev-master",
+        "mkusher/react-co": "dev-master"
     },
     "require-dev": {
         "behat/behat": "~3.0",

@@ -7,7 +7,7 @@ use Padawan\Domain\ProjectRepository;
 use Padawan\Domain\Project\Node\ClassData;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Application\Socket\HttpOutput;
 use Padawan\Framework\Utils\PathResolver;
 
 /**
@@ -25,7 +25,7 @@ class ListCommand extends AsyncCommand
                 "Path to the project root"
             );
     }
-    protected function executeAsync(InputInterface $input, SocketOutput $output)
+    protected function executeAsync(InputInterface $input, HttpOutput $output)
     {
         $path = $input->getArgument("path");
 
@@ -35,12 +35,18 @@ class ListCommand extends AsyncCommand
         /** @var Project */
         $project = $projectRepository->findByPath($path);
         $classesList = [];
-        foreach ($project->getIndex()->getClasses() as $class) {
-            $classesList[] = [
+        $dto = function ($class) use ($path, $pathResolver) {
+            return [
                 'fqcn' => $class->fqcn->toString(),
                 'filepath' => $pathResolver->join([$path, $class->file])
             ];
-        }
+        };
+        $classesList = array_values(
+            array_merge(
+                array_map($dto, $project->getIndex()->getClasses()),
+                array_map($dto, $project->getIndex()->getInterfaces())
+            )
+        );
         yield $output->write(json_encode($classesList));
     }
 }

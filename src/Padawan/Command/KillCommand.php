@@ -4,8 +4,7 @@ namespace Padawan\Command;
 
 
 use Symfony\Component\Console\Input\InputInterface;
-use Padawan\Framework\Application\Socket\SocketOutput;
-use Amp;
+use Padawan\Framework\Application\Socket\HttpOutput;
 
 class KillCommand extends AsyncCommand
 {
@@ -14,11 +13,10 @@ class KillCommand extends AsyncCommand
         $this->setName("kill")
             ->setDescription("Stops padawan server");
     }
-    protected function executeAsync(InputInterface $input, SocketOutput $output)
+    protected function executeAsync(InputInterface $input, HttpOutput $output)
     {
         yield $output->write(json_encode([]));
         yield $output->disconnect();
         printf("Goodbye\n");
-        yield Amp\stop();
     }
 }

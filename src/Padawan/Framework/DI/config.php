@@ -7,6 +7,7 @@ use Padawan\Domain\ProjectRepository;
 use Padawan\Framework\Domain\ProjectRepository as ProjectRepositoryImpl;
 use Padawan\Domain\Project\ClassRepository;
 use Padawan\Framework\Domain\Project\ClassRepository as ClassRepositoryImpl;
+use Padawan\Framework\Application;
 
 return [
     Psr\Log\LoggerInterface::class => DI\factory(function() {
@@ -19,5 +20,8 @@ return [
     }),
     IndexGenerator::class => DI\object(IndexGeneratorImpl::class),
     ProjectRepository::class => DI\object(ProjectRepositoryImpl::class),
-    ClassRepository::class => DI\object(ClassRepositoryImpl::class)
+    ClassRepository::class => DI\object(ClassRepositoryImpl::class),
+    React\EventLoop\LoopInterface::class => DI\factory(function() {
+        return Application::$eventLoop;
+    })
 ];

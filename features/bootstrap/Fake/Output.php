@@ -2,12 +2,12 @@
 
 namespace Fake;
 
-use Padawan\Framework\Application\Socket\SocketOutput;
+use Padawan\Framework\Application\Socket\HttpOutput;
 
 /**
  * Class Output
  */
-class Output extends SocketOutput
+class Output extends HttpOutput
 {
     public $output = [];
 
