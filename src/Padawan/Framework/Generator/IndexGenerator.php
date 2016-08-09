@@ -76,6 +76,8 @@ class IndexGenerator implements IndexGeneratorInterface
                 $this->getLogger()->info("Progress: $process%");
             } catch (\Exception $e) {
                 $this->getLogger()->error(get_class($e).": ".$e->getMessage().". Trace: ".$e->getTraceAsString());
+            } catch (\Error $e) {
+                $this->getLogger()->error(get_class($e).": ".$e->getMessage().". Trace: ".$e->getTraceAsString());
             }
         }
         $this->getLogger()->info("[ $globalTime ]");
