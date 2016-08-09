@@ -74,7 +74,7 @@ class IndexGenerator implements IndexGeneratorInterface
                 ++$done;
                 $process = floor($done / $all * 100);
                 $this->getLogger()->info("Progress: $process%");
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->getLogger()->error(get_class($e).": ".$e->getMessage().". Trace: ".$e->getTraceAsString());
             }
         }
