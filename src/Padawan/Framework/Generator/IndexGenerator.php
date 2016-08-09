@@ -63,16 +63,20 @@ class IndexGenerator implements IndexGeneratorInterface
         $files = $this->filesFinder->findProjectFiles($project);
         $all = count($files);
         foreach ($files as $file) {
-            $start = microtime(1);
-            $this->processFile($index, $file, $rewrite);
-            $end = microtime(1) - $start;
+            try {
+                $start = microtime(1);
+                $this->processFile($index, $file, $rewrite);
+                $end = microtime(1) - $start;
 
-            $this->getLogger()->debug("Indexing: [$end]s");
-            $this->getLogger()->debug("Memory: " . memory_get_usage());
-            $globalTime += $end;
-            ++$done;
-            $process = floor($done / $all * 100);
-            $this->getLogger()->info("Progress: $process%");
+                $this->getLogger()->debug("Indexing: [$end]s");
+                $this->getLogger()->debug("Memory: " . memory_get_usage());
+                $globalTime += $end;
+                ++$done;
+                $process = floor($done / $all * 100);
+                $this->getLogger()->info("Progress: $process%");
+            } catch (Exception $e) {
+                $this->getLogger()->error(get_class($e).": ".$e->getMessage().". Trace: ".$e->getTraceAsString());
+            }
         }
         $this->getLogger()->info("[ $globalTime ]");
         gc_enable();
