@@ -28,7 +28,8 @@ Plugins for editors
 -------------------
 
 1. [Vim](https://github.com/mkusher/padawan.vim)
-2. Sublime Text: [Padawan for ST3](https://github.com/mkusher/padawan.sublime) and [SublimePHPCompanion](https://github.com/erichard/SublimePHPCompanion)
+2. [Neovim](https://github.com/pbogut/deoplete-padawan)
+3. Sublime Text: [Padawan for ST3](https://github.com/mkusher/padawan.sublime) and [SublimePHPCompanion](https://github.com/erichard/SublimePHPCompanion)
 
 If you wish to write your own plugin, vim plugin example may serve
 as a source of inspiration. Look at
