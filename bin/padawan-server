@@ -48,7 +48,7 @@ function runServer() {
             $response->close();
             return;
         }
-        $contents = yield loadRequestData($request);
+        $contents = (yield loadRequestData($request));
         $requestDto = new \stdClass;
         $requestDto->command = substr($request->getPath(), 1);
         $requestDto->params = $request->getQuery();
