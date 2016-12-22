@@ -56,8 +56,8 @@ PATH=$PATH:$HOME/.composer/vendor/bin
 ```
 - Install plugin for your editor.
 - Run index generation command in your php composer
-project folder.
-- Start padawan's server
+project folder `padawan generate index`
+- Start padawan's server `padawan-server`
 - Enjoy smart completion
 
 Check out how to do this in the plugin documentation for specific editor above.
