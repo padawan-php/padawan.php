@@ -58,7 +58,7 @@ PATH=$PATH:$HOME/.composer/vendor/bin
 - Run index generation command in your php composer
 project folder:
 ```bash
-padawan generate index
+padawan generate
 ```
 - Start padawan's server
 ```bash
