@@ -26,9 +26,10 @@ class Persister
     public function save(Project $project)
     {
         $this->checkForPadawanDir($project->getRootFolder());
-        return $this->fs->file(
-            $this->getProjectIndexFilePath($project->getRootFolder())
-        )->putContents($this->serialize($project));
+        return file_put_contents(
+            $this->getProjectIndexFilePath($project->getRootFolder()),
+            $this->serialize($project)
+        );
     }
 
     public function load($rootDir)
