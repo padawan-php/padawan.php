@@ -26,6 +26,15 @@ class UseCompleter extends AbstractFileInfoCompleter
                 $fqcn
             );
         }
+        usort($entries, function($a, $b) {
+            $aname = $a->getName();
+            $bname = $b->getName();
+            $strlenDiff = strlen($aname) - strlen($bname);
+            if ($strlenDiff === 0) {
+                return $aname > $bname;
+            }
+            return $strlenDiff;
+        });
         return $entries;
     }
 
