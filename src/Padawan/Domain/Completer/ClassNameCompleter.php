@@ -27,6 +27,6 @@ class ClassNameCompleter implements CompleterInterface
 
     public function canHandle(Project $project, Context $context)
     {
-        return $context->isClassName();
+        return $context->isClassName() && !$context->isUse();
     }
 }
