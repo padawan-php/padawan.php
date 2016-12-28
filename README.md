@@ -10,6 +10,8 @@ Padawan.php smart php intelligent code completion for php projects
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
 [![License](https://poser.pugx.org/mkusher/padawan/license)](https://packagist.org/packages/mkusher/padawan)
 
+***Looking for maintainers! Please join gitter channel for discussion***
+
 Padawan.php is an http server that parses your project and gives you
 completions.
 Padawan.php looks recursively for all php files of a composer project, parses
