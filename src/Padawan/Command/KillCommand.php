@@ -5,6 +5,7 @@ namespace Padawan\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Padawan\Framework\Application\Socket\HttpOutput;
+use Padawan\Framework\Application;
 
 class KillCommand extends AsyncCommand
 {
@@ -18,5 +19,6 @@ class KillCommand extends AsyncCommand
         yield $output->write(json_encode([]));
         yield $output->disconnect();
         printf("Goodbye\n");
+        Application::$eventLoop->stop();
     }
 }
