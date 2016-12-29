@@ -3,7 +3,7 @@ Padawan.php smart php intelligent code completion for php projects
 
 [![Join the chat at https://gitter.im/mkusher/padawan.php](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mkusher/padawan.php?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build Status](https://travis-ci.org/mkusher/padawan.php.svg?branch=master)](https://travis-ci.org/mkusher/padawan.php)
+[![Build Status](https://travis-ci.org/padawan-php/padawan.php.svg?branch=master)](https://travis-ci.org/padawan-php/padawan.php)
 [![Total Downloads](https://poser.pugx.org/mkusher/padawan/downloads)](https://packagist.org/packages/mkusher/padawan)
 [![Latest Stable Version](https://poser.pugx.org/mkusher/padawan/v/stable)](https://packagist.org/packages/mkusher/padawan)
 [![Latest Unstable Version](https://poser.pugx.org/mkusher/padawan/v/unstable)](https://packagist.org/packages/mkusher/padawan)
