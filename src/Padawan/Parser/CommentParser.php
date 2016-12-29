@@ -63,6 +63,8 @@ class CommentParser
                     );
                     break;
                 case "property":
+                case "property-read":
+                case "property-write":
                     $comment->addProperty(
                         $this->createProperty($tag)
                     );

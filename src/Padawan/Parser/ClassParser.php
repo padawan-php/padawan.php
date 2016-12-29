@@ -100,5 +100,8 @@ class ClassParser
         /** @var Node\Comment $comment */
         $comment = $this->docParser->parse($node);
         $classData->doc = $comment->getDoc();
+        foreach ($comment->getProperties() as $prop) {
+            $classData->addProp($prop);
+        }
     }
 }
