@@ -9,17 +9,20 @@ use Padawan\Domain\Project\Node\MethodParam;
 use Padawan\Parser\CommentParser;
 use Padawan\Parser\ParamParser;
 use Padawan\Parser\UseParser;
+use Padawan\Parser\InlineTypeHintParser;
 
 class FunctionTransformer
 {
     public function __construct(
         CommentParser $commentParser,
         ParamParser $paramParser,
-        UseParser $useParser
+        UseParser $useParser,
+        InlineTypeHintParser $inlineTypeHintParser
     ) {
-        $this->commentParser = $commentParser;
-        $this->paramParser = $paramParser;
-        $this->useParser = $useParser;
+        $this->commentParser        = $commentParser;
+        $this->paramParser          = $paramParser;
+        $this->useParser            = $useParser;
+        $this->inlineTypeHintParser = $inlineTypeHintParser;
     }
     public function tranform(Function_ $node)
     {
@@ -31,6 +34,10 @@ class FunctionTransformer
             if ($child instanceof Param) {
                 $function->addArgument($this->tranformArgument($child));
             }
+        }
+        $typeHints = $this->inlineTypeHintParser->parse($node);
+        foreach ($typeHints as $typehint) {
+            $function->addTypeHint($typehint);
         }
         return $function;
     }
@@ -62,4 +69,5 @@ class FunctionTransformer
     private $paramParser;
     private $commentParser;
     private $useParser;
+    private $inlineTypeHintParser;
 }

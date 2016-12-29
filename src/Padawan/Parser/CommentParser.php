@@ -88,7 +88,13 @@ class CommentParser
     protected function createVar(Tag $tag) {
         $name = trim($tag->getVariableName(), '$');
         $param = new Variable($name);
-        $param->setType($this->getFQCN($tag->getType()));
+        $type = $tag->getType();
+        if (empty($type)) {
+            // fallback to desecription to support docs like:
+            // /** @var $varaname Type */
+            $type = $tag->getDescription();
+        }
+        $param->setType($this->getFQCN($type));
         return $param;
     }
     protected function createProperty(Tag $tag) {

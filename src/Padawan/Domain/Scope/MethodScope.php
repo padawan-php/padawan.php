@@ -17,6 +17,7 @@ class MethodScope extends AbstractChildScope
         foreach ($method->arguments as $param) {
             $this->addVar($param);
         }
+        $this->addTypeHints($method->inlineTypeHint);
     }
     public function getFQCN()
     {

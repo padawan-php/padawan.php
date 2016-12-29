@@ -19,12 +19,14 @@ class MethodParser {
     public function __construct(
         UseParser $useParser,
         CommentParser $commentParser,
-        ParamParser $paramParser
+        ParamParser $paramParser,
+        InlineTypeHintParser $inlineTypeHintParser
     )
     {
-        $this->useParser        = $useParser;
-        $this->commentParser    = $commentParser;
-        $this->paramParser      = $paramParser;
+        $this->useParser            = $useParser;
+        $this->commentParser        = $commentParser;
+        $this->paramParser          = $paramParser;
+        $this->inlineTypeHintParser = $inlineTypeHintParser;
     }
 
     /**
@@ -61,6 +63,10 @@ class MethodParser {
                 $method->addParam($this->parseMethodArgument($child));
             }
         }
+        $typeHints = $this->inlineTypeHintParser->parse($node);
+        foreach ($typeHints as $typehint) {
+            $method->addTypeHint($typehint);
+        }
         return $method;
     }
     protected function parseMethodArgument(Param $node) {
@@ -73,4 +79,6 @@ class MethodParser {
     private $commentParser;
     /** @var ParamParser */
     private $paramParser;
+    /** @var InlineTypeHintParser */
+    private $inlineTypeHintParser;
 }

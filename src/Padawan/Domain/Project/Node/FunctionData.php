@@ -12,6 +12,12 @@ class FunctionData
     public $doc = "";
     public $startLine = 0;
     public $endLine = 0;
+
+    /**
+     * @property TypeHint[] $inlineTypeHint
+     */
+    public $inlineTypeHint = [];
+
     public function __construct($name)
     {
         $this->name = $name;
@@ -70,5 +76,16 @@ class FunctionData
     public function setReturn(FQCN $fqcn = null)
     {
         $this->return = $fqcn;
+    }
+
+    public function addTypeHint(TypeHint $var)
+    {
+        if (array_key_exists($var->getName(), $this->inlineTypeHint)) {
+            $var = $this->inlineTypeHint[$var->getName()];
+            if (empty($var->getType())) {
+                $var->setType($var->getType());
+            }
+        }
+        $this->inlineTypeHint[$var->getName()] = $var;
     }
 }

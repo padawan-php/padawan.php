@@ -62,7 +62,7 @@ class CompleteEngine
             } catch (\Exception $e) {
                 $scope = new FileScope(new FQN);
             }
-            $entries = $this->findEntries($project, $scope, $completionLine, $column);
+            $entries = $this->findEntries($project, $scope, $completionLine, $column, $line);
             $this->logger->debug(sprintf(
                 "%s seconds for entries generation",
                 (microtime(1) - $start)
@@ -80,9 +80,9 @@ class CompleteEngine
     /**
      * @param string $badLine
      */
-    protected function findEntries(Project $project, Scope $scope, $badLine, $column)
+    protected function findEntries(Project $project, Scope $scope, $badLine, $column, $cursorLine = null)
     {
-        $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope);
+        $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope, $cursorLine);
         $completers = $this->completerFactory->getCompleters($project, $context);
         $entries = [];
         foreach($completers as $completer) {
