@@ -40,6 +40,6 @@ class GenerateCommand extends CliCommand
         $generator->generateProjectIndex($project);
         $persister = $this->getContainer()->get(Persister::class);
 
-        $persister->save($project);
+        $persister->saveNow($project);
     }
 }
