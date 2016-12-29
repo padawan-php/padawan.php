@@ -98,6 +98,11 @@ self-written parser:
 
 So, I decided to create my own project.
 
+Note
+----
+
+Install `igbinary` PHP extension to get optimized index file size and load speed.
+
 Roadmap
 -------
 

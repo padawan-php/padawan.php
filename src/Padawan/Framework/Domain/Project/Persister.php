@@ -26,9 +26,10 @@ class Persister
     public function save(Project $project)
     {
         $this->checkForPadawanDir($project->getRootFolder());
-        return $this->fs->file(
-            $this->getProjectIndexFilePath($project->getRootFolder())
-        )->putContents($this->serialize($project));
+        return file_put_contents(
+            $this->getProjectIndexFilePath($project->getRootFolder()),
+            $this->serialize($project)
+        );
     }
 
     public function load($rootDir)
@@ -50,6 +51,13 @@ class Persister
 
     private function unserialize($rawProject)
     {
+        if (function_exists('igbinary_serialize')) {
+            $project = @igbinary_unserialize($rawProject);
+            if (!empty($project)) {
+                return $project;
+            }
+            // fallback to native unserialize function
+        }
         return unserialize($rawProject);
     }
 
@@ -64,6 +72,10 @@ class Persister
 
     private function serialize(Project $project)
     {
+        if (function_exists('igbinary_serialize')) {
+            return igbinary_serialize($project);
+        }
+
         return serialize($project);
     }
 
