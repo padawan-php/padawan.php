@@ -53,13 +53,36 @@ Feature: Names Completion
         """
         <?php
 
-        class MyDateTimeImmutable {
+        class DateTimeImmutableMine {
         }
         """
         When I type "DateTimeImm" on the 5 line
         And I ask for completion
         Then I should get:
             | Menu                  |
-            | MyDateTimeImmutable   |
+            | DateTimeImmutableMine |
             | DateTimeImmutable     |
+
+    Scenario: FQCN completion
+        Given there is a file with:
+        """
+        <?php
+        namespace Padawan\Feature;
+
+        class One {
+        }
+
+        class Two{
+            public function test() {
+
+
+            }
+        }
+        """
+        When I type "$a = \Padawan\" on the 9 line
+        And I ask for completion
+        Then I should get:
+            | Menu                |
+            | Padawan\Feature\One |
+            | Padawan\Feature\Two |
 

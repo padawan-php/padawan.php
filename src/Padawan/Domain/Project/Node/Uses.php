@@ -71,4 +71,19 @@ class Uses {
         }
         return $this->reversed;
     }
+
+    public function searchByPrefix($prefix) {
+        if (!is_string($prefix) || empty($prefix)) {
+            return [];
+        }
+        $result = [];
+        foreach ($this->map as $key => $fqcn) {
+            if (strpos($key, $prefix) === 0) {
+                $result[$key] = $fqcn;
+            }
+        }
+        if (!empty($result)) ksort($result, SORT_NATURAL);
+
+        return $result;
+    }
 }
