@@ -1,7 +1,7 @@
 Feature: Processing phpdoc
     As a user
-    I want to have class properties types based on assignments in constructor
-    So that I can not write doc comment to all properties
+    I want to have class property type hints from phpdoc
+    for magic properties
 
     Scenario: Get properties list from classdoc
         Given there is a file with:
