@@ -52,6 +52,14 @@ class FeatureContext implements Context, SnippetAcceptingContext
     }
 
     /**
+     * @BeforeScenario
+     */
+    public function cleanTypedContent()
+    {
+        $this->typedContent = [];
+    }
+
+    /**
      * @Given there is a file with:
      */
     public function thereIsAFileWith(PyStringNode $string)
@@ -75,14 +83,10 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iTypeOnTheLine($code, $linenum)
     {
-        $content = explode("\n", $this->content);
-        if (!isset($content[$linenum-1])) {
-            $content[$linenum-1] = "";
-        }
-        $content[$linenum-1] .= $code;
-        $this->content = implode("\n", $content);
-        $this->line = $linenum - 1;
-        $this->column = strlen($content[$linenum-1]);
+        $this->typedContent[] = [
+            'line' => $linenum - 1,
+            'code' => $code,
+        ];
     }
 
     /**
@@ -90,14 +94,25 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function askForCompletion()
     {
+        $content = explode("\n", $this->content);
+        foreach ($this->typedContent as $entry) {
+            $linenum = $entry['line'];
+            if (!isset($content[$linenum])) {
+                $content[$linenum] = "";
+            }
+            $content[$linenum] .= $entry['code'];
+            $column = strlen($content[$linenum]);
+        }
+        $content = implode("\n", $content);
+
         $request = new \stdclass;
         $request->command = "complete";
         $request->params = new \stdclass;
-        $request->params->line = $this->line + 1;
-        $request->params->column = $this->column + 1;
+        $request->params->line = $linenum + 1;
+        $request->params->column = $column + 1;
         $request->params->filepath = $this->filename;
         $request->params->path = $this->path;
-        $request->params->data = $this->content;
+        $request->params->data = $content;
 
         $output = new Output;
         $app = $this->app;
@@ -147,4 +162,5 @@ class FeatureContext implements Context, SnippetAcceptingContext
     private $response;
     /** @var Scope */
     private $scope;
+    private $typedContent;
 }

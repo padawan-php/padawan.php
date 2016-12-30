@@ -76,7 +76,9 @@ class ContextResolver
             if ($workingNode instanceof Variable && $workingNode->name === 'this') {
                 $isThis = true;
             }
-            if ($workingNode instanceof Name) {
+            if ($workingNode instanceof Name
+                && !($scope instanceof FileScope)
+            ) {
                 $nodeFQCN = $this->useParser->getFQCN($workingNode);
                 if ($scope->getFQCN() instanceof FQCN
                     && $nodeFQCN->toString() === $scope->getFQCN()->toString()

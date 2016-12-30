@@ -18,16 +18,21 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
     {
         $this->logger = $logger;
     }
+
     public function getEntries(Project $project, Context $context)
     {
         /** @var FQCN $fqcn */
-        list($fqcn, $isThis) = $context->getData();
-        $this->logger->debug('creating static entries');
+        /** @var \PhpParser\Node\Name $workingNode */
+        list($fqcn, $isThis, $_, $workingNode) = $context->getData();
+        $workingNode = $workingNode->getLast();
+        $isThis = $workingNode == 'self' || $workingNode == 'static';
+
+        $this->logger->debug('creating static entries for type ' . $fqcn->toString());
+
         if (!$fqcn instanceof FQCN) {
             return [];
         }
         $index = $project->getIndex();
-        $this->logger->debug('Creating completion for ' . $fqcn->toString());
         $class = $index->findClassByFQCN($fqcn);
         if (empty($class)) {
             $class = $index->findInterfaceByFQCN($fqcn);
@@ -48,7 +53,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
         }
         if ($class->properties !== null) {
             foreach ($class->properties->all($spec) as $property) {
-                $entries[$property->name] = $this->createEntryForProperty($property);
+                $entries['$' . $property->name] = $this->createEntryForProperty($property);
             }
         }
         if ($class->constants !== null) {
@@ -56,7 +61,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
                 $entries[$const] = $this->createEntryForConst($const);
             }
         }
-        ksort($entries);
+        ksort($entries, SORT_NATURAL);
         return $entries;
     }
 
