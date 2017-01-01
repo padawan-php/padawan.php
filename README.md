@@ -7,7 +7,7 @@ Padawan.php smart php intelligent code completion for php projects
 [![Total Downloads](https://poser.pugx.org/mkusher/padawan/downloads)](https://packagist.org/packages/mkusher/padawan)
 [![Latest Stable Version](https://poser.pugx.org/mkusher/padawan/v/stable)](https://packagist.org/packages/mkusher/padawan)
 [![Latest Unstable Version](https://poser.pugx.org/mkusher/padawan/v/unstable)](https://packagist.org/packages/mkusher/padawan)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mkusher/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mkusher/padawan.php/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/padawan-php/padawan.php/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/padawan-php/padawan.php/?branch=master)
 [![License](https://poser.pugx.org/mkusher/padawan/license)](https://packagist.org/packages/mkusher/padawan)
 
 ***Looking for maintainers! Please join gitter channel for discussion***
