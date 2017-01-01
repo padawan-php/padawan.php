@@ -40,11 +40,19 @@ class CompleteCommand extends AsyncCommand
     }
     protected function executeAsync(InputInterface $input, HttpOutput $output)
     {
+        /** @var $logger \Psr\Log\LoggerInterface */
+        $logger = $this->getContainer()->get(\Psr\Log\LoggerInterface::class);
         $column = $input->getArgument("column");
         $file = $input->getArgument("filepath");
         $line = $input->getArgument("line");
         $content = $input->getArgument("data");
         $path = $input->getArgument("path");
+        $logger->debug('Starting complete command', [
+            'column' => $column,
+            'fild' => $file,
+            'line' => $line,
+            'path' => $path,
+        ]);
 
         $projectRepository = $this->getContainer()->get(ProjectRepository::class);
         $project = $projectRepository->findByPath($path);
