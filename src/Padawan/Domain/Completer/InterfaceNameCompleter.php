@@ -8,7 +8,7 @@ use Padawan\Domain\Completion\Entry;
 
 class InterfaceNameCompleter implements CompleterInterface
 {
-    public function getEntries(Project $project, Context $context) {
+    public function getEntries(Project $project, Context $context, $cursorLine = 0) {
         $entries = [];
         foreach ($project->getIndex()->getInterfaces() as $interface) {
             $fqcn = $interface->fqcn;

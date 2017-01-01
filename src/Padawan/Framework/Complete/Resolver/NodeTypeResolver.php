@@ -187,7 +187,7 @@ class NodeTypeResolver
      */
     protected function getVarType($name, Scope $scope, $cursorLine)
     {
-        $var = $scope->getVar($name, $cursorLine + 1);
+        $var = $scope->getVar($name, $cursorLine);
         if (empty($var)) {
             return null;
         }

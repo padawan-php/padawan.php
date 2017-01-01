@@ -87,7 +87,7 @@ class CompleteEngine
         $this->logger->debug('Complers', $completers);
         $entries = [];
         foreach($completers as $completer) {
-            $entries = array_merge($entries, $completer->getEntries($project, $context));
+            $entries = array_merge($entries, $completer->getEntries($project, $context, $cursorLine));
         }
         return $entries;
     }

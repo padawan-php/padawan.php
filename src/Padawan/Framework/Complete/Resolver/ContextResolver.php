@@ -91,6 +91,12 @@ class ContextResolver
                 $types,
                 $workingNode
             ]);
+        } elseif ($token->isVar()) {
+            $symbol = $token->getSymbol();
+            if ($symbol[0] == '$') {
+                $symbol = substr($symbol, 1);
+            }
+            $context->setData($symbol);
         }
         if ($token->isUseOperator()
             || $token->isNamespaceOperator()

@@ -20,7 +20,7 @@ class GlobalFunctionsCompleter extends AbstractInCodeBodyCompleter
         $this->classRepository = $classRepository;
     }
 
-    public function getEntries(Project $project, Context $context)
+    public function getEntries(Project $project, Context $context, $cursorLine = 0)
     {
         $entries = [];
         $postfix = trim($context->getData());

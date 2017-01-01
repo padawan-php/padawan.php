@@ -11,9 +11,12 @@ use Padawan\Domain\Project\FQCN;
 
 class VarCompleter extends AbstractInCodeBodyCompleter
 {
-    public function getEntries(Project $project, Context $context)
+    private $prefix;
+
+    public function getEntries(Project $project, Context $context, $cursorLine = 0)
     {
-        return array_map([$this, 'createEntry'], $context->getScope()->getVars());
+        $this->prefix = $context->getData();
+        return array_map([$this, 'createEntry'], $context->getScope()->getVars($cursorLine));
     }
 
     public function canHandle(Project $project, Context $context)
@@ -26,8 +29,8 @@ class VarCompleter extends AbstractInCodeBodyCompleter
         $type = $var->getType() instanceof FQCN ?
             $var->getType()->toString() : $var->getType();
         return new Entry(
-            $var->getName(),
-            $type
+            str_replace($this->prefix, '', $var->getName()),
+            $type, '', $var->getName()
         );
     }
 }
