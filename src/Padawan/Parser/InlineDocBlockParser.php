@@ -54,8 +54,24 @@ class InlineDocBlockParser {
                     }
                     $comment = $this->commentParser->parse($text);
                     foreach ($comment->getVars() as $variable) {
-                        /** @var $variable Variable */
-                        $variable->setStartLine($stmt->getAttribute('startLine') - 2);
+                        /**
+                         * @var $variable Variable
+                         * @var $stmt \PhpParser\NodeAbstract
+                         */
+                        $line = $stmt->getLine();
+                        if ($line < 0) {
+                            // comments at the end of scope, like
+                            // function test() {
+                            //     ....
+                            //     /** end of func */  <- processing this line
+                            //  }
+                            continue;
+                        }
+                        if ($line > 1) {
+                            // make up line difference between parsers
+                            $line -= 2;
+                        }
+                        $variable->setStartLine($line);
                         $result[] = $variable;
                     }
                 }
