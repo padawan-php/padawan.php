@@ -92,7 +92,9 @@ class NodeTypeResolver
         $chain = $this->createChain($node);
         $block = $chain;
         while ($block instanceof Chain) {
-            $this->logger->debug('looking for type of ' . $block->getName());
+            if (is_string($block->getName())) {
+                $this->logger->debug('looking for type of ' . $block->getName());
+            }
             $event = new TypeResolveEvent($block, $type);
             $this->dispatcher->dispatch(self::BLOCK_START, $event);
             if ($block->getType() === 'var') {
@@ -104,7 +106,10 @@ class NodeTypeResolver
                 }
                 $type = $this->getMethodType($block->getName(), $type, $index);
             } elseif ($block->getType() === 'property') {
-                if (!($type instanceof FQN)) {
+                if (
+                    !($type instanceof FQN)
+                    || !is_string($block->getName())
+                ) {
                     $types[] = null;
                     break;
                 }
