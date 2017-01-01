@@ -22,6 +22,7 @@ class Context
     private $token;
     private $scope;
     private $data;
+    private $cursorLine;
 
     public function __construct(Scope $scope, Token $token) {
         $this->scope = $scope;
@@ -64,6 +65,14 @@ class Context
     }
     public function addType($type) {
         $this->type = $this->type | $type;
+    }
+
+    public function setCursorLine($cursorLine) {
+        $this->cursorLine = $cursorLine;
+    }
+
+    public function getCursorLine() {
+        return (int) $this->cursorLine;
     }
 
     /**

@@ -64,6 +64,7 @@ class ContextResolver
     protected function createContext(Scope $scope, Token $token, $badLine, Index $index, $cursorLine)
     {
         $context = new Context($scope, $token);
+        $context->setCursorLine($cursorLine);
         $nodes = $this->parser->parse($this->prepareLine($badLine));
 
         if ($token->isObjectOperator() || $token->isStaticOperator() || $token->isMethodCall()) {

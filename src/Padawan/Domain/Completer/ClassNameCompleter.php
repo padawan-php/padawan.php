@@ -8,7 +8,7 @@ use Padawan\Domain\Completion\Entry;
 
 class ClassNameCompleter implements CompleterInterface
 {
-    public function getEntries(Project $project, Context $context, $cursorLine = 0) {
+    public function getEntries(Project $project, Context $context) {
         $entries = [];
         $postfix = trim("");
         foreach ($project->getIndex()->getClasses() as $fqcn => $class) {

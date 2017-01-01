@@ -20,13 +20,13 @@ class MethodParser {
         UseParser $useParser,
         CommentParser $commentParser,
         ParamParser $paramParser,
-        InlineTypeHintParser $inlineTypeHintParser
+        InlineDocBlockParser $inlineDocBlockParser
     )
     {
         $this->useParser            = $useParser;
         $this->commentParser        = $commentParser;
         $this->paramParser          = $paramParser;
-        $this->inlineTypeHintParser = $inlineTypeHintParser;
+        $this->inlineDocBlockParser = $inlineDocBlockParser;
     }
 
     /**
@@ -63,9 +63,9 @@ class MethodParser {
                 $method->addParam($this->parseMethodArgument($child));
             }
         }
-        $typeHints = $this->inlineTypeHintParser->parse($node);
-        foreach ($typeHints as $typehint) {
-            $method->addTypeHint($typehint);
+        $variables = $this->inlineDocBlockParser->parse($node);
+        foreach ($variables as $variable) {
+            $method->addVar($variable);
         }
         return $method;
     }
@@ -79,6 +79,6 @@ class MethodParser {
     private $commentParser;
     /** @var ParamParser */
     private $paramParser;
-    /** @var InlineTypeHintParser */
-    private $inlineTypeHintParser;
+    /** @var InlineDocBlockParser */
+    private $inlineDocBlockParser;
 }

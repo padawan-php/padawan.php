@@ -9,7 +9,7 @@ use Padawan\Domain\Completion\Entry;
 class NamespaceCompleter extends AbstractFileInfoCompleter
 {
 
-    public function getEntries(Project $project, Context $context, $cursorLine = 0) {
+    public function getEntries(Project $project, Context $context) {
         $entries = [];
         $postfix = trim($context->getData());
         foreach ($project->getIndex()->getFQCNs() AS $fqcn) {

@@ -8,7 +8,7 @@ use Padawan\Domain\Completion\Entry;
 
 class UseCompleter extends AbstractFileInfoCompleter
 {
-    public function getEntries(Project $project, Context $context, $cursorLine = 0)
+    public function getEntries(Project $project, Context $context)
     {
         $entries = [];
         $postfix = trim($context->getData());

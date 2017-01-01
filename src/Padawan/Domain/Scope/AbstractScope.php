@@ -16,34 +16,17 @@ abstract class AbstractScope implements Scope
     /** @var Scope */
     private $parent;
 
-    private $typeHints = [];
-
     /** @return Variable[] */
-    public function getVars($startLine = null)
+    public function getVars()
     {
-        if (!is_null($startLine) && !empty($this->typeHints)) {
-            return array_merge(
-                $this->variables,
-                $this->_filterTypeHints($startLine)
-            );
-        }
         return $this->variables;
     }
 
     /** @return Variable */
-    public function getVar($varName, $startLine = null)
+    public function getVar($varName)
     {
-        if (!is_null($startLine) && !empty($this->typeHints)) {
-            $candidates = array_merge(
-                $this->variables,
-                $this->_filterTypeHints($startLine)
-            );
-        } else {
-            $candidates = $this->variables;
-        }
-
-        if (array_key_exists($varName, $candidates)) {
-            return $candidates[$varName];
+        if (array_key_exists($varName, $this->variables)) {
+            return $this->variables[$varName];
         }
     }
 
@@ -85,32 +68,5 @@ abstract class AbstractScope implements Scope
     public function addConstant($constName)
     {
         $this->constants[$constName] = $constName;
-    }
-
-    public function addTypeHints($typeHints)
-    {
-        if (is_array($typeHints)) {
-            $this->typeHints = array_values($typeHints);
-        } else {
-            $this->typeHints[] = $typeHints;
-        }
-    }
-
-    private function _filterTypeHints($startLine)
-    {
-        if ($startLine < 2) {
-            // PHP file header
-            return [];
-        }
-        $result = array_filter($this->typeHints, function($th) use ($startLine) {
-            /** @var $th Variable */
-            return $th->getStartLine() <= $startLine;
-        });
-        $returnVal = [];
-        foreach ($result as $th) {
-            $returnVal[$th->getName()] = $th;
-        }
-
-        return $returnVal;
     }
 }

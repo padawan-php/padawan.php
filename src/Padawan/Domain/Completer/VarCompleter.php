@@ -13,10 +13,17 @@ class VarCompleter extends AbstractInCodeBodyCompleter
 {
     private $prefix;
 
-    public function getEntries(Project $project, Context $context, $cursorLine = 0)
+    public function getEntries(Project $project, Context $context)
     {
         $this->prefix = $context->getData();
-        return array_map([$this, 'createEntry'], $context->getScope()->getVars($cursorLine));
+        $cursorLine = $context->getCursorLine();
+        $variables = array_filter(
+            $context->getScope()->getVars(),
+            function(Variable $var) use ($cursorLine) {
+                return $var->getStartLine() < $cursorLine;
+            }
+        );
+        return array_map([$this, 'createEntry'], $variables);
     }
 
     public function canHandle(Project $project, Context $context)

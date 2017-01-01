@@ -18,7 +18,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
     {
         $this->logger = $logger;
     }
-    public function getEntries(Project $project, Context $context, $cursorLine = 0)
+    public function getEntries(Project $project, Context $context)
     {
         /** @var FQCN $fqcn */
         list($fqcn, $isThis) = $context->getData();

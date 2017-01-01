@@ -14,9 +14,9 @@ class FunctionData
     public $endLine = 0;
 
     /**
-     * @property Variable[] $inlineTypeHint
+     * @property Variable[] $variables
      */
-    public $inlineTypeHint = [];
+    public $variables = [];
 
     public function __construct($name)
     {
@@ -78,14 +78,14 @@ class FunctionData
         $this->return = $fqcn;
     }
 
-    public function addTypeHint(Variable $var)
+    public function addVar(Variable $var)
     {
-        if (array_key_exists($var->getName(), $this->inlineTypeHint)) {
-            $var = $this->inlineTypeHint[$var->getName()];
+        if (array_key_exists($var->getName(), $this->variables)) {
+            $var = $this->variables[$var->getName()];
             if (empty($var->getType())) {
                 $var->setType($var->getType());
             }
         }
-        $this->inlineTypeHint[$var->getName()] = $var;
+        $this->variables[$var->getName()] = $var;
     }
 }

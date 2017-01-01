@@ -10,7 +10,7 @@ use PhpParser\Node\Stmt\Foreach_;
 use PhpParser\Node\Expr\FuncCall;
 use Psr\Log\LoggerInterface;
 
-class InlineTypeHintParser {
+class InlineDocBlockParser {
 
     /**
      * Constructs
@@ -26,7 +26,7 @@ class InlineTypeHintParser {
     }
 
     /**
-     * Parses inline type hint
+     * Parses inline doc blocks
      *
      * @return Variable[]
      */
@@ -49,7 +49,7 @@ class InlineTypeHintParser {
                 $text = trim($comment->getText());
                 if (!empty($text)) {
                     if (strpos($text, '/**') !== 0) {
-                        // only parse inline type hint
+                        // only parse phpdoc
                         continue;
                     }
                     $comment = $this->commentParser->parse($text);

@@ -17,6 +17,8 @@ class FunctionScope extends AbstractChildScope
         foreach ($function->arguments as $param) {
             $this->addVar($param);
         }
-        $this->addTypeHints($function->inlineTypeHint);
+        foreach ($function->variables as $variable) {
+            $this->addVar($variable);
+        }
     }
 }
