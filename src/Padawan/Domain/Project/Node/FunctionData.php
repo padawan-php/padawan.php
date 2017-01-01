@@ -14,7 +14,7 @@ class FunctionData
     public $endLine = 0;
 
     /**
-     * @property TypeHint[] $inlineTypeHint
+     * @property Variable[] $inlineTypeHint
      */
     public $inlineTypeHint = [];
 
@@ -78,7 +78,7 @@ class FunctionData
         $this->return = $fqcn;
     }
 
-    public function addTypeHint(TypeHint $var)
+    public function addTypeHint(Variable $var)
     {
         if (array_key_exists($var->getName(), $this->inlineTypeHint)) {
             $var = $this->inlineTypeHint[$var->getName()];

@@ -2,7 +2,7 @@
 
 namespace Padawan\Parser;
 
-use Padawan\Domain\Project\Node\TypeHint;
+use Padawan\Domain\Project\Node\Variable;
 use Padawan\Domain\Project\Node\Comment;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Expr\Closure;
@@ -28,7 +28,7 @@ class InlineTypeHintParser {
     /**
      * Parses inline type hint
      *
-     * @return TypeHint[]
+     * @return Variable[]
      */
     public function parse($node)
     {
@@ -48,15 +48,15 @@ class InlineTypeHintParser {
             foreach ($comments as $comment) {
                 $text = trim($comment->getText());
                 if (!empty($text)) {
-                    if (strpos($text, '/** @var ') !== 0) {
+                    if (strpos($text, '/**') !== 0) {
                         // only parse inline type hint
                         continue;
                     }
                     $comment = $this->commentParser->parse($text);
                     foreach ($comment->getVars() as $variable) {
-                        $result[] = TypeHint::create(
-                            $variable, $stmt->getAttribute('startLine')
-                        );
+                        /** @var $variable Variable */
+                        $variable->setStartLine($stmt->getAttribute('startLine') - 2);
+                        $result[] = $variable;
                     }
                 }
             }

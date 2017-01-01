@@ -3,8 +3,9 @@
 namespace Padawan\Domain\Project\Node;
 
 class Variable {
-    public function __construct($name) {
+    public function __construct($name, $startLine = 0) {
         $this->name = $name;
+        $this->startLine = $startLine;
     }
     public function getName() {
         return $this->name;
@@ -21,6 +22,13 @@ class Variable {
     public function getType() {
         return $this->getFQCN();
     }
+    public function getStartLine() {
+        return $this->startLine;
+    }
+    public function setStartLine($startLine) {
+        $this->startLine = $startLine;
+    }
     private $name;
     private $fqcn;
+    private $startLine;
 }
