@@ -207,9 +207,7 @@ Feature: Static completion
         And I ask for completion
         Then I should get:
             | Name |
-            | $aaa |
-            | class |
-            | method1 |
+            | test |
 
     Scenario: Accessing only public static methods and properties for return
         Given there is a file with:
