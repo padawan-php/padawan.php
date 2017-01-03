@@ -69,7 +69,11 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
             } else {
                 $menu = $fqcnString;
             }
-            $complete = str_replace($prefix, '', $menu);
+            if (strpos($menu, $prefix) === 0) {
+                $complete = str_replace($prefix, '', $menu);
+            } else {
+                $complete = $menu;
+            }
             $entries[] = new Entry(
                 $complete, $scope, '', $menu
             );
@@ -106,7 +110,9 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
     private function getPostfix(Context $context)
     {
         if (is_string($context->getData())) {
-            return trim($context->getData());
+            $symbols = trim($context->getData());
+            $symbols = explode(' ', $symbols);
+            return trim($symbols[count($symbols) - 1]);
         }
         return "";
     }
