@@ -21,12 +21,7 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
         $scope = $context->getScope()->getNamespace();
 
         if ($postfix[0] === '\\') {
-            if (strlen($postfix) <= 2) {
-                // won't complete the root namespace
-                return [];
-            }
             $scope = null;
-            $postfix = substr($postfix, 1);
         }
         $candidates = array_merge(
             $this->formatEntries($candidates, $postfix),
@@ -53,9 +48,11 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
         if ($keyword[0] === '\\') {
             $keyword = substr($keyword, 1);
         }
-        $candidates = array_filter($candidates, function($name) use ($keyword) {
-            return strpos($name, $keyword) === 0;
-        });
+        if (!empty($keyword)) {
+            $candidates = array_filter($candidates, function($name) use ($keyword) {
+                return strpos($name, $keyword) === 0;
+            });
+        }
 
         if (is_null($scope)) {
             $search = '';
@@ -73,7 +70,6 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
                 $menu = $fqcnString;
             }
             $complete = str_replace($prefix, '', $menu);
-            $this->logger->debug('entry', ['name' => $complete, 'fqcn' => $fqcnString]);
             $entries[] = new Entry(
                 $complete, $scope, '', $menu
             );
@@ -86,7 +82,6 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
         $entries = [];
         foreach ($candidates as $name => $fqcnString) {
             $complete = str_replace($prefix, '', $name);
-            $this->logger->debug('entry', ['name' => $complete, 'fqcn' => $fqcnString]);
             $entries[] = new Entry(
                 $complete, '', '', $complete
             );
