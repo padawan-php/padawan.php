@@ -84,7 +84,7 @@ class CompleteEngine
     {
         $context = $this->contextResolver->getContext($badLine, $project->getIndex(), $scope, $cursorLine);
         $completers = $this->completerFactory->getCompleters($project, $context);
-        $this->logger->debug('Complers', $completers);
+        $this->logger->debug('Using completers', $completers);
         $entries = [];
         foreach($completers as $completer) {
             $entries = array_merge($entries, $completer->getEntries($project, $context, $cursorLine));
