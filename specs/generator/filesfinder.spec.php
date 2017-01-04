@@ -26,7 +26,6 @@ describe('FilesFinder', function() {
     describe('->findProjectFiles()', function() {
         it('returns all php files from project', function() {
             expect($this->files->findProjectFiles($this->project))->to->be->equal([
-                '/test/TestClass.php',
                 '/some/AnotherFile.php',
                 '/peridot.php'
             ]);
