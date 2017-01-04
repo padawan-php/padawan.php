@@ -35,6 +35,10 @@ class FilesFinder implements FilesFinderInterface
             if (!preg_match('/\.php$/', $file)) {
                 continue;
             }
+            if (preg_match('#/[tT]ests?/#', $file)) {
+                // exclude test files
+                continue;
+            }
             $projectFiles[] = $this->path->relative($project->getRootDir(), $file);
         }
         return $projectFiles;
