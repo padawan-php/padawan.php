@@ -45,9 +45,7 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
             $keyword = $scope->toString() . '\\' . $prefix;
         }
         $keyword = str_replace('\\\\', '\\', $keyword);
-        if ($keyword[0] === '\\') {
-            $keyword = substr($keyword, 1);
-        }
+        $keyword = ltrim($keyword, '\\');
         if (!empty($keyword)) {
             $candidates = array_filter($candidates, function($name) use ($keyword) {
                 return strpos($name, $keyword) === 0;
@@ -59,10 +57,10 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
         } else {
             $search = $scope->toString() . '\\';
             $search = str_replace('\\\\', '\\', $search);
-            if ($search[0] === '\\') {
-                $search = substr($search, 1);
-            }
+            $search = ltrim($search, '\\');
         }
+        // strip out first backslash
+        $prefix = ltrim($prefix, '\\');
         foreach ($candidates as $fqcnString) {
             if (!empty($search)) {
                 $menu = str_replace($search, '', $fqcnString);
@@ -87,7 +85,7 @@ class ClassNameCompleter extends AbstractInCodeBodyCompleter
         foreach ($candidates as $name => $fqcnString) {
             $complete = str_replace($prefix, '', $name);
             $entries[] = new Entry(
-                $complete, '', '', $complete
+                $complete, '', '', $name
             );
         }
 

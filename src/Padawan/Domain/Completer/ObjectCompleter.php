@@ -33,16 +33,35 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
     {
         /** @var FQCN $fqcn */
         list($fqcn, $isThis) = $context->getData();
-        $this->logger->debug('creating entries');
         if (!$fqcn instanceof FQCN) {
+            $this->logger->debug('Wrong data format!', ($context->getData()));
             return [];
         }
+        $this->logger->debug('creating entries for ' . $fqcn->toString());
         $index = $project->getIndex();
-        $this->logger->debug('Creating completion for ' . $fqcn->toString());
-        $class = $this->classRepository->findByName($project, $fqcn);
+        $fqcnString = $fqcn->toString();
+        $fqcnChunks = explode('|', $fqcnString);
+        while (count($fqcnChunks) > 0) {
+            $fqcnString = array_pop($fqcnChunks);
+            if ($fqcnString[strlen($fqcnString)-1] == ']'
+                && $fqcnString[strlen($fqcnString)-2] == '['
+            ) {
+                // is array
+                $fqcnString = substr($fqcnString, 0, -2);
+            }
+            $fqcn = new FQCN($fqcnString);
+            $this->logger->debug('trying to find info about ' . $fqcn->toString());
+            $class = $this->classRepository->findByName($project, $fqcn);
+            if (!empty($class)) {
+                $this->logger->debug('found class info');
+                break;
+            }
+        }
+
         if (empty($class)) {
             return [];
         }
+        $this->logger->debug('Creating completion for ' . $class->getName());
         $entries = [];
         $spec = new Specification($isThis ? 'private' : 'public');
         if ($class->methods !== null) {
