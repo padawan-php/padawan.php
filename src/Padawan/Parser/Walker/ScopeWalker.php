@@ -121,7 +121,10 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         $scope = $this->scope;
         $this->scope = new ClosureScope($scope);
         // add $this as a variable
-        $this->scope->addVar($scope->getVar('this'));
+        $thisVar = $scope->getVar('this');
+        if (!empty($thisVar)) {
+            $this->scope->addVar($thisVar);
+        }
         foreach ($node->params as $param) {
             $this->scope->addVar(
                 $this->paramParser->parse($param)
