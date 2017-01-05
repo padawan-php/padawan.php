@@ -95,7 +95,7 @@ class CompleteEngine
      * Should check for bad lines
      */
     protected function prepareContent($content, $line, $column) {
-        $lines = explode(PHP_EOL, $content);
+        $lines = explode("\n", $content);
         if ($line > count($lines)) {
             $badLine = "";
         } else {
