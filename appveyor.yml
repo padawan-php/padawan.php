@@ -26,7 +26,6 @@ install:
     - echo extension=php_intl.dll >> php.ini
     - cd c:\projects\padawan
     - IF NOT EXIST composer.phar (appveyor DownloadFile https://getcomposer.org/download/1.3.0/composer.phar)
-    - copy /Y .composer\* %APPDATA%\Composer\
     - php composer.phar install --no-progress --ansi
 
 test_script:
