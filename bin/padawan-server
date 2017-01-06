@@ -74,7 +74,7 @@ function runServer() {
         Co\await(function() use ($request, $response, $handler) {
             return $handler($request, $response);
         })->then(null, function($error) {
-            printf("Unhandled error: %s\n", $error->getMessage());
+            printf("Unhandled error: %s at %s:%s\n", $error->getMessage(), $error->getFile(), $error->getLine());
         });
     });
 
