@@ -118,11 +118,12 @@ class CompleteEngine
         if (empty($content)) {
             return;
         }
+        $filePath = ltrim($filePath, '/\\');
         if (!array_key_exists($filePath, $this->cachePool)) {
-            $this->cachePool[$filePath] = [0, [], []];
+            $this->cachePool[$filePath] = [0, null, null, ''];
         }
         if ($this->isValidCache($filePath, $content)) {
-            list(,$fileScope, $scope) = $this->cachePool[$filePath];
+            list(,$fileScope,) = $this->cachePool[$filePath];
         }
         $index = $project->getIndex();
         $file = $index->findFileByPath($filePath);
@@ -130,26 +131,47 @@ class CompleteEngine
         if (empty($file)) {
             $file = new File($filePath);
         }
-        if (empty($scope)) {
-            $parser = $this->parser;
-            $parser->addWalker($this->indexGeneratingWalker);
-            $parser->setIndex($project->getIndex());
-            $fileScope = $parser->parseContent($filePath, $content);
-            $this->generator->processFileScope(
-                $file,
-                $project->getIndex(),
-                $fileScope,
-                $hash
-            );
-            /** @var \Padawan\Domain\Project\Node\Uses */
-            $uses = $parser->getUses();
-            $this->scopeWalker->setLine($line);
-            $parser->addWalker($this->scopeWalker);
-            $parser->setIndex($project->getIndex());
-            $scope = $parser->parseContent($filePath, $content, $uses);
-            $contentHash = hash('sha1', $content);
-            $this->cachePool[$filePath] = [$contentHash, $fileScope, $scope];
+        $parser = $this->parser;
+        $parser->clearWalkers();
+        $parser->addWalker($this->indexGeneratingWalker);
+        $parser->setIndex($project->getIndex());
+        $fileScope = $parser->parseContent($filePath, $content);
+        if (empty($fileScope)) {
+            // use cache when parsing failed
+            $content = '';
+            $this->logger->info('Parsing failed, use cache instead');
+            if (!empty($this->cachePool[$filePath])) {
+                list(,$fileScope,$content) = $this->cachePool[$filePath];
+            }
         }
+        // Always parse file content to find current scope
+        // use last succesfully parsed file content if possible
+        if (empty($content)) {
+            $fullPath = realpath($project->getRootFolder() . DIRECTORY_SEPARATOR . $file->path());
+            $this->logger->info('Reparsing file ' . $fullPath);
+            $content = file_get_contents($fullPath);
+        } else {
+            $this->logger->info('Reparsing cached file content');
+        }
+        $parser->clearWalkers();
+        $parser->addWalker($this->indexGeneratingWalker);
+        $parser->setIndex($project->getIndex());
+        $fileScope = $parser->parseContent($filePath, $content);
+        $this->generator->processFileScope(
+            $file,
+            $project->getIndex(),
+            $fileScope,
+            $hash
+        );
+        /** @var $uses \Padawan\Domain\Project\Node\Uses */
+        $uses = $parser->getUses();
+        $this->scopeWalker->setLine($line);
+        $parser->clearWalkers();
+        $parser->addWalker($this->scopeWalker);
+        $parser->setIndex($project->getIndex());
+        $scope = $parser->parseContent($filePath, $content, $uses);
+        $contentHash = hash('sha1', $content);
+        $this->cachePool[$filePath] = [$contentHash, $fileScope, $content];
         if ($scope) {
             return $scope;
         }
