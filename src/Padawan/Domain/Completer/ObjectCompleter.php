@@ -42,7 +42,7 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
         $fqcnString = $fqcn->toString();
         $fqcnChunks = explode('|', $fqcnString);
         while (count($fqcnChunks) > 0) {
-            $fqcnString = array_pop($fqcnChunks);
+            $fqcnString = ltrim(array_pop($fqcnChunks), '\\');
             if ($fqcnString[strlen($fqcnString)-1] == ']'
                 && $fqcnString[strlen($fqcnString)-2] == '['
             ) {
