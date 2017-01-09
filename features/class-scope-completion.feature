@@ -118,3 +118,89 @@ Feature: Class Scope
             | aPublicProperty |
             | methodOfOtherClass |
             | otherMethodOfOtherClass |
+
+    Scenario: Gettings all methods and properties for $this with @return $this
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeClass
+        {
+            /**
+             * @return $this
+             */
+            public function method1()
+            {
+
+            }
+            public function method2()
+            {
+
+            }
+            private function somePrivateMethod()
+            {
+
+            }
+            private $someDep;
+            public $someApi;
+        }
+        """
+        When I type "$this->method1()->" on the 18 line
+        And I ask for completion
+        Then I should get:
+            | Name |
+            | method1 |
+            | method2 |
+            | someApi |
+
+    Scenario: Accessing only public methods and properties for return $this
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeOtherClass
+        {
+            public function methodOfOtherClass()
+            {
+
+            }
+            public function otherMethodOfOtherClass()
+            {
+
+            }
+            private function privateMethodOfOtherClass()
+            {
+
+
+            }
+            public $aPublicProperty;
+        }
+        class SomeClass
+        {
+            /**
+             * @return $this
+             */
+            public function method1()
+            {
+
+            }
+            public function method2()
+            {
+
+            }
+            private function somePrivateMethod()
+            {
+
+            }
+            private $someDep;
+            public $someApi;
+        }
+        """
+        When I type "$a = new SomeClass;" on the 15 line
+        And I type "$a->method1()->" on the 16 line
+        And I ask for completion
+        Then I should get:
+            | Name |
+            | method1 |
+            | method2 |
+            | someApi |

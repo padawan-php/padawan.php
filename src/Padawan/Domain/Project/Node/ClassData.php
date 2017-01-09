@@ -87,6 +87,11 @@ class ClassData
     }
     public function addMethod(MethodData $method)
     {
+        if ($method->return instanceof FQCN) {
+            if ($method->return->getLast() === 'this') {
+                $method->return = $this->fqcn;
+            }
+        }
         $this->methods->add($method);
     }
     public function getMethod($methodName)
