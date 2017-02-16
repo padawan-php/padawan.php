@@ -51,7 +51,7 @@ function runServer() {
         $contents = (yield loadRequestData($request));
         $requestDto = new \stdClass;
         $requestDto->command = substr($request->getPath(), 1);
-        $requestDto->params = $request->getQuery();
+        $requestDto->params = $request->getQueryParams();
         if (!empty($contents)) {
             $requestDto->params["data"] = $contents;
         }
@@ -67,7 +67,7 @@ function runServer() {
         printf("Response time: %s\n", microtime(1) - $start);
     };
 
-    $socket = new React\Socket\Server($loop);
+    $socket = new React\Socket\Server($port, $loop);
     $http = new React\Http\Server($socket);
 
     $http->on('request', function($request, $response) use ($handler) {
@@ -78,7 +78,7 @@ function runServer() {
         });
     });
 
-    $socket->listen($port);
+    // $socket->listen($port);
 
     echo "Started http server on 127.0.0.1:{$port}\n";
 
@@ -90,7 +90,7 @@ function loadRequestData(Request $request) {
     $body = new \stdClass;
     $body->data = "";
     $body->receivedLength = 0;
-    $body->dataLength = $headers['Content-Length'];
+    $body->dataLength = (int) @$headers['Content-Length'][0];
     $deferred = new Deferred();
     if ($body->dataLength > 0) {
         $request->on("data", function ($data) use ($body, $deferred) {
