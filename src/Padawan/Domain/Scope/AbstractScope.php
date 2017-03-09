@@ -32,6 +32,10 @@ abstract class AbstractScope implements Scope
 
     public function addVar(Variable $var)
     {
+        if (array_key_exists($var->getName(), $this->variables)
+            && empty($var->getFQCN())) {
+            return;
+        }
         $this->variables[$var->getName()] = $var;
     }
 

@@ -12,6 +12,7 @@ use Padawan\Domain\Completion\Context;
 use Padawan\Domain\Completion\Entry;
 use Padawan\Domain\Project\Collection\Specification;
 use Psr\Log\LoggerInterface;
+use PhpParser\Node\Expr\Variable;
 
 class ObjectCompleter extends AbstractInCodeBodyCompleter
 {
@@ -34,8 +35,29 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
         /** @var FQCN $fqcn */
         list($fqcn, $isThis) = $context->getData();
         $this->logger->debug('creating entries');
+        $this->logger->debug('FQCN is', [$fqcn]);
         if (!$fqcn instanceof FQCN) {
-            return [];
+            // special cases, try to find variable based on $workingNode
+            $workingNode = @$context->getData()[3];
+            if (empty($workingNode) || !($workingNode instanceof Variable)) {
+                $this->logger->debug('Wrong data format!', ($context->getData()));
+                return [];
+            }
+            // $workingNode is Variable
+            /** @var $workingNode \PhpParser\Node\Expr\Variable */
+            $name = $workingNode->getAttribute('name', '');
+            $this->logger->debug('looking for type of variable: ' . $name);
+            $var = $context->getScope()->getVar($name);
+            if (empty($var)) {
+                $this->logger->debug('no variable found');
+                return [];
+            }
+            $fqcn = $var->getFQCN();
+            if (empty($fqcn)) {
+                $this->logger->debug('no type found');
+                return [];
+            }
+            $this->logger->debug('found fqcn', [$fqcn]);
         }
         $index = $project->getIndex();
         $this->logger->debug('Creating completion for ' . $fqcn->toString());
