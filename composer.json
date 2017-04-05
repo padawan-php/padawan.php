@@ -21,7 +21,7 @@
         "doctrine/cache": "^1.4",
         "symfony/console": "~2.7 || ~3.0",
         "php-di/php-di": "^5.1",
-        "react/http": "dev-master",
+        "react/http": "^0.4.4",
         "react/filesystem": "dev-master",
         "mkusher/react-co": "dev-master"
     },
