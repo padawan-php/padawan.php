@@ -14,7 +14,7 @@
     "license": "MIT",
     "require": {
         "phine/path": "~1.0",
-        "nikic/php-parser": "2.1",
+        "nikic/php-parser": "~3.0",
         "monolog/monolog": "~1.13",
         "phpdocumentor/reflection-docblock": "~2.0",
         "symfony/event-dispatcher": "~2.6 || ~3.0",
