@@ -16,7 +16,7 @@ use Padawan\Domain\Scope\FunctionScope;
 use Padawan\Domain\Scope\MethodScope;
 use Padawan\Domain\Scope\ClassScope;
 use Padawan\Domain\Scope\ClosureScope;
-use PhpParser\NodeTraverserInterface;
+use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Variable as NodeVar;
@@ -47,7 +47,7 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
     {
         list($startLine, $endLine) = $this->getNodeLines($node);
         if (!$this->isIn($node, $this->line)) {
-            return NodeTraverserInterface::DONT_TRAVERSE_CHILDREN;
+            return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }
         if ($node instanceof Class_) {
             $this->createScopeFromClass($node);

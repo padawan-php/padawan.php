@@ -7,6 +7,7 @@ use Padawan\Domain\Project\Node\Uses;
 use Padawan\Framework\Utils\PathResolver;
 use PhpParser\ParserFactory;
 use PhpParser\NodeTraverser as Traverser;
+use PhpParser\ErrorHandler\Collecting;
 use Psr\Log\LoggerInterface;
 use Padawan\Parser\NamespaceParser;
 
@@ -35,12 +36,11 @@ class Parser
         }
         $this->setUses($uses);
         $this->setFileInfo($uses, $file);
-        try {
-            $parser = $this->parserFactory->create(ParserFactory::PREFER_PHP5);
-            $ast = $parser->parse($content);
-        } catch (\Exception $e) {
+        $parser = $this->parserFactory->create(ParserFactory::PREFER_PHP7, null);
+        $collector = new Collecting;
+        $ast = $parser->parse($content, $collector);
+        if (empty($ast)) {
             $this->logger->error(sprintf("Parsing failed in file %s\n", $file));
-            $this->logger->error($e);
             $this->clearWalkers();
             return;
         }
