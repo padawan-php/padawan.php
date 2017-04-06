@@ -47,3 +47,42 @@ Feature: Names Completion
             | Menu |
             | array_pop_custom |
             | array_pop |
+
+    Scenario: Getting core classes with prefix
+        Given there is a file with:
+        """
+        <?php
+
+        class DateTimeImmutableMine {
+        }
+        """
+        When I type "DateTimeImm" on the 5 line
+        And I ask for completion
+        Then I should get:
+            | Menu                  |
+            | DateTimeImmutableMine |
+            | DateTimeImmutable     |
+
+    Scenario: FQCN completion
+        Given there is a file with:
+        """
+        <?php
+        namespace Padawan\Feature;
+
+        class One {
+        }
+
+        class Two{
+            public function test() {
+
+
+            }
+        }
+        """
+        When I type "$a = \Padawan\" on the 9 line
+        And I ask for completion
+        Then I should get:
+            | Menu                |
+            | Padawan\Feature\One |
+            | Padawan\Feature\Two |
+
