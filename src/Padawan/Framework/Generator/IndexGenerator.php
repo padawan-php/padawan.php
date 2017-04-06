@@ -61,10 +61,11 @@ class IndexGenerator implements IndexGeneratorInterface
         $globalTime = 0;
         $done = 0;
         $files = $this->filesFinder->findProjectFiles($project);
+        $projectRoot = $project->getRootDir();
         $all = count($files);
         foreach ($files as $file) {
             $start = microtime(1);
-            $this->processFile($index, $file, $rewrite);
+            $this->processFile($index, $file, $rewrite, $projectRoot);
             $end = microtime(1) - $start;
 
             $this->getLogger()->debug("Indexing: [$end]s");
@@ -81,7 +82,8 @@ class IndexGenerator implements IndexGeneratorInterface
     public function processFile(
         Index $index,
         $filePath,
-        $rewrite = true
+        $rewrite = true,
+        $projectRoot = null
     ) {
         $this->getLogger()
             ->info("processing $filePath");
@@ -89,7 +91,7 @@ class IndexGenerator implements IndexGeneratorInterface
         if (empty($file)) {
             $file = new File($filePath);
         }
-        $filePath = $this->path->getAbsolutePath($file->path());
+        $filePath = $this->path->getAbsolutePath($file->path(), $projectRoot);
         $content = $this->path->read($filePath);
         $hash = sha1($content);
         if ($rewrite || $file->isChanged($hash)) {
