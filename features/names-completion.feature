@@ -47,3 +47,19 @@ Feature: Names Completion
             | Menu |
             | array_pop_custom |
             | array_pop |
+
+    Scenario: Getting core classes with prefix
+        Given there is a file with:
+        """
+        <?php
+
+        class MyDateTimeImmutable {
+        }
+        """
+        When I type "DateTimeImm" on the 5 line
+        And I ask for completion
+        Then I should get:
+            | Menu                  |
+            | MyDateTimeImmutable   |
+            | DateTimeImmutable     |
+

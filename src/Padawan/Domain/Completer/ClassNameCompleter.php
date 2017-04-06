@@ -6,11 +6,11 @@ use Padawan\Domain\Project;
 use Padawan\Domain\Completion\Context;
 use Padawan\Domain\Completion\Entry;
 
-class ClassNameCompleter implements CompleterInterface
+class ClassNameCompleter extends AbstractInCodeBodyCompleter
 {
     public function getEntries(Project $project, Context $context) {
         $entries = [];
-        $postfix = trim("");
+        $postfix = $this->getPostfix($context);
         foreach ($project->getIndex()->getClasses() as $fqcn => $class) {
             if (!empty($postfix) && strpos($fqcn, $postfix) === false) {
                 continue;
@@ -27,6 +27,20 @@ class ClassNameCompleter implements CompleterInterface
 
     public function canHandle(Project $project, Context $context)
     {
-        return $context->isClassName();
+        $postfix = $this->getPostfix($context);
+        return $context->isClassName()
+            || (
+                parent::canHandle($project, $context)
+                && ($context->isString() || $context->isEmpty())
+                && strlen($postfix) > 0
+            );
+    }
+
+    private function getPostfix(Context $context)
+    {
+        if (is_string($context->getData())) {
+            return trim($context->getData());
+        }
+        return "";
     }
 }
