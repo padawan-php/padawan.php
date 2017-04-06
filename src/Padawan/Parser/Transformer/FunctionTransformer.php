@@ -9,17 +9,20 @@ use Padawan\Domain\Project\Node\MethodParam;
 use Padawan\Parser\CommentParser;
 use Padawan\Parser\ParamParser;
 use Padawan\Parser\UseParser;
+use Padawan\Parser\InlineDocBlockParser;
 
 class FunctionTransformer
 {
     public function __construct(
         CommentParser $commentParser,
         ParamParser $paramParser,
-        UseParser $useParser
+        UseParser $useParser,
+        InlineDocBlockParser $inlineDocBlockParser
     ) {
-        $this->commentParser = $commentParser;
-        $this->paramParser = $paramParser;
-        $this->useParser = $useParser;
+        $this->commentParser        = $commentParser;
+        $this->paramParser          = $paramParser;
+        $this->useParser            = $useParser;
+        $this->inlineDocBlockParser = $inlineDocBlockParser;
     }
     public function tranform(Function_ $node)
     {
@@ -31,6 +34,10 @@ class FunctionTransformer
             if ($child instanceof Param) {
                 $function->addArgument($this->tranformArgument($child));
             }
+        }
+        $variables = $this->inlineDocBlockParser->parse($node);
+        foreach ($variables as $variable) {
+            $function->addVar($variable);
         }
         return $function;
     }
@@ -62,4 +69,5 @@ class FunctionTransformer
     private $paramParser;
     private $commentParser;
     private $useParser;
+    private $inlineDocBlockParser;
 }

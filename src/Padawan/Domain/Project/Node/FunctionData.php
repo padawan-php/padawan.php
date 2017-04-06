@@ -12,6 +12,12 @@ class FunctionData
     public $doc = "";
     public $startLine = 0;
     public $endLine = 0;
+
+    /**
+     * @property Variable[] $variables
+     */
+    public $variables = [];
+
     public function __construct($name)
     {
         $this->name = $name;
@@ -70,5 +76,16 @@ class FunctionData
     public function setReturn(FQCN $fqcn = null)
     {
         $this->return = $fqcn;
+    }
+
+    public function addVar(Variable $var)
+    {
+        if (array_key_exists($var->getName(), $this->variables)) {
+            $var = $this->variables[$var->getName()];
+            if (empty($var->getType())) {
+                $var->setType($var->getType());
+            }
+        }
+        $this->variables[$var->getName()] = $var;
     }
 }

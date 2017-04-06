@@ -26,6 +26,7 @@ class Token
             $this->addType(self::T_CONTINUE_PROCESS);
             break;
         case T_VARIABLE:
+            $this->symbol = $symbol;
         case T_DOUBLE_COLON:
             if ($this->isWhitespace()) {
                 $this->resetType(self::T_UNKNOWN);

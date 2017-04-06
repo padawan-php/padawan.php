@@ -28,7 +28,7 @@ class ContextResolver
         $this->logger = $logger;
         $this->useParser = $useParser;
     }
-    public function getContext($badLine, Index $index, Scope $scope = null)
+    public function getContext($badLine, Index $index, Scope $scope = null, $cursorLine = null)
     {
         if (empty($scope)) {
             $scope = new FileScope(new FQN);
@@ -40,7 +40,7 @@ class ContextResolver
             $token->getSymbol(),
             $token->getType()
         ));
-        return $this->createContext($scope, $token, $badLine, $index);
+        return $this->createContext($scope, $token, $badLine, $index, $cursorLine);
     }
 
     /**
@@ -61,9 +61,10 @@ class ContextResolver
         return $token;
     }
 
-    protected function createContext(Scope $scope, Token $token, $badLine, Index $index)
+    protected function createContext(Scope $scope, Token $token, $badLine, Index $index, $cursorLine)
     {
         $context = new Context($scope, $token);
+        $context->setCursorLine($cursorLine);
         $nodes = $this->parser->parse($this->prepareLine($badLine));
 
         if ($token->isObjectOperator() || $token->isStaticOperator() || $token->isMethodCall()) {
@@ -84,13 +85,19 @@ class ContextResolver
                     $isThis = true;
                 }
             }
-            $types = $this->typeResolver->getChainType($workingNode, $index, $scope);
+            $types = $this->typeResolver->getChainType($workingNode, $index, $scope, $cursorLine);
             $context->setData([
                 array_pop($types),
                 $isThis,
                 $types,
                 $workingNode
             ]);
+        } elseif ($token->isVar()) {
+            $symbol = $token->getSymbol();
+            if (!empty($symbol) && $symbol[0] == '$') {
+                $symbol = substr($symbol, 1);
+            }
+            $context->setData($symbol);
         }
         if ($token->isUseOperator()
             || $token->isNamespaceOperator()

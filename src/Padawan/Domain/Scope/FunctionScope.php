@@ -17,5 +17,8 @@ class FunctionScope extends AbstractChildScope
         foreach ($function->arguments as $param) {
             $this->addVar($param);
         }
+        foreach ($function->variables as $variable) {
+            $this->addVar($variable);
+        }
     }
 }

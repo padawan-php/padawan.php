@@ -82,9 +82,10 @@ class NodeTypeResolver
      * @param \PhpParser\Node $node
      * @param Index $index
      * @param Scope $scope
+     * @param int   $cursorLine
      * @return FQCN[]
      */
-    public function getChainType($node, Index $index, Scope $scope)
+    public function getChainType($node, Index $index, Scope $scope, $cursorLine = null)
     {
         /** @var FQCN */
         $type = null;
@@ -98,7 +99,7 @@ class NodeTypeResolver
             $event = new TypeResolveEvent($block, $type);
             $this->dispatcher->dispatch(self::BLOCK_START, $event);
             if ($block->getType() === 'var') {
-                $type = $this->getVarType($block->getName(), $scope);
+                $type = $this->getVarType($block->getName(), $scope, $cursorLine);
             } elseif ($block->getType() === 'method') {
                 if (!($type instanceof FQN)) {
                     $types[] = null;
@@ -189,9 +190,9 @@ class NodeTypeResolver
     /**
      * @param string $name
      */
-    protected function getVarType($name, Scope $scope)
+    protected function getVarType($name, Scope $scope, $cursorLine)
     {
-        $var = $scope->getVar($name);
+        $var = $scope->getVar($name, $cursorLine);
         if (empty($var)) {
             return null;
         }
