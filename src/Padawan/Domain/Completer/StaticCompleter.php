@@ -27,7 +27,12 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
         /** @var FQCN $fqcn */
         /** @var \PhpParser\Node\Name $workingNode */
         list($fqcn, $isThis, $_, $workingNode) = $context->getData();
-        $workingNode = $workingNode->getLast();
+        if (in_array('parts', $workingNode->getSubNodeNames())) {
+            // $workingNode has proper subnodes
+            $workingNode = $workingNode->getLast();
+        } else {
+            $workingNode = '';
+        }
 
         if ($workingNode == 'parent') {
             // parent instance method completion
