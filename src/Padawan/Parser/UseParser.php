@@ -2,6 +2,7 @@
 
 namespace Padawan\Parser;
 
+use Padawan\Domain\Project\FQN;
 use Padawan\Domain\Project\FQCN;
 use Padawan\Domain\Project\Node\Uses;
 use PhpParser\Node\Name;
@@ -44,7 +45,10 @@ class UseParser {
         }
         $fqcn = $this->uses->find($node->getFirst());
         if($fqcn){
-            return $fqcn;
+            if ($node->isUnqualified()) {
+                return $fqcn;
+            }
+            return $fqcn->join(new FQN($node->slice(1)->toString()));
         }
         return $this->createFQCN($node->toString());
     }
