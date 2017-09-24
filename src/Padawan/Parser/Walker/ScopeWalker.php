@@ -119,7 +119,12 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
     public function createScopeFromClosure(Closure $node)
     {
         $scope = $this->scope;
-        $this->scope = new ClosureScope($scope);
+        $classData = null;
+        if (!$node->static && $scope instanceof MethodScope) {
+            $index = $this->getIndex();
+            $classData = $index->findClassByFQCN($scope->getClass()->fqcn);
+        }
+        $this->scope = new ClosureScope($scope, $classData);
         foreach ($node->params as $param) {
             $this->scope->addVar(
                 $this->paramParser->parse($param)
