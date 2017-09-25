@@ -22,6 +22,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\Assign;
 use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\Stmt\Foreach_;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
@@ -58,6 +59,7 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             $this->createScopeFromClosure($node);
         } elseif ($node instanceof Assign
             || $node instanceof Catch_
+            || $node instanceof Foreach_
             || $node instanceof NodeVar
         ) {
             $this->addVarToScope($node);
@@ -170,6 +172,8 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             $var = new Variable($node->var->name);
         } elseif ($node instanceof Catch_) {
             $var = new Variable($node->var);
+        } elseif ($node instanceof Foreach_) {
+            $var = new Variable($node->valueVar->name);
         } elseif ($node instanceof NodeVar) {
             $var = new Variable($node->name);
         }
@@ -190,6 +194,13 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         $current = $this->scope->getVar($var->getName());
         if (!isset($type) && $current && $current->getType()) {
             return;
+        }
+
+        if ($node instanceof Foreach_) {
+            if (!isset($type) || !$type->isArray()) {
+                return;
+            }
+            $type = new FQCN($type->className, $type->namespace, false);
         }
 
         if (isset($type)) {
