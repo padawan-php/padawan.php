@@ -188,11 +188,14 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
 
         $current = $this->scope->getVar($var->getName());
-        if (!isset($type) || ($current && $current->getType())) {
+        if (!isset($type) && $current && $current->getType()) {
             return;
         }
 
-        $var->setType($type);
+        if (isset($type)) {
+            $var->setType($type);
+        }
+
         $this->scope->addVar($var);
     }
     public function parseUse(Use_ $node, $fqcn, $file)
