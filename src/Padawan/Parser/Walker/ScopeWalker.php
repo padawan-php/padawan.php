@@ -179,7 +179,7 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             $type = $this->useParser->getFQCN($node->types[0]);
         } elseif ($comment->getVar($var->getName())) {
             $type = $comment->getVar($var->getName())->getType();
-        } else {
+        } elseif (isset($node->expr)) {
             $type = $this->typeResolver->getType(
                 $node->expr,
                 $this->getIndex(),
@@ -188,7 +188,7 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
 
         $current = $this->scope->getVar($var->getName());
-        if (!$type && $current && $current->getType()) {
+        if (!isset($type) || ($current && $current->getType())) {
             return;
         }
 
