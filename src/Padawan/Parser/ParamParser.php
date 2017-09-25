@@ -4,20 +4,47 @@ namespace Padawan\Parser;
 
 use PhpParser\Node\Param;
 use PhpParser\Node\Name;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\NullableType;
+use Padawan\Domain\Project\FQCN;
 use Padawan\Domain\Project\Node\MethodParam;
 
 class ParamParser {
     public function __construct(UseParser $useParser) {
         $this->useParser = $useParser;
     }
-    public function parse(Param $node) {
+    /**
+     * @param  Param       $node
+     * @return MethodParam
+     */
+    public function parse($node) {
         $param = new MethodParam($node->name);
-        if ($node->type instanceof Name)
-            $param->setFQCN($this->useParser->getFQCN($node->type));
-        else {
-            $param->setType($node->type);
-        }
+        $param->setFQCN($this->createFQCN($node->type, $node->variadic));
         return $param;
+    }
+    /**
+     * @param  null|Name|NullableType|Identifier|string $type
+     * @param  bool                                     $isArray
+     * @return null|FQCN
+     */
+    protected function createFQCN($type, $isArray) {
+        do {
+            if ($type instanceof NullableType) {
+                $type = $type->type;
+            }
+            if ($type instanceof Identifier) {
+                $type = $type->name;
+            }
+            if (!$type) {
+                return null;
+            }
+            if (is_string($type)) {
+                return new FQCN($type, '', $isArray);
+            }
+        } while (!$type instanceof Name);
+
+        $fqcn = $this->useParser->getFQCN($type);
+        return new FQCN($fqcn->className, $fqcn->namespace, $isArray);
     }
 
     private $useParser;
