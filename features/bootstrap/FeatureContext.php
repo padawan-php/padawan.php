@@ -132,7 +132,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
             }
             return $hash;
         }, $this->response["completion"]);
-        expect($table->getColumnsHash())->to->loosely->equal($result);
+        expect($result)->to->loosely->equal($table->getColumnsHash());
     }
 
     /** @var App */
