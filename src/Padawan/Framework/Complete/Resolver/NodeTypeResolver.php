@@ -16,6 +16,7 @@ use PhpParser\Node\Expr\StaticPropertyFetch;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\Closure;
 use PhpParser\Node\Expr\New_;
 use PhpParser\Node\Expr\BooleanNot;
 use PhpParser\Node\Expr\Isset_;
@@ -74,6 +75,9 @@ class NodeTypeResolver
         }
         if ($node instanceof New_ && $node->class instanceof Name) {
             return $this->useParser->getFQCN($node->class);
+        }
+        if ($node instanceof Closure) {
+            return new FQCN('Closure');
         }
         if ($node instanceof Cast\Bool_
             || $node instanceof BooleanNot
