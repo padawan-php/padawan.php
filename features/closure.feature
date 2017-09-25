@@ -37,7 +37,7 @@ Feature: Completion in closure
             | Name      | Signature |
             | test1     | Test1     |
             | test2     | Test2     |
-            | test3     |           |
+            | test3     | array     |
 
     Scenario: Getting closure uses
         Given there is a file with:
@@ -59,4 +59,4 @@ Feature: Completion in closure
             | arg2      | Argument2 |
             | test1     | Test1     |
             | test2     | Test2     |
-            | test3     |           |
+            | test3     | array     |
