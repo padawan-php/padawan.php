@@ -59,7 +59,7 @@ class FunctionData
     public function getReturnStr()
     {
         if ($this->return instanceof FQCN) {
-            return $this->return->getClassName();
+            return $this->return->getClassName() . ($this->return->isArray() ? '[]' : '');
         }
         return "mixed";
     }

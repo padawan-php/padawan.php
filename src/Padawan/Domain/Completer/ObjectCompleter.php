@@ -85,7 +85,11 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
 
     protected function createEntryForProperty(ClassProperty $prop)
     {
-        $type = $prop->type instanceof FQCN ? $prop->type->getClassName() : 'mixed';
+        if ($prop->type instanceof FQCN) {
+            $type = $prop->type->getClassName() . ($prop->type->isArray() ? '[]' : '');
+        } else {
+            $type = 'mixed';
+        }
         return new Entry(
             $prop->name,
             $type
