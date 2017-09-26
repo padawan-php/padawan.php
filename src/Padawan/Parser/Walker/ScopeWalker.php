@@ -29,6 +29,7 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Unset_;
 use PhpParser\Node\Expr\Closure;
 
 class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
@@ -66,6 +67,9 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             || $node instanceof NodeVar
         ) {
             $this->addVarToScope($node);
+        } elseif ($node instanceof Unset_) {
+            $this->removeVarFromScope($node);
+            return NodeTraverser::DONT_TRAVERSE_CHILDREN;
         }
     }
     public function leaveNode(Node $node)
@@ -249,6 +253,17 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
                 $var = new Variable($item->value->name);
                 $var->setType(new FQCN($type->className, $type->namespace, $type->getDimension() - 1));
                 $this->scope->addVar($var);
+            }
+        }
+    }
+    public function removeVarFromScope(Unset_ $node)
+    {
+        foreach ($node->vars as $expr) {
+            if ($expr instanceof NodeVar) {
+                $var = $this->scope->getVar($expr->name);
+                if ($var) {
+                    $this->scope->removeVar($var);
+                }
             }
         }
     }

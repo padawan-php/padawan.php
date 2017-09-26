@@ -35,6 +35,14 @@ abstract class AbstractScope implements Scope
         $this->variables[$var->getName()] = $var;
     }
 
+    public function removeVar(Variable $var)
+    {
+        $name = array_search($var, $this->variables);
+        if ($name !== false) {
+            unset($this->variables[$name]);
+        }
+    }
+
     public function getFunctions()
     {
         return $this->functions;
