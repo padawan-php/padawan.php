@@ -19,15 +19,15 @@ class ParamParser {
      */
     public function parse($node) {
         $param = new MethodParam($node->name);
-        $param->setFQCN($this->createFQCN($node->type, $node->variadic));
+        $param->setFQCN($this->createFQCN($node->type, (int)$node->variadic));
         return $param;
     }
     /**
      * @param  null|Name|NullableType|Identifier|string $type
-     * @param  bool                                     $isArray
+     * @param  int                                      $dimension
      * @return null|FQCN
      */
-    protected function createFQCN($type, $isArray) {
+    protected function createFQCN($type, $dimension) {
         do {
             if ($type instanceof NullableType) {
                 $type = $type->type;
@@ -39,12 +39,12 @@ class ParamParser {
                 return null;
             }
             if (is_string($type)) {
-                return new FQCN($type, '', $isArray);
+                return new FQCN($type, '', $dimension);
             }
         } while (!$type instanceof Name);
 
         $fqcn = $this->useParser->getFQCN($type);
-        return new FQCN($fqcn->className, $fqcn->namespace, $isArray);
+        return new FQCN($fqcn->className, $fqcn->namespace, $dimension);
     }
 
     private $useParser;

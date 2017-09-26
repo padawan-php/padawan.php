@@ -171,18 +171,23 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
      */
     public function addVarToScope($node)
     {
-        if ($node instanceof Assign) {
-            if ($node->var instanceof List_ || $node->var instanceof Array_) {
-                return $this->addListToScope($node->var, $node);
+        if ($node instanceof Assign || $node instanceof Foreach_) {
+            if (isset($node->var)) {
+                $nodeVar = $node->var;
+            } elseif (isset($node->valueVar)) {
+                $nodeVar = $node->valueVar;
             }
-            if (!$node->var instanceof NodeVar) {
+
+            if ($nodeVar instanceof List_ || $nodeVar instanceof Array_) {
+                return $this->addListToScope($nodeVar, $node);
+            }
+            if (!isset($nodeVar->name)) {
                 return;
             }
-            $var = new Variable($node->var->name);
+
+            $var = new Variable($nodeVar->name);
         } elseif ($node instanceof Catch_) {
             $var = new Variable($node->var);
-        } elseif ($node instanceof Foreach_) {
-            $var = new Variable($node->valueVar->name);
         } elseif ($node instanceof NodeVar) {
             $var = new Variable($node->name);
         }
@@ -206,10 +211,10 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
 
         if ($node instanceof Foreach_) {
-            if (!isset($type) || !$type->isArray()) {
+            if (!isset($type) || !$type instanceof FQCN || !$type->isArray()) {
                 return;
             }
-            $type = new FQCN($type->className, $type->namespace, false);
+            $type = new FQCN($type->className, $type->namespace, $type->getDimension() - 1);
         }
 
         if (isset($type)) {
@@ -235,14 +240,14 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             );
         }
 
-        if (!isset($type) || !$type->isArray()) {
+        if (!isset($type) || !$type instanceof FQCN || !$type->isArray()) {
             return;
         }
 
         foreach ($list->items as $item) {
             if ($item->value instanceof NodeVar) {
                 $var = new Variable($item->value->name);
-                $var->setType(new FQCN($type->className, $type->namespace, false));
+                $var->setType(new FQCN($type->className, $type->namespace, $type->getDimension() - 1));
                 $this->scope->addVar($var);
             }
         }

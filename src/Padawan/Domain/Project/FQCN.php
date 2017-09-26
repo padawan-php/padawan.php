@@ -12,9 +12,9 @@ class FQCN extends FQN {
             return $this->getNamespace();
         }
     }
-    public function __construct($className, $namespace = "", $isArray = false) {
+    public function __construct($className, $namespace = "", $dimension = 0) {
         parent::__construct($namespace);
-        $this->_isArray = $isArray;
+        $this->_dimension = (int)$dimension;
         $this->_isScalar = false;
         if (count($this->parts) === 0) {
             switch ($className) {
@@ -57,20 +57,20 @@ class FQCN extends FQN {
         array_pop($parts);
         return implode("\\", $parts);
     }
+    public function getDimension() {
+        return $this->_dimension ?: (int)$this->_isArray;
+    }
     public function toString() {
-        $str = parent::toString();
-        if ($this->isArray()) {
-            $str .= '[]';
-        }
-        return $str;
+        return parent::toString() . str_repeat('[]', $this->_dimension);
     }
     public function isArray() {
-        return $this->_isArray;
+        return $this->_dimension > 0 || $this->_isArray;
     }
     public function isScalar() {
         return $this->_isScalar;
     }
 
+    private $_dimension;
     private $_isArray;
     private $_isScalar;
 }

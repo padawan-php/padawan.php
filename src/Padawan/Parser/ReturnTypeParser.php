@@ -11,6 +11,6 @@ class ReturnTypeParser extends ParamParser
      */
     public function parse($node)
     {
-        return $this->createFQCN($node->returnType, false);
+        return $this->createFQCN($node->returnType, 0);
     }
 }

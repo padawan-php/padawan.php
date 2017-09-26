@@ -86,7 +86,7 @@ class ObjectCompleter extends AbstractInCodeBodyCompleter
     protected function createEntryForProperty(ClassProperty $prop)
     {
         if ($prop->type instanceof FQCN) {
-            $type = $prop->type->getClassName() . ($prop->type->isArray() ? '[]' : '');
+            $type = $prop->type->getClassName() . str_repeat('[]', $prop->type->getDimension());
         } else {
             $type = 'mixed';
         }

@@ -59,17 +59,17 @@ class UseParser {
         }
         $parts = explode('\\', $fqcn);
         $name = array_pop($parts);
-        $regex = '/(\w+)(\\[\\])?/';
+        $regex = '/(\w+)((?:\[\])*)/';
         preg_match($regex, $name, $matches);
         if(count($matches) === 0){
             throw new \Exception("Could not parse FQCN for empty class name: " . $fqcn);
         }
         $name = $matches[1];
-        $isArray = count($matches) === 3 && $matches[2] = '[]';
+        $dimension = isset($matches[2]) ? strlen($matches[2]) / 2 : 0;
         return new FQCN(
             $name,
             $parts,
-            $isArray
+            $dimension
         );
     }
     public function getUses() {
