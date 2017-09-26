@@ -62,7 +62,7 @@ class MethodParser {
                 $method->addParam($this->parseMethodArgument($child));
             }
         }
-        if (isset($node->returnType)) {
+        if (!isset($method->return) && isset($node->returnType)) {
             $method->return = $this->parseMethodReturnType($node);
         }
         return $method;
