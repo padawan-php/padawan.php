@@ -29,6 +29,7 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\StaticVar;
 use PhpParser\Node\Stmt\Unset_;
 use PhpParser\Node\Expr\Closure;
 
@@ -62,6 +63,7 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         } elseif ($node instanceof Closure) {
             $this->createScopeFromClosure($node);
         } elseif ($node instanceof Assign
+            || $node instanceof StaticVar
             || $node instanceof Catch_
             || $node instanceof Foreach_
             || $node instanceof NodeVar
@@ -171,15 +173,20 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         $this->scope = new MethodScope($classScope, $method);
     }
     /**
-     * @param Assign|Catch_|Foreach_|NodeVar $node
+     * @param Assign|Catch_|Foreach_|StaticVar|NodeVar $node
      */
     public function addVarToScope($node)
     {
-        if ($node instanceof Assign || $node instanceof Foreach_) {
+        if ($node instanceof Assign
+            || $node instanceof StaticVar
+            || $node instanceof Foreach_
+        ) {
             if (isset($node->var)) {
                 $nodeVar = $node->var;
             } elseif (isset($node->valueVar)) {
                 $nodeVar = $node->valueVar;
+            } elseif (isset($node->name)) {
+                $nodeVar = new NodeVar($node->name);
             }
 
             if ($nodeVar instanceof List_ || $nodeVar instanceof Array_) {
@@ -201,9 +208,10 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             $type = $this->useParser->getFQCN($node->types[0]);
         } elseif ($comment->getVar($var->getName())) {
             $type = $comment->getVar($var->getName())->getType();
-        } elseif (isset($node->expr)) {
+        } elseif (isset($node->expr) || isset($node->default)) {
+            $expr = isset($node->expr) ? $node->expr : $node->default;
             $type = $this->typeResolver->getType(
-                $node->expr,
+                $expr,
                 $this->getIndex(),
                 $this->scope
             );
