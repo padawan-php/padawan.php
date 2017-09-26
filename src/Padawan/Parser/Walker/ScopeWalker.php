@@ -21,8 +21,11 @@ use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Variable as NodeVar;
 use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\Stmt\Foreach_;
+use PhpParser\Node\Expr\List_;
+use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
@@ -163,9 +166,15 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
         $this->scope = new MethodScope($classScope, $method);
     }
+    /**
+     * @param Assign|Catch_|Foreach_|NodeVar $node
+     */
     public function addVarToScope($node)
     {
         if ($node instanceof Assign) {
+            if ($node->var instanceof List_ || $node->var instanceof Array_) {
+                return $this->addListToScope($node->var, $node);
+            }
             if (!$node->var instanceof NodeVar) {
                 return;
             }
@@ -208,6 +217,35 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
 
         $this->scope->addVar($var);
+    }
+    /**
+     * @param List_|Array_    $list
+     * @param Assign|Foreach_ $parent
+     */
+    public function addListToScope($list, $parent)
+    {
+        $comment = $this->commentParser->parse($parent->getAttribute('comments'));
+        if ($parent->expr instanceof NodeVar && $comment->getVar($parent->expr->name)) {
+            $type = $comment->getVar($parent->expr->name)->getType();
+        } else {
+            $type = $this->typeResolver->getType(
+                $parent->expr,
+                $this->getIndex(),
+                $this->scope
+            );
+        }
+
+        if (!isset($type) || !$type->isArray()) {
+            return;
+        }
+
+        foreach ($list->items as $item) {
+            if ($item->value instanceof NodeVar) {
+                $var = new Variable($item->value->name);
+                $var->setType(new FQCN($type->className, $type->namespace, false));
+                $this->scope->addVar($var);
+            }
+        }
     }
     public function parseUse(Use_ $node, $fqcn, $file)
     {
