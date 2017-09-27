@@ -273,7 +273,7 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
      * @param List_|Array_    $list
      * @param Assign|Foreach_ $parent
      */
-    public function addListToScope($list, $parent)
+    public function addListToScope($list, $parent, $level = 1)
     {
         $comment = $this->commentParser->parse($parent->getAttribute('comments'));
         if ($parent->expr instanceof NodeVar && $comment->getVar($parent->expr->name)) {
@@ -291,9 +291,16 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
 
         foreach ($list->items as $item) {
+            if (!isset($item->value)) {
+                continue;
+            }
+            if ($item->value instanceof List_ || $item->value instanceof Array_) {
+                $this->addListToScope($item->value, $parent, $level + 1);
+                continue;
+            }
             if ($item->value instanceof NodeVar) {
                 $var = new Variable($item->value->name);
-                $var->setType(new FQCN($type->className, $type->namespace, $type->getDimension() - 1));
+                $var->setType(new FQCN($type->className, $type->namespace, $type->getDimension() - $level));
                 $this->scope->addVar($var);
             }
         }
