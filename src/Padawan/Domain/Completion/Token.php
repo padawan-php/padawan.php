@@ -42,9 +42,11 @@ class Token
         case T_GLOBAL:
         case T_EXTENDS:
         case T_IMPLEMENTS:
-        case '$':
         case '(':
             $this->resetType(self::$MAP[$code]);
+            break;
+        case '$':
+            $this->resetType(self::T_VAR | self::T_CONTINUE_PROCESS);
             break;
         case ';':
         case ',':
@@ -210,7 +212,6 @@ class Token
         T_EXTENDS               => Token::T_EXTENDS_OPERATOR,
         T_IMPLEMENTS            => Token::T_IMPLEMENTS_OPERATOR,
         T_GLOBAL                => Token::T_GLOBAL,
-        '$'                     => Token::T_VAR | Token::T_CONTINUE_PROCESS,
         '('                     => Token::T_METHOD_CALL
     ];
 
