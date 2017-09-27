@@ -11,6 +11,7 @@ use Padawan\Domain\Project\Index;
 use Padawan\Domain\Project\Node\Uses;
 use Padawan\Domain\Project\Node\Variable;
 use Padawan\Domain\Scope;
+use Padawan\Domain\Scope\AbstractChildScope;
 use Padawan\Domain\Scope\FileScope;
 use Padawan\Domain\Scope\FunctionScope;
 use Padawan\Domain\Scope\MethodScope;
@@ -29,6 +30,8 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Stmt\Catch_;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use PhpParser\Node\Stmt\Function_;
+use PhpParser\Node\Stmt\Global_;
 use PhpParser\Node\Stmt\StaticVar;
 use PhpParser\Node\Stmt\Unset_;
 use PhpParser\Node\Expr\Closure;
@@ -60,12 +63,15 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
             $this->createScopeFromClass($node);
         } elseif ($node instanceof ClassMethod) {
             $this->createScopeFromMethod($node);
+        } elseif ($node instanceof Function_) {
+            $this->createScopeFromFunction($node);
         } elseif ($node instanceof Closure) {
             $this->createScopeFromClosure($node);
         } elseif ($node instanceof Assign
             || $node instanceof StaticVar
             || $node instanceof Catch_
             || $node instanceof Foreach_
+            || $node instanceof Global_
             || $node instanceof NodeVar
         ) {
             $this->addVarToScope($node);
@@ -95,9 +101,10 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
     public function isIn($node, $line)
     {
         list($startLine, $endLine) = $this->getNodeLines($node);
-        if ($node instanceof ClassMethod
+        if ($node instanceof Class_
+            || $node instanceof ClassMethod
+            || $node instanceof Function_
             || $node instanceof Closure
-            || $node instanceof Class_
         ) {
             return $line >= $startLine && $line <= $endLine;
         }
@@ -172,11 +179,38 @@ class ScopeWalker extends NodeVisitorAbstract implements WalkerInterface
         }
         $this->scope = new MethodScope($classScope, $method);
     }
+    public function createScopeFromFunction(Function_ $node)
+    {
+        $scope = $this->scope;
+        $index = $this->getIndex();
+        if (empty($index)) {
+            return;
+        }
+        $function = $index->findFunctionByName($node->name);
+        if (empty($function)) {
+            return;
+        }
+        $this->scope = new FunctionScope($scope, $function);
+    }
     /**
-     * @param Assign|Catch_|Foreach_|StaticVar|NodeVar $node
+     * @param Global_|Assign|Catch_|Foreach_|StaticVar|NodeVar $node
      */
     public function addVarToScope($node)
     {
+        if ($node instanceof Global_) {
+            $parent = $this->scope;
+            while ($parent instanceof AbstractChildScope) {
+                $parent = $parent->getParent();
+            }
+            foreach ($node->vars as $nodeVar) {
+                $var = $parent->getVar($nodeVar->name);
+                if ($var) {
+                    $this->scope->addVar($var);
+                }
+            }
+            return;
+        }
+
         if ($node instanceof Assign
             || $node instanceof StaticVar
             || $node instanceof Foreach_

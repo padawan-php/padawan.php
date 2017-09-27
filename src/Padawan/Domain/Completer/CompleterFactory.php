@@ -21,6 +21,7 @@ class CompleterFactory
         UseCompleter $useCompleter,
         VarCompleter $varCompleter,
         GlobalFunctionsCompleter $functionsCompleter,
+        GlobalCompleter $globalCompleter,
         EventDispatcher $dispatcher
     ) {
         $this->completers = [
@@ -31,7 +32,8 @@ class CompleterFactory
             $staticCompleter,
             $useCompleter,
             $varCompleter,
-            $functionsCompleter
+            $functionsCompleter,
+            $globalCompleter,
         ];
         $this->dispatcher = $dispatcher;
     }

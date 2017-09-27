@@ -39,6 +39,7 @@ class Token
         case T_NAMESPACE:
         case T_USE:
         case T_NEW:
+        case T_GLOBAL:
         case T_EXTENDS:
         case T_IMPLEMENTS:
         case '$':
@@ -127,6 +128,11 @@ class Token
         return (bool) ($this->type & self::T_VAR);
     }
 
+    public function isGlobal()
+    {
+        return (bool) ($this->type & self::T_GLOBAL);
+    }
+
     public function isWhitespace()
     {
         return (bool) ($this->type & self::T_WHITESPACE);
@@ -192,6 +198,7 @@ class Token
     const T_METHOD_CALL         = 2048;
     const T_STRING              = 4096;
     const T_EMPTY               = 8192;
+    const T_GLOBAL              = 16384;
 
     protected static $MAP = [
         T_VARIABLE              => Token::T_VAR,
@@ -202,7 +209,8 @@ class Token
         T_NEW                   => Token::T_NEW_OPERATOR,
         T_EXTENDS               => Token::T_EXTENDS_OPERATOR,
         T_IMPLEMENTS            => Token::T_IMPLEMENTS_OPERATOR,
-        '$'                     => Token::T_VAR,
+        T_GLOBAL                => Token::T_GLOBAL,
+        '$'                     => Token::T_VAR | Token::T_CONTINUE_PROCESS,
         '('                     => Token::T_METHOD_CALL
     ];
 
