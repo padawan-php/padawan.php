@@ -14,20 +14,39 @@ use Psr\Log\LoggerInterface;
 
 class StaticCompleter extends AbstractInCodeBodyCompleter
 {
-    public function __construct(LoggerInterface $logger)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ObjectCompleter $objectCompleter
+    ) {
         $this->logger = $logger;
+        $this->objectCompleter = $objectCompleter;
     }
+
     public function getEntries(Project $project, Context $context)
     {
         /** @var FQCN $fqcn */
-        list($fqcn, $isThis) = $context->getData();
-        $this->logger->debug('creating static entries');
+        /** @var \PhpParser\Node\Name $workingNode */
+        list($fqcn, $isThis, $_, $workingNode) = $context->getData();
+        if (in_array('parts', $workingNode->getSubNodeNames())) {
+            // $workingNode has proper subnodes
+            $workingNode = $workingNode->getLast();
+        } else {
+            $workingNode = '';
+        }
+
+        if ($workingNode == 'parent') {
+            // parent instance method completion
+            return $this->objectCompleter->getEntries($project, $context);
+        }
+
+        $isThis = $workingNode == 'self' || $workingNode == 'static';
+
+        $this->logger->debug('creating static entries for type ' . $fqcn->toString());
+
         if (!$fqcn instanceof FQCN) {
             return [];
         }
         $index = $project->getIndex();
-        $this->logger->debug('Creating completion for ' . $fqcn->toString());
         $class = $index->findClassByFQCN($fqcn);
         if (empty($class)) {
             $class = $index->findInterfaceByFQCN($fqcn);
@@ -48,7 +67,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
         }
         if ($class->properties !== null) {
             foreach ($class->properties->all($spec) as $property) {
-                $entries[$property->name] = $this->createEntryForProperty($property);
+                $entries['$' . $property->name] = $this->createEntryForProperty($property);
             }
         }
         if ($class->constants !== null) {
@@ -56,7 +75,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
                 $entries[$const] = $this->createEntryForConst($const);
             }
         }
-        ksort($entries);
+        ksort($entries, SORT_NATURAL);
         return $entries;
     }
 
@@ -96,4 +115,6 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
 
     /** @property LoggerInterface */
     private $logger;
+    /** @property ObjectCompleter */
+    private $objectCompleter;
 }
