@@ -1,8 +1,12 @@
 language: php
-php:
-    - '5.5'
-    - '5.6'
-    - '7.0'
+matrix:
+    include:
+      - php: '5.5'
+        env: BEHAT_TAGS=~@php70
+      - php: '5.6'
+        env: BEHAT_TAGS=~@php70
+      - php: '7.0'
+        env: BEHAT_TAGS=~@
 install:
     - composer install
-script: bin/peridot specs/ && bin/behat --colors
+script: bin/peridot specs/ && bin/behat --tags $BEHAT_TAGS --colors

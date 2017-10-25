@@ -17,6 +17,7 @@ class Context
     const T_METHOD_CALL      = 512;
     const T_VAR              = 1024;
     const T_ANY_NAME         = 2048;
+    const T_GLOBAL           = 4096;
 
     private $type            = 0;
     private $token;
@@ -30,24 +31,26 @@ class Context
     public function setToken(Token $token) {
         $this->token = $token;
         if ($token->isVar()) {
-            $this->addType(Context::T_VAR);
+            $this->addType(self::T_VAR);
+        } elseif ($token->isGlobal()) {
+            $this->addType(self::T_GLOBAL);
         } elseif ($token->isObjectOperator()) {
-            $this->addType(Context::T_OBJECT);
+            $this->addType(self::T_OBJECT);
         } elseif ($token->isStaticOperator()) {
-            $this->addType(Context::T_CLASS_STATIC);
+            $this->addType(self::T_CLASS_STATIC);
         } elseif ($token->isNamespaceOperator()) {
-            $this->addType(Context::T_NAMESPACE);
+            $this->addType(self::T_NAMESPACE);
         } elseif ($token->isUseOperator()) {
-            $this->addType(Context::T_USE);
-            $this->addType(Context::T_CLASSNAME);
+            $this->addType(self::T_USE);
+            $this->addType(self::T_CLASSNAME);
         } elseif ($token->isNewOperator()) {
-            $this->addType(Context::T_CLASSNAME);
+            $this->addType(self::T_CLASSNAME);
         } elseif ($token->isExtendsOperator()) {
-            $this->addType(Context::T_CLASSNAME);
+            $this->addType(self::T_CLASSNAME);
         } elseif ($token->isImplementsOperator()) {
-            $this->addType(Context::T_INTERFACENAME);
+            $this->addType(self::T_INTERFACENAME);
         } elseif ($token->isMethodCall()) {
-            $this->addType(Context::T_METHOD_CALL);
+            $this->addType(self::T_METHOD_CALL);
         } elseif ($token->isString()) {
             $this->addType(self::T_ANY_NAME);
             $this->setData($token->getSymbol());
@@ -84,6 +87,9 @@ class Context
     }
     public function isVar() {
         return (bool) ($this->type & self::T_VAR);
+    }
+    public function isGlobal() {
+        return (bool) ($this->type & self::T_GLOBAL);
     }
     public function isUse() {
         return (bool) ($this->type & self::T_USE);

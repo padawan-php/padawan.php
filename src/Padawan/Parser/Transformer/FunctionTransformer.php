@@ -8,6 +8,7 @@ use Padawan\Domain\Project\Node\FunctionData;
 use Padawan\Domain\Project\Node\MethodParam;
 use Padawan\Parser\CommentParser;
 use Padawan\Parser\ParamParser;
+use Padawan\Parser\ReturnTypeParser;
 use Padawan\Parser\UseParser;
 
 class FunctionTransformer
@@ -15,10 +16,12 @@ class FunctionTransformer
     public function __construct(
         CommentParser $commentParser,
         ParamParser $paramParser,
+        ReturnTypeParser $returnTypeParser,
         UseParser $useParser
     ) {
         $this->commentParser = $commentParser;
         $this->paramParser = $paramParser;
+        $this->returnTypeParser = $returnTypeParser;
         $this->useParser = $useParser;
     }
     public function tranform(Function_ $node)
@@ -31,6 +34,9 @@ class FunctionTransformer
             if ($child instanceof Param) {
                 $function->addArgument($this->tranformArgument($child));
             }
+        }
+        if (!isset($function->return) && isset($node->returnType)) {
+            $function->return = $this->tranformReturnType($node);
         }
         return $function;
     }
@@ -57,6 +63,10 @@ class FunctionTransformer
     protected function tranformArgument(Param $node)
     {
         return $this->paramParser->parse($node);
+    }
+    protected function tranformReturnType(Function_ $node)
+    {
+        return $this->returnTypeParser->parse($node);
     }
 
     private $paramParser;

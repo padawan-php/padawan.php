@@ -46,7 +46,7 @@ class FunctionData
             $curParam = [];
             if ($argument->getType()) {
                 if ($argument->getType() instanceof FQCN) {
-                    $curParam[] = $argument->getType()->getClassName();
+                    $curParam[] = $argument->getType()->getClassName() . str_repeat('[]', $argument->getType()->getDimension());
                 } else {
                     $curParam[] = $argument->getType();
                 }
@@ -59,7 +59,7 @@ class FunctionData
     public function getReturnStr()
     {
         if ($this->return instanceof FQCN) {
-            return $this->return->getClassName();
+            return $this->return->getClassName() . str_repeat('[]', $this->return->getDimension());
         }
         return "mixed";
     }

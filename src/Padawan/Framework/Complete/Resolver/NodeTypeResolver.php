@@ -10,13 +10,30 @@ use Padawan\Domain\Scope;
 use Padawan\Parser\UseParser;
 use PhpParser\Node\Name;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\StaticPropertyFetch;
 use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\FuncCall;
+use PhpParser\Node\Expr\Closure;
 use PhpParser\Node\Expr\New_;
+use PhpParser\Node\Expr\Clone_;
+use PhpParser\Node\Expr\BooleanNot;
+use PhpParser\Node\Expr\Isset_;
+use PhpParser\Node\Expr\Print_;
 use PhpParser\Node\Expr\Assign;
+use PhpParser\Node\Expr\Array_;
+use PhpParser\Node\Expr\Empty_;
+use PhpParser\Node\Expr\ShellExec;
+use PhpParser\Node\Expr\Cast;
+use PhpParser\Node\Expr\ErrorSuppress;
+use PhpParser\Node\Scalar\String_;
+use PhpParser\Node\Scalar\Encapsed;
+use PhpParser\Node\Scalar\MagicConst;
+use PhpParser\Node\Scalar\MagicConst\Line;
+use PhpParser\Node\Scalar\DNumber;
+use PhpParser\Node\Scalar\LNumber;
 use Psr\Log\LoggerInterface;
 use Padawan\Domain\Project\Chain;
 use Padawan\Domain\Project\Chain\MethodCall as ChainMethodCall;
@@ -52,12 +69,58 @@ class NodeTypeResolver
         if ($node instanceof Variable
             || $node instanceof PropertyFetch
             || $node instanceof StaticPropertyFetch
+            || $node instanceof FuncCall
             || $node instanceof MethodCall
             || $node instanceof StaticCall
         ) {
             return $this->getLastChainNodeType($node, $index, $scope);
-        } elseif ($node instanceof New_ && $node->class instanceof Name) {
+        }
+        if ($node instanceof New_ && $node->class instanceof Name) {
             return $this->useParser->getFQCN($node->class);
+        }
+        if ($node instanceof Clone_
+            || $node instanceof ErrorSuppress
+        ) {
+            return $this->getType($node->expr, $index, $scope);
+        }
+        if ($node instanceof Closure) {
+            return new FQCN('Closure');
+        }
+        if ($node instanceof Cast\Bool_
+            || $node instanceof BooleanNot
+            || $node instanceof Isset_
+            || $node instanceof Empty_
+            || ($node instanceof ConstFetch && in_array(strtolower($node->name), ['true', 'false']))
+        ) {
+            return new FQCN('bool');
+        }
+        if ($node instanceof Cast\Array_
+            || $node instanceof Array_
+        ) {
+            return new FQCN('array');
+        }
+        if ($node instanceof Cast\Object_) {
+            return new FQCN('object');
+        }
+        if ($node instanceof Cast\Double
+            || $node instanceof DNumber
+        ) {
+            return new FQCN('float');
+        }
+        if ($node instanceof Cast\Int_
+            || $node instanceof LNumber
+            || $node instanceof Line
+            || $node instanceof Print_
+        ) {
+            return new FQCN('int');
+        }
+        if ($node instanceof Cast\String_
+            || $node instanceof String_
+            || $node instanceof Encapsed
+            || $node instanceof MagicConst
+            || $node instanceof ShellExec
+        ) {
+            return new FQCN('string');
         }
         return null;
     }
@@ -131,7 +194,12 @@ class NodeTypeResolver
                 }
             } elseif ($block->getType() === 'function') {
                 $name = $block->getName();
-                $function = $index->findFunctionByName($name->toString());
+                if ($name instanceof Name) {
+                    $name = $name->toString();
+                } elseif ($name instanceof Variable) {
+                    $name = $name->name;
+                }
+                $function = $index->findFunctionByName($name);
                 if (empty($function)) {
                     $type = null;
                 } else {

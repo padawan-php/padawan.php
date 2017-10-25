@@ -7,7 +7,6 @@ use Padawan\Domain\Project\Node\MethodParam;
 use Padawan\Domain\Project\Node\Comment;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\Node\Param;
-use PhpParser\Node\Name;
 
 class MethodParser {
 
@@ -19,12 +18,14 @@ class MethodParser {
     public function __construct(
         UseParser $useParser,
         CommentParser $commentParser,
-        ParamParser $paramParser
+        ParamParser $paramParser,
+        ReturnTypeParser $returnTypeParser
     )
     {
         $this->useParser        = $useParser;
         $this->commentParser    = $commentParser;
         $this->paramParser      = $paramParser;
+        $this->returnTypeParser = $returnTypeParser;
     }
 
     /**
@@ -61,16 +62,24 @@ class MethodParser {
                 $method->addParam($this->parseMethodArgument($child));
             }
         }
+        if (!isset($method->return) && isset($node->returnType)) {
+            $method->return = $this->parseMethodReturnType($node);
+        }
         return $method;
     }
     protected function parseMethodArgument(Param $node) {
         return $this->paramParser->parse($node);
     }
+    protected function parseMethodReturnType(ClassMethod $node) {
+        return $this->returnTypeParser->parse($node);
+    }
 
     /** @var UseParser $useParser */
     private $useParser;
-    /** @property CommentParser $commentParser */
+    /** @var CommentParser $commentParser */
     private $commentParser;
     /** @var ParamParser */
     private $paramParser;
+    /** @var ReturnTypeParser */
+    private $returnTypeParser;
 }
