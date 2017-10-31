@@ -20,6 +20,10 @@ class FileScope extends AbstractScope
     {
         $this->uses = $uses;
     }
+    public function getFQCN()
+    {
+        return $this->uses->getFQCN();
+    }
     public function getNamespace()
     {
         return $this->uses->getFQCN();

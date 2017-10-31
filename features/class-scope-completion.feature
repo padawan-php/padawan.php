@@ -204,3 +204,39 @@ Feature: Class Scope
             | method1 |
             | method2 |
             | someApi |
+
+    Scenario: Accessing only public methods and properties for return static
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeClass
+        {
+            /**
+             * @return static
+             */
+            public static function method1()
+            {
+
+            }
+            public static function method2()
+            {
+
+            }
+            private static function somePrivateMethod()
+            {
+
+            }
+            private static $someDep;
+            public static $someApi;
+        }
+
+        """
+        When I type "SomeClass::" on the 23 line
+        And I ask for completion
+        Then I should get:
+            | Name     |
+            | class    |
+            | method1  |
+            | method2  |
+            | $someApi |

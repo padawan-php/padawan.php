@@ -17,6 +17,10 @@ abstract class AbstractChildScope extends AbstractScope
     {
         return $this->parent;
     }
+    public function getFQCN()
+    {
+        return $this->parent->getFQCN();
+    }
     public function getNamespace()
     {
         return $this->parent->getNamespace();
