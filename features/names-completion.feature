@@ -1,6 +1,6 @@
 Feature: Names Completion
     As a user
-    I want to have all names(functions, classes, interfaces) when typing a T_STRING
+    I want to have all names (functions, classes, interfaces, namespaces) when typing a T_STRING
     In order to have access to built-in and project names
 
     Scenario: Getting all global functions with prefix
@@ -47,3 +47,86 @@ Feature: Names Completion
             | Menu |
             | array_pop_custom |
             | array_pop |
+
+    Scenario: Getting all classes with prefix by extends
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeClass
+        {
+        }
+
+        class SomeOtherClass {}
+        """
+        When I type " extends SomeO" on the 3 line
+        And I ask for completion
+        Then I should get:
+            | Menu           |
+            | SomeOtherClass |
+
+    Scenario: Getting all interfaces with prefix by implements
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeClass
+        {
+        }
+
+        interface SomeInterface {}
+        """
+        When I type " implements SomeI" on the 3 line
+        And I ask for completion
+        Then I should get:
+            | Menu          |
+            | SomeInterface |
+
+    Scenario: Getting all classes with prefix by new
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeClass {}
+        """
+        When I type "new Some" on the 4 line
+        And I ask for completion
+        Then I should get:
+            | Menu      |
+            | SomeClass |
+
+    Scenario: Getting all namespaces with prefix by namespace
+        Given there is a file with:
+        """
+        <?php
+
+        namespace Test\Test1
+        {
+            class SomeClass {}
+        }
+
+        namespace Test\Test2 {}
+        """
+        When I type "namespace Test" on the 9 line
+        And I ask for completion
+        Then I should get:
+            | Menu       |
+            | Test\Test1 |
+
+    Scenario: Getting all namespaces with prefix by use
+        Given there is a file with:
+        """
+        <?php
+
+        namespace Test\Test1
+        {
+            class SomeClass {}
+        }
+
+        namespace Test\Test2 {}
+        """
+        When I type "use Test" on the 9 line
+        And I ask for completion
+        Then I should get:
+            | Menu                 |
+            | Test\Test1\SomeClass |
