@@ -77,9 +77,12 @@ class ContextResolver
             $isThis = $scope->getFQCN() instanceof FQCN
                 && $workingNodeType instanceof FQCN
                 && $workingNodeType->toString() === $scope->getFQCN()->toString();
+            $isParent = $workingNode instanceof Name
+                && $workingNode->getFirst() === 'parent';
             $context->setData([
                 $workingNodeType,
                 $isThis,
+                $isParent,
                 $types,
                 $workingNode
             ]);

@@ -21,7 +21,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
     public function getEntries(Project $project, Context $context)
     {
         /** @var FQCN $fqcn */
-        list($fqcn, $isThis) = $context->getData();
+        list($fqcn, $isThis, $isParent) = $context->getData();
         $this->logger->debug('creating static entries');
         if (!$fqcn instanceof FQCN) {
             return [];
@@ -36,7 +36,17 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
             return [];
         }
         $entries = [];
-        $spec = new Specification($isThis ? 'private' : 'public', 1);
+        if ($isParent) {
+            $mode = 'protected';
+            $static = 2;
+        } elseif ($isThis) {
+            $mode = 'private';
+            $static = 1;
+        } else {
+            $mode = 'public';
+            $static = 1;
+        }
+        $spec = new Specification($mode, $static);
         if ($class->methods !== null) {
             foreach ($class->methods->all($spec) as $method) {
                 $entry = $this->createEntryForMethod($method);
@@ -46,7 +56,7 @@ class StaticCompleter extends AbstractInCodeBodyCompleter
         if ($class instanceof InterfaceData) {
             return $entries;
         }
-        if ($class->properties !== null) {
+        if ($class->properties !== null && $static < 2) {
             foreach ($class->properties->all($spec) as $property) {
                 $entries[$property->name] = $this->createEntryForProperty($property);
             }

@@ -327,3 +327,60 @@ Feature: Class Scope
             | class          |
             | $someStaticApi |
             | staticMethod   |
+
+    Scenario: Accessing only public/protected methods and properties for parent
+        Given there is a file with:
+        """
+        <?php
+
+        class SomeOtherClass
+        {
+            public function publicApi()
+            {
+
+            }
+            protected function protectedMethod()
+            {
+
+            }
+            private function privateMethod()
+            {
+
+            }
+            public static function publicStaticApi()
+            {
+
+            }
+            protected static function protectedStaticMethod()
+            {
+
+            }
+            private static function privateStaticMethod()
+            {
+
+            }
+            public $aPublicProperty;
+            protected $aProtectedProperty;
+            private $aPrivateProperty;
+            public $aPublicStaticProperty;
+            protected $aProtectedStaticProperty;
+            private $aPrivateStaticProperty;
+        }
+
+        class SomeClass extends SomeOtherClass
+        {
+            public function method()
+            {
+
+            }
+        }
+        """
+        When I type "parent::" on the 41 line
+        And I ask for completion
+        Then I should get:
+            | Name                  |
+            | class                 |
+            | protectedMethod       |
+            | protectedStaticMethod |
+            | publicApi             |
+            | publicStaticApi       |
