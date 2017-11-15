@@ -40,15 +40,19 @@ class Context
             $this->addType(self::T_CLASS_STATIC);
         } elseif ($token->isNamespaceOperator()) {
             $this->addType(self::T_NAMESPACE);
+            $this->setData($token->getSymbol());
         } elseif ($token->isUseOperator()) {
             $this->addType(self::T_USE);
-            $this->addType(self::T_CLASSNAME);
+            $this->setData($token->getSymbol());
         } elseif ($token->isNewOperator()) {
             $this->addType(self::T_CLASSNAME);
+            $this->setData($token->getSymbol());
         } elseif ($token->isExtendsOperator()) {
             $this->addType(self::T_CLASSNAME);
+            $this->setData($token->getSymbol());
         } elseif ($token->isImplementsOperator()) {
             $this->addType(self::T_INTERFACENAME);
+            $this->setData($token->getSymbol());
         } elseif ($token->isMethodCall()) {
             $this->addType(self::T_METHOD_CALL);
         } elseif ($token->isString()) {

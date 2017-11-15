@@ -15,6 +15,8 @@ interface Scope
     public function getVar($varName);
     public function addVar(Variable $var);
     /** @return FQCN */
+    public function getFQCN();
+    /** @return FQCN */
     public function getNamespace();
     /** @return Uses */
     public function getUses();

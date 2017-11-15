@@ -10,17 +10,15 @@ class ClassNameCompleter implements CompleterInterface
 {
     public function getEntries(Project $project, Context $context) {
         $entries = [];
-        $postfix = trim("");
+        $postfix = trim($context->getData());
+        $uses = $context->getScope()->getUses();
         foreach ($project->getIndex()->getClasses() as $fqcn => $class) {
+            $fqcn = $uses ? $uses->findAlias($class->fqcn) : $class->fqcn;
             if (!empty($postfix) && strpos($fqcn, $postfix) === false) {
                 continue;
             }
-            $fqcn = $context->getScope()->getUses()->findAlias($class->fqcn);
             $complete = str_replace($postfix, "", $fqcn);
-            $entries[] = new Entry(
-                $complete, '', '',
-                $fqcn
-            );
+            $entries[] = new Entry($complete, '', '', $fqcn);
         }
         return $entries;
     }

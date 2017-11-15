@@ -88,7 +88,7 @@ class ClassData
     public function addMethod(MethodData $method)
     {
         if ($method->return instanceof FQCN) {
-            if ($method->return->getLast() === 'this') {
+            if (in_array($method->return->getLast(), ['this', 'self', 'static'], true)) {
                 $method->return = $this->fqcn;
             }
         }

@@ -72,22 +72,17 @@ class ContextResolver
             } else {
                 $workingNode = $nodes;
             }
-            $isThis = false;
-            if ($workingNode instanceof Variable && $workingNode->name === 'this') {
-                $isThis = true;
-            }
-            if ($workingNode instanceof Name) {
-                $nodeFQCN = $this->useParser->getFQCN($workingNode);
-                if ($scope->getFQCN() instanceof FQCN
-                    && $nodeFQCN->toString() === $scope->getFQCN()->toString()
-                ) {
-                    $isThis = true;
-                }
-            }
             $types = $this->typeResolver->getChainType($workingNode, $index, $scope);
+            $workingNodeType = array_pop($types);
+            $isThis = $scope->getFQCN() instanceof FQCN
+                && $workingNodeType instanceof FQCN
+                && $workingNodeType->toString() === $scope->getFQCN()->toString();
+            $isParent = $workingNode instanceof Name
+                && $workingNode->getFirst() === 'parent';
             $context->setData([
-                array_pop($types),
+                $workingNodeType,
                 $isThis,
+                $isParent,
                 $types,
                 $workingNode
             ]);
