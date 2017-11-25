@@ -2,11 +2,12 @@
 
 namespace Padawan\Domain\Project\Node;
 
-use Padawan\Domain\Project\FQCN;
 use Padawan\Domain\Project\FQN;
+use Padawan\Domain\Project\FQCN;
+use Padawan\Parser\Exception\SemanticError;
+use Padawan\Domain\Project\Collection\ConstCollection;
 use Padawan\Domain\Project\Collection\MethodsCollection;
 use Padawan\Domain\Project\Collection\PropertiesCollection;
-use Padawan\Domain\Project\Collection\ConstCollection;
 
 /**
  * @property $properties
@@ -64,7 +65,7 @@ class ClassData
     public function setParent($parent)
     {
         if ($this === $parent) {
-            throw new \Exception("Parent class and child class could not be same");
+            throw new SemanticError("Parent class and child class could not be same");
         }
         $this->parent = null;
         if ($parent instanceof ClassData) {

@@ -181,6 +181,9 @@ class InMemoryIndex implements Index
     }
 
     public function addClass(ClassData $class) {
+        if (!$this->isSemanticsCorrect($class)) {
+            return;
+        }
         $this->classes[$class->fqcn->toString()] = $class;
         if ($class->getParent() instanceof FQCN) {
             $this->addExtend($class, $class->getParent());
@@ -237,5 +240,16 @@ class InMemoryIndex implements Index
     private function hasCoreIndex()
     {
         return $this !== self::$coreIndex && !empty(self::$coreIndex);
+    }
+
+    private function isSemanticsCorrect(ClassData $class)
+    {
+        if ($class->getParent() === $class) {
+            return false;
+        }
+        if ($class->getParent() instanceof FQCN
+            && $class->getParent()->toString() === $class->fqcn->toString()) {
+            return false;
+        }
     }
 }
