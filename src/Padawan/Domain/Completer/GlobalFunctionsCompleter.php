@@ -23,7 +23,7 @@ class GlobalFunctionsCompleter extends AbstractInCodeBodyCompleter
     public function getEntries(Project $project, Context $context)
     {
         $entries = [];
-        $postfix = trim($context->getData());
+        $postfix = $this->getPostfix($context);
         foreach ($project->getIndex()->getFunctions() as $function) {
             /** @var FunctionData $function */
             $name = $function->name;
@@ -44,13 +44,28 @@ class GlobalFunctionsCompleter extends AbstractInCodeBodyCompleter
 
     public function canHandle(Project $project, Context $context)
     {
-        $postfix = "";
-        if (is_string($context->getData())) {
-            $postfix = trim($context->getData());
-        }
+        $postfix = $this->getPostfix($context);
         return parent::canHandle($project, $context)
             && ($context->isString() || $context->isEmpty())
             && strlen($postfix) > 0
             ;
+    }
+
+    private function getPostfix(Context $context)
+    {
+        if (is_string($context->getData())) {
+            return trim($context->getData());
+        }
+        if (empty($postfix)) {
+            $contextData = $context->getData();
+            if (is_array($contextData) && @$contextData[3] instanceof \PhpParser\Node\Arg) {
+                if ($contextData[3]->value instanceof \PhpParser\Node\Expr\ConstFetch) {
+                    $postfix = $contextData[3]->value->name;
+                    $context->addType(Context::T_ANY_NAME);
+                    return trim($postfix);
+                }
+            }
+        }
+        return '';
     }
 }
