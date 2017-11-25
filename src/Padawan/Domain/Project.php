@@ -3,17 +3,33 @@
 namespace Padawan\Domain;
 
 use Padawan\Domain\Project\Index;
+use Padawan\Domain\Project\Config;
 
 class Project
 {
     private $index;
     private $rootFolder;
+    private $config;
     private $plugins = [];
 
     public function __construct(Index $index, $rootFolder = "")
     {
         $this->index        = $index;
         $this->rootFolder   = $rootFolder;
+        $this->config       = Config::default();
+    }
+
+    /**
+     * @return Project
+     */
+    public static function withConfig(
+        Index $index,
+        $rootFolder,
+        Config $config
+    ) {
+        $self = new static($index, $rootFolder);
+        $self->config = $config;
+        return $self;
     }
     public function getRootFolder()
     {
